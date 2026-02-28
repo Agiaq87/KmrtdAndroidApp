@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Kmrtd Example App</string>
+
+    <!-- DataChecker Widget -->
+    <string name="data_checker_empty_value">In attesa di input</string>
+    <string name="data_checker_invalid_value">Il valore inserito non è valido</string>
+    <string name="data_checker_valid_value">Valore accettato</string>
+
+    <!-- Home screen -->
+    <string name="home_screen_title">Inserisci i dati del documento</string>
+    <string name="home_screen_document_number">Numero di documento</string>
+    <string name="home_screen_birthdate">Data di nascita</string>
+    <string name="home_screen_expire_date">Data di scadenza</string>
+    <string name="home_screen_read_button">Leggi documento NFC con JMRTD</string>
+
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+</resources>
