@@ -65,7 +65,7 @@ public class CVCPrincipal implements Principal, Serializable {
       country = Country.getInstance(alpha2Code);
     } catch (IllegalArgumentException iae) {
       LOGGER.log(Level.FINE, "Could not find country for " + alpha2Code, iae);
-      country = new Country() {
+      country = new UnknownCountry(name); /*Country() {
 
         private static final long serialVersionUID = 345841304964161797L;
 
@@ -94,10 +94,10 @@ public class CVCPrincipal implements Principal, Serializable {
           return "XXX";
         }
 
-      };
+      };*/
     }
     mnemonic = name.substring(2, name.length() - 5);
-    seqNumber = name.substring(name.length() - 5, name.length());
+    seqNumber = name.substring(name.length() - 5);
   }
 
   /**
