@@ -19,8 +19,15 @@
  *
  * $Id: FaceImageInfo.java 1808 2019-03-07 21:32:19Z martijno $
  */
-
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.lds.iso19794;
+
+import static kmrtd.lds.iso19794.support.FaceImageInfoConstants.EXPRESSION_SQUINTING;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -28,7 +35,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +42,10 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 import kmrtd.lds.AbstractImageInfo;
+import kmrtd.lds.iso19794.support.EyeColor;
+import kmrtd.lds.iso19794.support.FaceImageInfoConstants;
+import kmrtd.lds.iso19794.support.FeaturePoint;
+import kmrtd.lds.iso19794.support.HairColor;
 
 import net.sf.scuba.data.Gender;
 
@@ -55,234 +65,6 @@ public class FaceImageInfo extends AbstractImageInfo {
   private static final long serialVersionUID = -1751069410327594067L;
 
   private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-
-  /** Eye color code based on Section 5.5.4 of ISO 19794-5. */
-  public enum EyeColor {
-    UNSPECIFIED(EYE_COLOR_UNSPECIFIED),
-    BLACK(EYE_COLOR_BLACK),
-    BLUE(EYE_COLOR_BLUE),
-    BROWN(EYE_COLOR_BROWN),
-    GRAY(EYE_COLOR_GRAY),
-    GREEN(EYE_COLOR_GREEN),
-    MULTI_COLORED(EYE_COLOR_MULTI_COLORED),
-    PINK(EYE_COLOR_PINK),
-    UNKNOWN(EYE_COLOR_UNKNOWN);
-
-    private int code;
-
-    /**
-     * Creates an eye color.
-     *
-     * @param code the ISO19794-5 integer code for the color
-     */
-    private EyeColor(int code) {
-      this.code = code;
-    }
-
-    /**
-     * Returns the integer code to use in ISO19794-5 encoding for this color.
-     *
-     * @return the integer code
-     */
-    public int toInt() {
-      return code;
-    }
-
-    /**
-     * Returns an eye color value for the given code.
-     *
-     * @param i the integer code for a color
-     *
-     * @return the color value
-     */
-    static EyeColor toEyeColor(int i) {
-      for (EyeColor c: EyeColor.values()) {
-        if (c.toInt() == i) {
-          return c;
-        }
-      }
-      return UNKNOWN;
-    }
-  }
-
-  /* These correspond to values in Table 4 in 5.5.4 in ISO/IEC 19794-5:2005(E). */
-  public static final int EYE_COLOR_UNSPECIFIED = 0x00;
-  public static final int EYE_COLOR_BLACK = 0x01;
-  public static final int EYE_COLOR_BLUE = 0x02;
-  public static final int EYE_COLOR_BROWN = 0x03;
-  public static final int EYE_COLOR_GRAY = 0x04;
-  public static final int EYE_COLOR_GREEN = 0x05;
-  public static final int EYE_COLOR_MULTI_COLORED = 0x06;
-  public static final int EYE_COLOR_PINK = 0x07;
-  public static final int EYE_COLOR_UNKNOWN = 0xFF;
-
-  /** Hair color code based on Section 5.5.5 of ISO 19794-5. */
-  public enum HairColor {
-    UNSPECIFIED(HAIR_COLOR_UNSPECIFIED),
-    BALD(HAIR_COLOR_BALD),
-    BLACK(HAIR_COLOR_BLACK),
-    BLONDE(HAIR_COLOR_BLONDE),
-    BROWN(HAIR_COLOR_BROWN),
-    GRAY(HAIR_COLOR_GRAY),
-    WHITE(HAIR_COLOR_WHITE),
-    RED(HAIR_COLOR_RED),
-    GREEN(HAIR_COLOR_GREEN),
-    BLUE(HAIR_COLOR_BLUE),
-    UNKNOWN(HAIR_COLOR_UNKNOWN);
-
-    private int code;
-
-    /**
-     * Creates a hair color.
-     *
-     * @param code the integer code for a color
-     */
-    private HairColor(int code) {
-      this.code = code;
-    }
-
-    /**
-     * Returns the code for this hair color.
-     *
-     * @return the code
-     */
-    public int toInt() {
-      return code;
-    }
-
-    /**
-     * Returns a hair color value for the given code.
-     *
-     * @param i the integer code for a color
-     *
-     * @return the color value
-     */
-    static HairColor toHairColor(int i) {
-      for (HairColor c: HairColor.values()) {
-        if (c.toInt() == i) {
-          return c;
-        }
-      }
-
-      return UNKNOWN;
-    }
-  }
-
-  public static final int HAIR_COLOR_UNSPECIFIED = 0x00;
-  public static final int HAIR_COLOR_BALD = 0x01;
-  public static final int HAIR_COLOR_BLACK = 0x02;
-  public static final int HAIR_COLOR_BLONDE = 0x03;
-  public static final int HAIR_COLOR_BROWN = 0x04;
-  public static final int HAIR_COLOR_GRAY = 0x05;
-  public static final int HAIR_COLOR_WHITE = 0x06;
-  public static final int HAIR_COLOR_RED = 0x07;
-  public static final int HAIR_COLOR_GREEN = 0x08;
-  public static final int HAIR_COLOR_BLUE = 0x09;
-  public static final int HAIR_COLOR_UNKNOWN = 0xFF;
-
-  /** Feature flags meaning based on Section 5.5.6 of ISO 19794-5. */
-  public enum Features {
-    FEATURES_ARE_SPECIFIED,
-    GLASSES,
-    MOUSTACHE,
-    BEARD,
-    TEETH_VISIBLE,
-    BLINK,
-    MOUTH_OPEN,
-    LEFT_EYE_PATCH,
-    RIGHT_EYE_PATCH,
-    DARK_GLASSES,
-    DISTORTING_MEDICAL_CONDITION
-  }
-
-  private static final int FEATURE_FEATURES_ARE_SPECIFIED_FLAG = 0x000001;
-  private static final int FEATURE_GLASSES_FLAG = 0x000002;
-  private static final int FEATURE_MOUSTACHE_FLAG = 0x000004;
-  private static final int FEATURE_BEARD_FLAG = 0x000008;
-  private static final int FEATURE_TEETH_VISIBLE_FLAG = 0x000010;
-  private static final int FEATURE_BLINK_FLAG = 0x000020;
-  private static final int FEATURE_MOUTH_OPEN_FLAG = 0x000040;
-  private static final int FEATURE_LEFT_EYE_PATCH_FLAG = 0x000080;
-  private static final int FEATURE_RIGHT_EYE_PATCH = 0x000100;
-  private static final int FEATURE_DARK_GLASSES = 0x000200;
-  private static final int FEATURE_DISTORTING_MEDICAL_CONDITION = 0x000400;
-
-  /** Expression code based on Section 5.5.7 of ISO 19794-5. */
-  public enum Expression {
-    UNSPECIFIED,
-    NEUTRAL,
-    SMILE_CLOSED,
-    SMILE_OPEN,
-    RAISED_EYEBROWS,
-    EYES_LOOKING_AWAY,
-    SQUINTING,
-    FROWNING
-  }
-
-  public static final short EXPRESSION_UNSPECIFIED = 0x0000;
-  public static final short EXPRESSION_NEUTRAL = 0x0001;
-  public static final short EXPRESSION_SMILE_CLOSED = 0x0002;
-  public static final short EXPRESSION_SMILE_OPEN = 0x0003;
-  public static final short EXPRESSION_RAISED_EYEBROWS = 0x0004;
-  public static final short EXPRESSION_EYES_LOOKING_AWAY = 0x0005;
-  public static final short EXPRESSION_SQUINTING = 0x0006;
-  public static final short EXPRESSION_FROWNING = 0x0007;
-
-  /** Face image type code based on Section 5.7.1 of ISO 19794-5. */
-  public enum FaceImageType {
-    BASIC,
-    FULL_FRONTAL,
-    TOKEN_FRONTAL
-  }
-
-  public static final int FACE_IMAGE_TYPE_BASIC = 0x00;
-  public static final int FACE_IMAGE_TYPE_FULL_FRONTAL = 0x01;
-  public static final int FACE_IMAGE_TYPE_TOKEN_FRONTAL = 0x02;
-
-  /** Image data type code based on Section 5.7.2 of ISO 19794-5. */
-  public enum ImageDataType {
-    TYPE_JPEG,
-    TYPE_JPEG2000
-  }
-
-  public static final int IMAGE_DATA_TYPE_JPEG = 0x00;
-  public static final int IMAGE_DATA_TYPE_JPEG2000 = 0x01;
-
-  /** Color space code based on Section 5.7.4 of ISO 19794-5. */
-  public enum ImageColorSpace {
-    UNSPECIFIED,
-    RGB24,
-    YUV422,
-    GRAY8,
-    OTHER
-  }
-
-  public static final int IMAGE_COLOR_SPACE_UNSPECIFIED = 0x00;
-  public static final int IMAGE_COLOR_SPACE_RGB24 = 0x01;
-  public static final int IMAGE_COLOR_SPACE_YUV422 = 0x02;
-  public static final int IMAGE_COLOR_SPACE_GRAY8 = 0x03;
-  public static final int IMAGE_COLOR_SPACE_OTHER = 0x04;
-
-  /** Source type based on Section 5.7.6 of ISO 19794-5. */
-  public enum SourceType {
-    UNSPECIFIED,
-    STATIC_PHOTO_UNKNOWN_SOURCE,
-    STATIC_PHOTO_DIGITAL_CAM,
-    STATIC_PHOTO_SCANNER,
-    VIDEO_FRAME_UNKNOWN_SOURCE,
-    VIDEO_FRAME_ANALOG_CAM,
-    VIDEO_FRAME_DIGITAL_CAM,
-    UNKNOWN
-  }
-
-  public static final int SOURCE_TYPE_UNSPECIFIED = 0x00;
-  public static final int SOURCE_TYPE_STATIC_PHOTO_UNKNOWN_SOURCE = 0x01;
-  public static final int SOURCE_TYPE_STATIC_PHOTO_DIGITAL_CAM = 0x02;
-  public static final int SOURCE_TYPE_STATIC_PHOTO_SCANNER = 0x03;
-  public static final int SOURCE_TYPE_VIDEO_FRAME_UNKNOWN_SOURCE = 0x04;
-  public static final int SOURCE_TYPE_VIDEO_FRAME_ANALOG_CAM = 0x05;
-  public static final int SOURCE_TYPE_VIDEO_FRAME_DIGITAL_CAM = 0x06;
-  public static final int SOURCE_TYPE_UNKNOWN = 0x07;
 
   /** Indexes into poseAngle array. */
   private static final int YAW = 0;
@@ -371,9 +153,9 @@ public class FaceImageInfo extends AbstractImageInfo {
     this.recordLength = 20L + 8 * featurePointCount + 12L + imageLength;
 
     this.faceImageType = faceImageType;
-    this.colorSpace = colorSpace;
+    /*this.colorSpace = colorSpace;
     this.sourceType = sourceType;
-    this.deviceType = deviceType;
+    this.deviceType = deviceType;*/
     this.quality = quality;
   }
 
@@ -525,13 +307,22 @@ public class FaceImageInfo extends AbstractImageInfo {
   }
 
   /**
-   * Returns the hair color
-   * (bald, black, blonde, etc).
+   * Returns a mime-type string for the compression algorithm code.
    *
-   * @return hair color
+   * @param compressionAlg the compression algorithm code as it occurs in the header
+   *
+   * @return a mime-type string,
+   *         typically {@code JPEG_MIME_TYPE} or {@code JPEG2000_MIME_TYPE}
    */
-  public int getHairColor() {
-    return hairColor;
+  private static String toMimeType(int compressionAlg) {
+    return switch (compressionAlg) {
+      case FaceImageInfoConstants.IMAGE_DATA_TYPE_JPEG -> JPEG_MIME_TYPE;
+      case FaceImageInfoConstants.IMAGE_DATA_TYPE_JPEG2000 -> JPEG2000_MIME_TYPE;
+      default -> {
+        LOGGER.warning("Unknown image type: " + compressionAlg);
+        yield null;
+      }
+    };
   }
 
   /**
@@ -714,6 +505,16 @@ public class FaceImageInfo extends AbstractImageInfo {
   }
 
   /**
+   * Returns the hair color
+   * (bald, black, blonde, etc).
+   *
+   * @return hair color
+   */
+  public HairColor getHairColor() {
+    return HairColor.toHairColor(hairColor);
+  }
+
+  /**
    * Writes the record data to a stream.
    *
    * @param outputStream the stream to write to
@@ -742,10 +543,10 @@ public class FaceImageInfo extends AbstractImageInfo {
 
     /* Feature Point(s) (optional) (8 * featurePointCount) */
     for (FeaturePoint fp: featurePoints) {
-      dataOut.writeByte(fp.getType());
-      dataOut.writeByte((fp.getMajorCode() << 4) | fp.getMinorCode());
-      dataOut.writeShort(fp.getX());
-      dataOut.writeShort(fp.getY());
+      dataOut.writeByte(fp.type());
+      dataOut.writeByte((fp.majorCode() << 4) | fp.minorCode());
+      dataOut.writeShort(fp.x());
+      dataOut.writeShort(fp.y());
       dataOut.writeShort(0x00); /* 2 bytes RFU */
     }
 
@@ -774,30 +575,19 @@ public class FaceImageInfo extends AbstractImageInfo {
    * @return a human readable string for the current hair color value
    */
   private String hairColorToString() {
-    switch (hairColor) {
-      case HAIR_COLOR_UNSPECIFIED:
-        return "unspecified";
-      case HAIR_COLOR_BALD:
-        return "bald";
-      case HAIR_COLOR_BLACK:
-        return "black";
-      case HAIR_COLOR_BLONDE:
-        return "blonde";
-      case HAIR_COLOR_BROWN:
-        return "brown";
-      case HAIR_COLOR_GRAY:
-        return "gray";
-      case HAIR_COLOR_WHITE:
-        return "white";
-      case HAIR_COLOR_RED:
-        return "red";
-      case HAIR_COLOR_GREEN:
-        return "green";
-      case HAIR_COLOR_BLUE:
-        return "blue";
-      default:
-        return "unknown";
-    }
+    return switch (hairColor) {
+      case FaceImageInfoConstants.HAIR_COLOR_UNSPECIFIED -> "unspecified";
+      case FaceImageInfoConstants.HAIR_COLOR_BALD -> "bald";
+      case FaceImageInfoConstants.HAIR_COLOR_BLACK -> "black";
+      case FaceImageInfoConstants.HAIR_COLOR_BLONDE -> "blonde";
+      case FaceImageInfoConstants.HAIR_COLOR_BROWN -> "brown";
+      case FaceImageInfoConstants.HAIR_COLOR_GRAY -> "gray";
+      case FaceImageInfoConstants.HAIR_COLOR_WHITE -> "white";
+      case FaceImageInfoConstants.HAIR_COLOR_RED -> "red";
+      case FaceImageInfoConstants.HAIR_COLOR_GREEN -> "green";
+      case FaceImageInfoConstants.HAIR_COLOR_BLUE -> "blue";
+      default -> "unknown";
+    };
   }
 
   /**
@@ -806,38 +596,38 @@ public class FaceImageInfo extends AbstractImageInfo {
    * @return a human readable string
    */
   private String featureMaskToString() {
-    if ((featureMask & FEATURE_FEATURES_ARE_SPECIFIED_FLAG) == 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_FEATURES_ARE_SPECIFIED_FLAG) == 0) {
       return "";
     }
     Collection<String> features = new ArrayList<String>();
-    if ((featureMask & FEATURE_GLASSES_FLAG) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_GLASSES_FLAG) != 0) {
       features.add("glasses");
     }
-    if ((featureMask & FEATURE_MOUSTACHE_FLAG) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_MOUSTACHE_FLAG) != 0) {
       features.add("moustache");
     }
-    if ((featureMask & FEATURE_BEARD_FLAG) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_BEARD_FLAG) != 0) {
       features.add("beard");
     }
-    if ((featureMask & FEATURE_TEETH_VISIBLE_FLAG) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_TEETH_VISIBLE_FLAG) != 0) {
       features.add("teeth visible");
     }
-    if ((featureMask & FEATURE_BLINK_FLAG) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_BLINK_FLAG) != 0) {
       features.add("blink");
     }
-    if ((featureMask & FEATURE_MOUTH_OPEN_FLAG) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_MOUTH_OPEN_FLAG) != 0) {
       features.add("mouth open");
     }
-    if ((featureMask & FEATURE_LEFT_EYE_PATCH_FLAG) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_LEFT_EYE_PATCH_FLAG) != 0) {
       features.add("left eye patch");
     }
-    if ((featureMask & FEATURE_RIGHT_EYE_PATCH) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_RIGHT_EYE_PATCH) != 0) {
       features.add("right eye patch");
     }
-    if ((featureMask & FEATURE_DARK_GLASSES) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_DARK_GLASSES) != 0) {
       features.add("dark glasses");
     }
-    if ((featureMask & FEATURE_DISTORTING_MEDICAL_CONDITION) != 0) {
+    if ((featureMask & FaceImageInfoConstants.FEATURE_DISTORTING_MEDICAL_CONDITION) != 0) {
       features.add("distorting medical condition (which could impact feature point detection)");
     }
     StringBuilder out = new StringBuilder();
@@ -849,34 +639,6 @@ public class FaceImageInfo extends AbstractImageInfo {
     }
 
     return out.toString();
-  }
-
-  /**
-   * Converts the current expression to a human readable string.
-   *
-   * @return a human readable string
-   */
-  private String expressionToString() {
-    switch (expression) {
-      case EXPRESSION_UNSPECIFIED:
-        return "unspecified";
-      case EXPRESSION_NEUTRAL:
-        return "neutral (non-smiling) with both eyes open and mouth closed";
-      case EXPRESSION_SMILE_CLOSED:
-        return "a smile where the inside of the mouth and/or teeth is not exposed (closed jaw)";
-      case EXPRESSION_SMILE_OPEN:
-        return "a smile where the inside of the mouth and/or teeth is exposed";
-      case EXPRESSION_RAISED_EYEBROWS:
-        return "raised eyebrows";
-      case EXPRESSION_EYES_LOOKING_AWAY:
-        return "eyes looking away from the camera";
-      case EXPRESSION_SQUINTING:
-        return "squinting";
-      case EXPRESSION_FROWNING:
-        return "frowning";
-      default:
-        return "unknown";
-    }
   }
 
   /**
@@ -906,6 +668,29 @@ public class FaceImageInfo extends AbstractImageInfo {
   }
 
   /**
+   * Converts the current expression to a human readable string.
+   *
+   * @return a human readable string
+   */
+  private String expressionToString() {
+    return switch (expression) {
+      case FaceImageInfoConstants.EXPRESSION_UNSPECIFIED -> "unspecified";
+      case FaceImageInfoConstants.EXPRESSION_NEUTRAL ->
+              "neutral (non-smiling) with both eyes open and mouth closed";
+      case FaceImageInfoConstants.EXPRESSION_SMILE_CLOSED ->
+              "a smile where the inside of the mouth and/or teeth is not exposed (closed jaw)";
+      case FaceImageInfoConstants.EXPRESSION_SMILE_OPEN ->
+              "a smile where the inside of the mouth and/or teeth is exposed";
+      case FaceImageInfoConstants.EXPRESSION_RAISED_EYEBROWS -> "raised eyebrows";
+      case FaceImageInfoConstants.EXPRESSION_EYES_LOOKING_AWAY ->
+              "eyes looking away from the camera";
+      case FaceImageInfoConstants.EXPRESSION_SQUINTING -> "squinting";
+      case FaceImageInfoConstants.EXPRESSION_FROWNING -> "frowning";
+      default -> "unknown";
+    };
+  }
+
+  /**
    * Returns a textual representation of the face image type
    * ({@code "basic"}, {@code "full frontal"}, {@code "token frontal"},
    * or {@code "unknown"}).
@@ -913,16 +698,12 @@ public class FaceImageInfo extends AbstractImageInfo {
    * @return a textual representation of the face image type
    */
   private String faceImageTypeToString() {
-    switch (faceImageType) {
-      case FACE_IMAGE_TYPE_BASIC:
-        return "basic";
-      case FACE_IMAGE_TYPE_FULL_FRONTAL:
-        return "full frontal";
-      case FACE_IMAGE_TYPE_TOKEN_FRONTAL:
-        return "token frontal";
-      default:
-        return "unknown";
-    }
+    return switch (faceImageType) {
+      case FaceImageInfoConstants.FACE_IMAGE_TYPE_BASIC -> "basic";
+      case FaceImageInfoConstants.FACE_IMAGE_TYPE_FULL_FRONTAL -> "full frontal";
+      case FaceImageInfoConstants.FACE_IMAGE_TYPE_TOKEN_FRONTAL -> "token frontal";
+      default -> "unknown";
+    };
   }
 
   /**
@@ -931,153 +712,21 @@ public class FaceImageInfo extends AbstractImageInfo {
    * @return a textual representation of the source type
    */
   private String sourceTypeToString() {
-    switch (sourceType) {
-      case SOURCE_TYPE_UNSPECIFIED:
-        return "unspecified";
-      case SOURCE_TYPE_STATIC_PHOTO_UNKNOWN_SOURCE:
-        return "static photograph from an unknown source";
-      case SOURCE_TYPE_STATIC_PHOTO_DIGITAL_CAM:
-        return "static photograph from a digital still-image camera";
-      case SOURCE_TYPE_STATIC_PHOTO_SCANNER:
-        return "static photograph from a scanner";
-      case SOURCE_TYPE_VIDEO_FRAME_UNKNOWN_SOURCE:
-        return "single video frame from an unknown source";
-      case SOURCE_TYPE_VIDEO_FRAME_ANALOG_CAM:
-        return "single video frame from an analogue camera";
-      case SOURCE_TYPE_VIDEO_FRAME_DIGITAL_CAM:
-        return "single video frame from a digital camera";
-      default:
-        return "unknown";
-    }
-  }
-
-  /**
-   * Returns a mime-type string for the compression algorithm code.
-   *
-   * @param compressionAlg the compression algorithm code as it occurs in the header
-   *
-   * @return a mime-type string,
-   *         typically {@code JPEG_MIME_TYPE} or {@code JPEG2000_MIME_TYPE}
-   */
-  private static String toMimeType(int compressionAlg) {
-    switch (compressionAlg) {
-      case IMAGE_DATA_TYPE_JPEG:
-        return JPEG_MIME_TYPE;
-      case IMAGE_DATA_TYPE_JPEG2000:
-        return JPEG2000_MIME_TYPE;
-      default:
-        LOGGER.warning("Unknown image type: " + compressionAlg);
-        return null;
-    }
-  }
-
-  /**
-   * Feature points as described in Section 5.6.3 of ISO/IEC FCD 19794-5.
-   *
-   * @author The JMRTD team (info@jmrtd.org)
-   *
-   * @version $Revision: 1808 $
-   */
-  public static class FeaturePoint implements Serializable {
-
-    private static final long serialVersionUID = -4209679423938065215L;
-
-    private int type;
-    private int majorCode;
-    private int minorCode;
-    private int x;
-    private int y;
-
-    /**
-     * Constructs a new feature point.
-     *
-     * @param type feature point type
-     * @param majorCode major code
-     * @param minorCode minor code
-     * @param x X-coordinate
-     * @param y Y-coordinate
-     */
-    public FeaturePoint(int type, int majorCode, int minorCode, int x, int y) {
-      this.type = type;
-      this.majorCode = majorCode;
-      this.minorCode = minorCode;
-      this.x = x;
-      this.y = y;
-    }
-
-    /**
-     * Constructs a new feature point.
-     *
-     * @param type feature point type
-     * @param code combined major and minor code
-     * @param x X-coordinate
-     * @param y Y-coordinate
-     */
-    FeaturePoint(int type, byte code, int x, int y) {
-      this(type, (code & 0xF0) >> 4, code & 0x0F, x ,y);
-    }
-
-    /**
-     * Returns the major code of this point.
-     *
-     * @return major code
-     */
-    public int getMajorCode() {
-      return majorCode;
-    }
-
-    /**
-     * Returns the minor code of this point.
-     *
-     * @return minor code
-     */
-    public int getMinorCode() {
-      return minorCode;
-    }
-
-    /**
-     * Returns the type of this point.
-     *
-     * @return type
-     */
-    public int getType() {
-      return type;
-    }
-
-    /**
-     * Returns the X-coordinate of this point.
-     *
-     * @return X-coordinate
-     */
-    public int getX() {
-      return x;
-    }
-
-    /**
-     * Returns the Y-coordinate of this point.
-     *
-     * @return Y-coordinate
-     */
-    public int getY() {
-      return y;
-    }
-
-    /**
-     * Generates a textual representation of this point.
-     *
-     * @return a textual representation of this point
-     *
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-      return new StringBuilder()
-          .append("( point: ").append(getMajorCode()).append(".").append(getMinorCode())
-          .append(", ")
-          .append("type: ").append(Integer.toHexString(type)).append(", ")
-          .append("(").append(x).append(", ")
-          .append(y).append(")")
-          .append(")").toString();
-    }
+    return switch (sourceType) {
+      case FaceImageInfoConstants.SOURCE_TYPE_UNSPECIFIED -> "unspecified";
+      case FaceImageInfoConstants.SOURCE_TYPE_STATIC_PHOTO_UNKNOWN_SOURCE ->
+              "static photograph from an unknown source";
+      case FaceImageInfoConstants.SOURCE_TYPE_STATIC_PHOTO_DIGITAL_CAM ->
+              "static photograph from a digital still-image camera";
+      case FaceImageInfoConstants.SOURCE_TYPE_STATIC_PHOTO_SCANNER ->
+              "static photograph from a scanner";
+      case FaceImageInfoConstants.SOURCE_TYPE_VIDEO_FRAME_UNKNOWN_SOURCE ->
+              "single video frame from an unknown source";
+      case FaceImageInfoConstants.SOURCE_TYPE_VIDEO_FRAME_ANALOG_CAM ->
+              "single video frame from an analogue camera";
+      case FaceImageInfoConstants.SOURCE_TYPE_VIDEO_FRAME_DIGITAL_CAM ->
+              "single video frame from a digital camera";
+      default -> "unknown";
+    };
   }
 }

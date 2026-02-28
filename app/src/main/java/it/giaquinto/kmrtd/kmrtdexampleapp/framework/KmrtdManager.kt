@@ -26,6 +26,7 @@ import kmrtd.lds.icao.DG6File
 import kmrtd.lds.icao.DG7File
 import kmrtd.lds.icao.MRZInfo
 import kmrtd.lds.iso19794.FaceInfo
+import kmrtd.lds.iso19794.support.HairColor
 import kmrtd.protocol.BACResult
 import kmrtd.protocol.PACEResult
 import kotlinx.coroutines.Dispatchers
@@ -498,6 +499,9 @@ class KmrtdManager {
                 }
 
                 eyeColor = it.eyeColor
+                // Added from KMRTD
+                hairColor = it.hairColor
+                gender = it.gender
 
                 _state.value = KmrtdState.DG2File
             }

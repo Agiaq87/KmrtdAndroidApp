@@ -27,6 +27,8 @@
  */
 package kmrtd.cert
 
+import kmrtd.cert.cvc.Permission
+import kmrtd.cert.cvc.Role
 import org.ejbca.cvc.AccessRightEnum
 import org.ejbca.cvc.AuthorizationRoleEnum
 import org.ejbca.cvc.CAReferenceField
@@ -122,13 +124,13 @@ object CVCertificateBuilder {
      * 
      * @return the role as an EJBCA typed object
      */
-    private fun getRole(role: CVCAuthorizationTemplate.Role): AuthorizationRoleEnum {
+    private fun getRole(role: Role): AuthorizationRoleEnum {
         return when (role) {
-            CVCAuthorizationTemplate.Role.CVCA -> AuthorizationRoleEnum.CVCA
-            CVCAuthorizationTemplate.Role.DV_D -> AuthorizationRoleEnum.DV_D
-            CVCAuthorizationTemplate.Role.DV_F -> AuthorizationRoleEnum.DV_F
-            CVCAuthorizationTemplate.Role.IS -> AuthorizationRoleEnum.IS
-            else -> throw NumberFormatException("Cannot decode role " + role)
+            Role.CVCA -> AuthorizationRoleEnum.CVCA
+            Role.DV_D -> AuthorizationRoleEnum.DV_D
+            Role.DV_F -> AuthorizationRoleEnum.DV_F
+            Role.IS -> AuthorizationRoleEnum.IS
+            else -> throw NumberFormatException("Cannot decode role $role")
         }
     }
 
@@ -139,13 +141,13 @@ object CVCertificateBuilder {
      * 
      * @return the access right as an EJBCA typed object
      */
-    private fun getAccessRight(accessRight: CVCAuthorizationTemplate.Permission): AccessRightEnum {
+    private fun getAccessRight(accessRight: Permission): AccessRightEnum {
         return when (accessRight) {
-            CVCAuthorizationTemplate.Permission.READ_ACCESS_NONE -> AccessRightEnum.READ_ACCESS_NONE
-            CVCAuthorizationTemplate.Permission.READ_ACCESS_DG3 -> AccessRightEnum.READ_ACCESS_DG3
-            CVCAuthorizationTemplate.Permission.READ_ACCESS_DG4 -> AccessRightEnum.READ_ACCESS_DG4
-            CVCAuthorizationTemplate.Permission.READ_ACCESS_DG3_AND_DG4 -> AccessRightEnum.READ_ACCESS_DG3_AND_DG4
-            else -> throw NumberFormatException("Cannot decode access right " + accessRight)
+            Permission.READ_ACCESS_NONE -> AccessRightEnum.READ_ACCESS_NONE
+            Permission.READ_ACCESS_DG3 -> AccessRightEnum.READ_ACCESS_DG3
+            Permission.READ_ACCESS_DG4 -> AccessRightEnum.READ_ACCESS_DG4
+            Permission.READ_ACCESS_DG3_AND_DG4 -> AccessRightEnum.READ_ACCESS_DG3_AND_DG4
+            else -> throw NumberFormatException("Cannot decode access right $accessRight")
         }
     }
 }
