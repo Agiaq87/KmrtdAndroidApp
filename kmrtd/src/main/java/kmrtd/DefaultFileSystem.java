@@ -31,11 +31,11 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.io.FragmentBuffer;
-import org.kmrtd.io.Fragment;
-import org.kmrtd.lds.CVCAFile;
-import org.kmrtd.lds.LDSFileUtil;
-import org.kmrtd.protocol.SecureMessagingWrapper;
+import kmrtd.io.FragmentBuffer;
+import kmrtd.io.Fragment;
+import kmrtd.lds.CVCAFile;
+import kmrtd.lds.LDSFileUtil;
+import kmrtd.protocol.SecureMessagingWrapper;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardServiceException;

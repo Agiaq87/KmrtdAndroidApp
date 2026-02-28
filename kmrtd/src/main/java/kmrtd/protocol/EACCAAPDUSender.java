@@ -28,8 +28,8 @@ import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.APDULevelEACCACapable;
-import org.kmrtd.Util;
+import kmrtd.APDULevelEACCACapable;
+import kmrtd.Util;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;

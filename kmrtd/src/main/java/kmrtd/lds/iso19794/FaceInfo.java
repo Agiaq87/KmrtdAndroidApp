@@ -36,12 +36,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import kmrtd.cbeff.BiometricDataBlock;
-import org.kmrtd.cbeff.CBEFFInfo;
-import org.kmrtd.cbeff.ISO781611;
-import org.kmrtd.cbeff.StandardBiometricHeader;
-import org.kmrtd.lds.AbstractListInfo;
-import org.kmrtd.lds.iso19794.FaceImageInfo.EyeColor;
-import org.kmrtd.lds.iso19794.FaceImageInfo.FeaturePoint;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
+import kmrtd.lds.AbstractListInfo;
+import kmrtd.lds.iso19794.FaceImageInfo.EyeColor;
+import kmrtd.lds.iso19794.FaceImageInfo.FeaturePoint;
 
 import net.sf.scuba.data.Gender;
 

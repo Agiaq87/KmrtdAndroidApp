@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.APDULevelPACECapable;
-import org.kmrtd.Util;
+import kmrtd.APDULevelPACECapable;
+import kmrtd.Util;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;

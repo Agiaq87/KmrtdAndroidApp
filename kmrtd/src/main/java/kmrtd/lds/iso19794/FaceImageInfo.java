@@ -35,7 +35,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
-import org.kmrtd.lds.AbstractImageInfo;
+import kmrtd.lds.AbstractImageInfo;
 
 import net.sf.scuba.data.Gender;
 

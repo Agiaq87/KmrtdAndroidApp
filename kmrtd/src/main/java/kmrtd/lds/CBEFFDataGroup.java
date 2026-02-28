@@ -33,13 +33,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import kmrtd.cbeff.BiometricDataBlock;
-import org.kmrtd.cbeff.BiometricEncodingType;
-import org.kmrtd.cbeff.CBEFFInfo;
-import org.kmrtd.cbeff.ComplexCBEFFInfo;
-import org.kmrtd.cbeff.ISO781611;
-import org.kmrtd.cbeff.ISO781611Decoder;
-import org.kmrtd.cbeff.ISO781611Encoder;
-import org.kmrtd.cbeff.SimpleCBEFFInfo;
+import kmrtd.cbeff.BiometricEncodingType;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.cbeff.ComplexCBEFFInfo;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.ISO781611Decoder;
+import kmrtd.cbeff.ISO781611Encoder;
+import kmrtd.cbeff.SimpleCBEFFInfo;
 
 import net.sf.scuba.tlv.TLVOutputStream;
 

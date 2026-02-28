@@ -1,7 +1,7 @@
 package it.giaquinto.kmrtd.kmrtdexampleapp.model
 
-import org.kmrtd.support.DocumentNumber
-import org.kmrtd.support.ICAODate
+import kmrtd.support.DocumentNumber
+import kmrtd.support.ICAODate
 
 data class MRZInput(
     val documentNumber: DocumentNumber,

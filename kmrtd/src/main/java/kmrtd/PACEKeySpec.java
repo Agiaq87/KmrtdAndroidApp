@@ -25,7 +25,7 @@ package kmrtd;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
-import org.kmrtd.protocol.PACEProtocol;
+import kmrtd.protocol.PACEProtocol;
 
 import net.sf.scuba.util.Hex;
 

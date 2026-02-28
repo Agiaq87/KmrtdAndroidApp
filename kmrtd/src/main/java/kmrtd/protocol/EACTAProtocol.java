@@ -37,13 +37,13 @@ import java.util.logging.Logger;
 
 import javax.crypto.interfaces.DHPublicKey;
 
-import org.kmrtd.APDULevelEACTACapable;
-import org.kmrtd.CardServiceProtocolException;
-import org.kmrtd.Util;
-import org.kmrtd.cert.CVCAuthorizationTemplate.Role;
-import org.kmrtd.cert.CVCPrincipal;
-import org.kmrtd.cert.CardVerifiableCertificate;
-import org.kmrtd.lds.icao.MRZInfo;
+import kmrtd.APDULevelEACTACapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
+import kmrtd.cert.CVCAuthorizationTemplate.Role;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
+import kmrtd.lds.icao.MRZInfo;
 
 import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.tlv.TLVOutputStream;

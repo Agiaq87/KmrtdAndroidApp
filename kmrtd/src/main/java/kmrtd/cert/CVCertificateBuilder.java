@@ -34,8 +34,9 @@ import java.util.Date;
 import org.ejbca.cvc.CAReferenceField;
 import org.ejbca.cvc.HolderReferenceField;
 import org.ejbca.cvc.exception.ConstructionException;
-import org.kmrtd.cert.CVCAuthorizationTemplate.Permission;
-import org.kmrtd.cert.CVCAuthorizationTemplate.Role;
+
+import kmrtd.cert.CVCAuthorizationTemplate.Permission;
+import kmrtd.cert.CVCAuthorizationTemplate.Role;
 
 /**
  * Card verifiable certificate builder.

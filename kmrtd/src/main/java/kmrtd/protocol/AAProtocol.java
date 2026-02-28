@@ -24,9 +24,9 @@ package kmrtd.protocol;
 
 import java.security.PublicKey;
 
-import org.kmrtd.APDULevelAACapable;
-import org.kmrtd.CardServiceProtocolException;
-import org.kmrtd.Util;
+import kmrtd.APDULevelAACapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
 
 import net.sf.scuba.smartcards.CardServiceException;
 

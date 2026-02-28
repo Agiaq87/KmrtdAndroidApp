@@ -48,11 +48,12 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.kmrtd.ASN1Util;
+
+import kmrtd.ASN1Util;
 import kmrtd.cbeff.BiometricDataBlock;
-import org.kmrtd.cbeff.CBEFFInfo;
-import org.kmrtd.cbeff.ISO781611;
-import org.kmrtd.cbeff.StandardBiometricHeader;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
 
 public class IrisImageDataBlock extends Block implements BiometricDataBlock {
 

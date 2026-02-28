@@ -28,11 +28,11 @@ import java.util.Random;
 
 import javax.crypto.SecretKey;
 
-import org.kmrtd.APDULevelBACCapable;
-import org.kmrtd.AccessKeySpec;
-import org.kmrtd.BACKeySpec;
-import org.kmrtd.CardServiceProtocolException;
-import org.kmrtd.Util;
+import kmrtd.APDULevelBACCapable;
+import kmrtd.AccessKeySpec;
+import kmrtd.BACKeySpec;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
 
 import net.sf.scuba.smartcards.CardServiceException;
 

@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.Util;
-import org.kmrtd.WrappedAPDUEvent;
+import kmrtd.Util;
+import kmrtd.WrappedAPDUEvent;
 
 import net.sf.scuba.smartcards.APDUEvent;
 import net.sf.scuba.smartcards.APDUListener;

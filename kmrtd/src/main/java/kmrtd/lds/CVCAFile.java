@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.kmrtd.PassportService;
-import org.kmrtd.cert.CVCPrincipal;
+import kmrtd.PassportService;
+import kmrtd.cert.CVCPrincipal;
 
 /* TODO: Use CVCPrincipal instead of String for references? */
 /**

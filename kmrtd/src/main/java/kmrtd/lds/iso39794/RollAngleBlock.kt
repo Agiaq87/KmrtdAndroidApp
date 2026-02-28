@@ -7,7 +7,7 @@
 package kmrtd.lds.iso39794
 
 import org.bouncycastle.asn1.ASN1Encodable
-import org.kmrtd.ASN1Util
+import kmrtd.ASN1Util
 
 data class RollAngleBlock(
     val angle: Int,

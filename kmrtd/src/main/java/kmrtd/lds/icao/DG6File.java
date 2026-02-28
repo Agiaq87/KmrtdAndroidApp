@@ -25,7 +25,7 @@ package kmrtd.lds.icao;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.kmrtd.lds.DisplayedImageDataGroup;
+import kmrtd.lds.DisplayedImageDataGroup;
 
 /**
  * File structure for the EF_DG6 file.

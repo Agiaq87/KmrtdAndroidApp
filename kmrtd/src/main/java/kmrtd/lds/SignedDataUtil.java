@@ -76,7 +76,8 @@ import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.kmrtd.Util;
+
+import kmrtd.Util;
 
 /**
  * Utility class for helping with CMS SignedData in security object document and

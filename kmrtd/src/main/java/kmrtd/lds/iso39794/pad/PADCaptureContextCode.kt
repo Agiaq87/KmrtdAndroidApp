@@ -6,7 +6,7 @@
  */
 package kmrtd.lds.iso39794.pad
 
-import org.kmrtd.lds.iso39794.EncodableEnum
+import kmrtd.lds.iso39794.EncodableEnum
 
 enum class PADCaptureContextCode(override val code: Int) : EncodableEnum<PADCaptureContextCode> {
     ENROLMENT(0),

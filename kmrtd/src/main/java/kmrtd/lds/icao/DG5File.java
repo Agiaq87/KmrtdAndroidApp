@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import org.kmrtd.lds.DisplayedImageDataGroup;
-import org.kmrtd.lds.DisplayedImageInfo;
+import kmrtd.lds.DisplayedImageDataGroup;
+import kmrtd.lds.DisplayedImageInfo;
 
 /**
  * File structure for the EF_DG5 file.

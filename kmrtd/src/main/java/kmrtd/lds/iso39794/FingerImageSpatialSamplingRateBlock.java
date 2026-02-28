@@ -40,7 +40,8 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.kmrtd.ASN1Util;
+
+import kmrtd.ASN1Util;
 
 public class FingerImageSpatialSamplingRateBlock extends Block {
 

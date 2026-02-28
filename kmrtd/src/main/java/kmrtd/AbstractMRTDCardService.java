@@ -31,14 +31,14 @@ import java.util.List;
 
 import javax.crypto.SecretKey;
 
-import org.kmrtd.cert.CVCPrincipal;
-import org.kmrtd.cert.CardVerifiableCertificate;
-import org.kmrtd.protocol.AAResult;
-import org.kmrtd.protocol.BACResult;
-import org.kmrtd.protocol.EACCAResult;
-import org.kmrtd.protocol.EACTAResult;
-import org.kmrtd.protocol.PACEResult;
-import org.kmrtd.protocol.SecureMessagingWrapper;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
+import kmrtd.protocol.AAResult;
+import kmrtd.protocol.BACResult;
+import kmrtd.protocol.EACCAResult;
+import kmrtd.protocol.EACTAResult;
+import kmrtd.protocol.PACEResult;
+import kmrtd.protocol.SecureMessagingWrapper;
 
 import net.sf.scuba.smartcards.CardServiceException;
 

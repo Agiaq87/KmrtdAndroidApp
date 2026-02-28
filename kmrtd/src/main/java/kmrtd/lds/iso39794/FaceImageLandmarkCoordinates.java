@@ -40,7 +40,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.kmrtd.ASN1Util;
+
+import kmrtd.ASN1Util;
 
 //  LandmarkCoordinates ::= CHOICE {
 //    base [0] LandmarkCoordinatesBase,

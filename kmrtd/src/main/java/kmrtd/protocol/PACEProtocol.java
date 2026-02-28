@@ -64,17 +64,18 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.kmrtd.APDULevelPACECapable;
-import org.kmrtd.AccessKeySpec;
-import org.kmrtd.BACKeySpec;
-import org.kmrtd.CardServiceProtocolException;
-import org.kmrtd.PACEKeySpec;
-import org.kmrtd.PACESecretKeySpec;
-import org.kmrtd.PassportService;
-import org.kmrtd.Util;
-import org.kmrtd.lds.PACEInfo;
-import org.kmrtd.lds.PACEInfo.DHCParameterSpec;
-import org.kmrtd.lds.PACEInfo.MappingType;
+
+import kmrtd.APDULevelPACECapable;
+import kmrtd.AccessKeySpec;
+import kmrtd.BACKeySpec;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.PACEKeySpec;
+import kmrtd.PACESecretKeySpec;
+import kmrtd.PassportService;
+import kmrtd.Util;
+import kmrtd.lds.PACEInfo;
+import kmrtd.lds.PACEInfo.DHCParameterSpec;
+import kmrtd.lds.PACEInfo.MappingType;
 
 import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.tlv.TLVInputStream;

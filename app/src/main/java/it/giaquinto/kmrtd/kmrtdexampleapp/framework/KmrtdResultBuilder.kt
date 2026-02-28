@@ -2,8 +2,8 @@ package it.giaquinto.kmrtd.kmrtdexampleapp.framework
 
 import android.graphics.Bitmap
 import net.sf.scuba.data.Gender
-import org.kmrtd.lds.DataGroup
-import org.kmrtd.lds.iso19794.FaceImageInfo
+import kmrtd.lds.DataGroup
+import kmrtd.lds.iso19794.FaceImageInfo
 import java.util.Date
 
 class KmrtdResultBuilder {

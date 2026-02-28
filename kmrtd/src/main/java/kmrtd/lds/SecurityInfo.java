@@ -39,8 +39,9 @@ import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.kmrtd.ASN1Util;
-import org.kmrtd.Util;
+
+import kmrtd.ASN1Util;
+import kmrtd.Util;
 
 /* FIXME: dependency on BC in interface? */
 

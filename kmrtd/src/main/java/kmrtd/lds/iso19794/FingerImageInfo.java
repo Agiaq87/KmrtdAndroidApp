@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.kmrtd.cbeff.CBEFFInfo;
-import org.kmrtd.lds.AbstractImageInfo;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.lds.AbstractImageInfo;
 
 /**
  * Data structure for storing view of a single finger

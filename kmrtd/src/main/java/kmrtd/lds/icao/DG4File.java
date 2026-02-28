@@ -31,16 +31,16 @@ import java.util.List;
 import java.util.Map;
 
 import kmrtd.cbeff.BiometricDataBlock;
-import org.kmrtd.cbeff.BiometricDataBlockDecoder;
-import org.kmrtd.cbeff.BiometricDataBlockEncoder;
-import org.kmrtd.cbeff.BiometricEncodingType;
-import org.kmrtd.cbeff.ISO781611;
-import org.kmrtd.cbeff.ISO781611Decoder;
-import org.kmrtd.cbeff.ISO781611Encoder;
-import org.kmrtd.cbeff.StandardBiometricHeader;
-import org.kmrtd.lds.CBEFFDataGroup;
-import org.kmrtd.lds.iso19794.IrisInfo;
-import org.kmrtd.lds.iso39794.IrisImageDataBlock;
+import kmrtd.cbeff.BiometricDataBlockDecoder;
+import kmrtd.cbeff.BiometricDataBlockEncoder;
+import kmrtd.cbeff.BiometricEncodingType;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.ISO781611Decoder;
+import kmrtd.cbeff.ISO781611Encoder;
+import kmrtd.cbeff.StandardBiometricHeader;
+import kmrtd.lds.CBEFFDataGroup;
+import kmrtd.lds.iso19794.IrisInfo;
+import kmrtd.lds.iso39794.IrisImageDataBlock;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;

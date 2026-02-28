@@ -22,6 +22,8 @@
 
 package kmrtd.lds.icao;
 
+import static kmrtd.lds.LDSFile.EF_COM_TAG;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,8 +33,8 @@ import java.util.IllegalFormatConversionException;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import org.kmrtd.lds.AbstractTaggedLDSFile;
-import org.kmrtd.lds.LDSFileUtil;
+import kmrtd.lds.AbstractTaggedLDSFile;
+import kmrtd.lds.LDSFileUtil;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;

@@ -96,9 +96,10 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
-import org.kmrtd.lds.PACEInfo;
-import org.kmrtd.lds.SecurityInfo;
-import org.kmrtd.lds.icao.MRZInfo;
+
+import kmrtd.lds.PACEInfo;
+import kmrtd.lds.SecurityInfo;
+import kmrtd.lds.icao.MRZInfo;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVUtil;

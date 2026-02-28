@@ -34,7 +34,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.kmrtd.Util;
+import kmrtd.Util;
 
 /**
  * An AES secure messaging wrapper for APDUs. Based on TR-SAC.

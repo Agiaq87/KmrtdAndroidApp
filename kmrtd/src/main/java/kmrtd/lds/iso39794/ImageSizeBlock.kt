@@ -8,7 +8,7 @@ package kmrtd.lds.iso39794
 
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
-import org.kmrtd.ASN1Util
+import kmrtd.ASN1Util
 
 data class ImageSizeBlock(
     val width: Int?,

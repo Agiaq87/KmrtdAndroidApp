@@ -47,7 +47,8 @@ import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.kmrtd.Util;
+
+import kmrtd.Util;
 
 /**
  * PACE Domain Parameter Info object as per SAC TR 1.01, November 11, 2010.

@@ -41,8 +41,8 @@
 package kmrtd.lds.iso39794
 
 import org.bouncycastle.asn1.ASN1Encodable
-import org.kmrtd.ASN1Util
-import org.kmrtd.lds.iso39794.RegistryIdBlock.Companion.from
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.RegistryIdBlock.Companion.from
 import java.util.Objects
 
 class FingerImageSegmentationBlock internal constructor(asn1Encodable: ASN1Encodable?) : Block() {

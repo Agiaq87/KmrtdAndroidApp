@@ -52,9 +52,10 @@ import org.bouncycastle.asn1.ASN1VisibleString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERVisibleString;
-import org.kmrtd.ASN1Util;
-import org.kmrtd.cbeff.CBEFFInfo;
-import org.kmrtd.lds.ImageInfo;
+
+import kmrtd.ASN1Util;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.lds.ImageInfo;
 
 public class FingerImageRepresentationBlock extends Block implements ImageInfo {
 

@@ -30,7 +30,8 @@ import java.util.Map;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.kmrtd.ASN1Util;
+
+import kmrtd.ASN1Util;
 
 class ISO39794Util {
 

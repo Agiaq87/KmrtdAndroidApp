@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.kmrtd.lds.AbstractImageInfo;
+import kmrtd.lds.AbstractImageInfo;
 
 /**
  * Iris image header and image data

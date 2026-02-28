@@ -33,19 +33,19 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.PassportService;
-import org.kmrtd.lds.icao.COMFile;
-import org.kmrtd.lds.icao.DG11File;
-import org.kmrtd.lds.icao.DG12File;
-import org.kmrtd.lds.icao.DG14File;
-import org.kmrtd.lds.icao.DG15File;
-import org.kmrtd.lds.icao.DG1File;
-import org.kmrtd.lds.icao.DG2File;
-import org.kmrtd.lds.icao.DG3File;
-import org.kmrtd.lds.icao.DG4File;
-import org.kmrtd.lds.icao.DG5File;
-import org.kmrtd.lds.icao.DG6File;
-import org.kmrtd.lds.icao.DG7File;
+import kmrtd.PassportService;
+import kmrtd.lds.icao.COMFile;
+import kmrtd.lds.icao.DG11File;
+import kmrtd.lds.icao.DG12File;
+import kmrtd.lds.icao.DG14File;
+import kmrtd.lds.icao.DG15File;
+import kmrtd.lds.icao.DG1File;
+import kmrtd.lds.icao.DG2File;
+import kmrtd.lds.icao.DG3File;
+import kmrtd.lds.icao.DG4File;
+import kmrtd.lds.icao.DG5File;
+import kmrtd.lds.icao.DG6File;
+import kmrtd.lds.icao.DG7File;
 
 /**
  * Static LDS file methods.

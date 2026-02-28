@@ -39,12 +39,13 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DLSet;
-import org.kmrtd.lds.ActiveAuthenticationInfo;
-import org.kmrtd.lds.ChipAuthenticationInfo;
-import org.kmrtd.lds.ChipAuthenticationPublicKeyInfo;
-import org.kmrtd.lds.DataGroup;
-import org.kmrtd.lds.SecurityInfo;
-import org.kmrtd.lds.TerminalAuthenticationInfo;
+
+import kmrtd.lds.ActiveAuthenticationInfo;
+import kmrtd.lds.ChipAuthenticationInfo;
+import kmrtd.lds.ChipAuthenticationPublicKeyInfo;
+import kmrtd.lds.DataGroup;
+import kmrtd.lds.SecurityInfo;
+import kmrtd.lds.TerminalAuthenticationInfo;
 
 /**
  * Data Group 14 stores a set of SecurityInfos for EAC and PACE, see

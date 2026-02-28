@@ -31,7 +31,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 
-import org.kmrtd.lds.AbstractLDSInfo;
+import kmrtd.lds.AbstractLDSInfo;
 
 import net.sf.scuba.data.Gender;
 

@@ -1,12 +1,12 @@
 package it.giaquinto.kmrtd.kmrtdexampleapp.framework
 
 import android.util.Log
-import org.kmrtd.lds.SODFile
-import org.kmrtd.lds.icao.COMFile
-import org.kmrtd.lds.icao.DG14File
-import org.kmrtd.lds.icao.DG15File
-import org.kmrtd.lds.icao.DG1File
-import org.kmrtd.lds.icao.DG2File
+import kmrtd.lds.SODFile
+import kmrtd.lds.icao.COMFile
+import kmrtd.lds.icao.DG14File
+import kmrtd.lds.icao.DG15File
+import kmrtd.lds.icao.DG1File
+import kmrtd.lds.icao.DG2File
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 

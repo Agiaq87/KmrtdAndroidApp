@@ -34,8 +34,8 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.Util;
-import org.kmrtd.lds.DataGroup;
+import kmrtd.Util;
+import kmrtd.lds.DataGroup;
 
 /**
  * File structure for the EF_DG15 file.

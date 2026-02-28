@@ -6,7 +6,7 @@
  */
 package kmrtd.support
 
-import org.kmrtd.BACKey
+import kmrtd.BACKey
 import java.util.Date
 import java.util.Objects.toString
 

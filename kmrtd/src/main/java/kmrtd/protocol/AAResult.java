@@ -26,7 +26,7 @@ import java.io.Serializable;
 import java.security.PublicKey;
 import java.util.Arrays;
 
-import org.kmrtd.Util;
+import kmrtd.Util;
 
 import net.sf.scuba.util.Hex;
 

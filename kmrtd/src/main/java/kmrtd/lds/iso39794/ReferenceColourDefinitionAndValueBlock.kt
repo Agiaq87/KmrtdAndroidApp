@@ -9,7 +9,7 @@ package kmrtd.lds.iso39794
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DEROctetString
-import org.kmrtd.ASN1Util
+import kmrtd.ASN1Util
 
 data class ReferenceColourDefinitionAndValueBlock(
     val referenceColourDefinition: ByteArray?,

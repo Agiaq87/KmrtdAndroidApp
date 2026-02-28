@@ -33,10 +33,10 @@ import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import kmrtd.cbeff.BiometricDataBlock;
-import org.kmrtd.cbeff.CBEFFInfo;
-import org.kmrtd.cbeff.ISO781611;
-import org.kmrtd.cbeff.StandardBiometricHeader;
-import org.kmrtd.lds.AbstractListInfo;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
+import kmrtd.lds.AbstractListInfo;
 
 /**
  * Fingerprint general record header and finger image data blocks

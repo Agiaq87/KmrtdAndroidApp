@@ -22,7 +22,7 @@
 
 package kmrtd.protocol;
 
-import org.kmrtd.APDULevelEACTACapable;
+import kmrtd.APDULevelEACTACapable;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;

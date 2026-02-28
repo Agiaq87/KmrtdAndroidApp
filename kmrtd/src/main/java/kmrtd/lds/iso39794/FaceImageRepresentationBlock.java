@@ -44,8 +44,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.kmrtd.ASN1Util;
-import org.kmrtd.lds.ImageInfo;
+
+import kmrtd.ASN1Util;
+import kmrtd.lds.ImageInfo;
 
 public class FaceImageRepresentationBlock extends Block implements ImageInfo {
 

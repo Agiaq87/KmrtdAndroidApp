@@ -42,11 +42,11 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHPublicKey;
 
-import org.kmrtd.APDULevelEACCACapable;
-import org.kmrtd.CardServiceProtocolException;
-import org.kmrtd.Util;
-import org.kmrtd.lds.ChipAuthenticationInfo;
-import org.kmrtd.lds.SecurityInfo;
+import kmrtd.APDULevelEACCACapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
+import kmrtd.lds.ChipAuthenticationInfo;
+import kmrtd.lds.SecurityInfo;
 
 import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.tlv.TLVUtil;

@@ -30,7 +30,8 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECPoint;
 
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.kmrtd.Util;
+
+import kmrtd.Util;
 
 /**
  * An ECDH key agreement implementation, used by PACE protocol for the Generic Mapping

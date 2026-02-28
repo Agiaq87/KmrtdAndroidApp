@@ -8,9 +8,9 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.kmrtd.APDULevelBACCapable;
-import org.kmrtd.CardServiceProtocolException;
-import org.kmrtd.Util;
+import kmrtd.APDULevelBACCapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;

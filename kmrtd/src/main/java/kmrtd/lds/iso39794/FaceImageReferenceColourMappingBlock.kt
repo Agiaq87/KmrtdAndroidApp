@@ -49,8 +49,8 @@ package kmrtd.lds.iso39794
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DEROctetString
-import org.kmrtd.ASN1Util
-import org.kmrtd.lds.iso39794.ReferenceColourDefinitionAndValueBlock.Companion.decodeReferenceColourDefinitionAndValueBlocks
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.ReferenceColourDefinitionAndValueBlock.Companion.decodeReferenceColourDefinitionAndValueBlocks
 
 data class FaceImageReferenceColourMappingBlock(
     val referenceColourSchema: ByteArray?,

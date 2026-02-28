@@ -26,8 +26,8 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Arrays;
 
-import org.kmrtd.AccessKeySpec;
-import org.kmrtd.lds.PACEInfo.MappingType;
+import kmrtd.AccessKeySpec;
+import kmrtd.lds.PACEInfo.MappingType;
 
 import net.sf.scuba.util.Hex;
 

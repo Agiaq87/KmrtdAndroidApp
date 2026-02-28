@@ -25,5 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "Kmrtd Example App"
 include(":app")
 include(":kmrtd")
-include(":jmrtd")
  

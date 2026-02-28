@@ -31,9 +31,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.Util;
-import org.kmrtd.cert.CVCPrincipal;
-import org.kmrtd.cert.CardVerifiableCertificate;
+import kmrtd.Util;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
 
 import net.sf.scuba.util.Hex;
 

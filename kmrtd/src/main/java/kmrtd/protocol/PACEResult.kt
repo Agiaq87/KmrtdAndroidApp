@@ -27,9 +27,9 @@
  */
 package kmrtd.protocol
 
-import org.kmrtd.AccessKeySpec
-import org.kmrtd.Util
-import org.kmrtd.lds.PACEInfo
+import kmrtd.AccessKeySpec
+import kmrtd.Util
+import kmrtd.lds.PACEInfo
 import java.io.Serializable
 import java.security.KeyPair
 import java.security.PublicKey

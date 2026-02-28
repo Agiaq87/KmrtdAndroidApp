@@ -25,7 +25,7 @@ package kmrtd.protocol;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.kmrtd.APDULevelAACapable;
+import kmrtd.APDULevelAACapable;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;

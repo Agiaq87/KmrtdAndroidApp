@@ -52,11 +52,12 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.kmrtd.ASN1Util;
-import org.kmrtd.lds.iso39794.pad.PADCaptureContextCode;
-import org.kmrtd.lds.iso39794.pad.PADCriteriaCategoryCode;
-import org.kmrtd.lds.iso39794.pad.PADDecisionCode;
-import org.kmrtd.lds.iso39794.pad.PADSupervisionLevelCode;
+
+import kmrtd.ASN1Util;
+import kmrtd.lds.iso39794.pad.PADCaptureContextCode;
+import kmrtd.lds.iso39794.pad.PADCriteriaCategoryCode;
+import kmrtd.lds.iso39794.pad.PADDecisionCode;
+import kmrtd.lds.iso39794.pad.PADSupervisionLevelCode;
 
 import net.sf.scuba.util.Hex;
 
