@@ -189,7 +189,7 @@ public class EACTAProtocol {
        * is the CVCA.
        */
       CardVerifiableCertificate firstCert = terminalCertificates.get(0);
-      Role firstCertRole = firstCert.getAuthorizationTemplate().getRole();
+      Role firstCertRole = firstCert.getAuthorizationTemplate().role;
       if (Role.CVCA.equals(firstCertRole)) {
         CVCPrincipal firstCertHolderReference = firstCert.getHolderReference();
         if (caReference != null && !caReference.equals(firstCertHolderReference)) {
@@ -212,7 +212,7 @@ public class EACTAProtocol {
 
       /* Check if the last cert is an IS cert. */
       CardVerifiableCertificate lastCert = terminalCertificates.get(terminalCertificates.size() - 1);
-      Role lastCertRole = lastCert.getAuthorizationTemplate().getRole();
+      Role lastCertRole = lastCert.getAuthorizationTemplate().role;
       if (!Role.IS.equals(lastCertRole)) {
         throw new CardServiceException("Last certificate in chain (" + lastCert.getHolderReference().getName()
             + ") does not have role IS, but has role " + lastCertRole);

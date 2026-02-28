@@ -19,97 +19,106 @@
  *
  * $Id: CVCertificateFactorySpi.java 1751 2018-01-15 15:35:45Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.cert
 
-package kmrtd.cert;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.cert.CRL;
-import java.security.cert.CRLException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactorySpi;
-import java.util.Collection;
-
-import org.ejbca.cvc.CVCObject;
-import org.ejbca.cvc.CertificateParser;
-import org.ejbca.cvc.exception.ConstructionException;
-import org.ejbca.cvc.exception.ParseException;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import org.ejbca.cvc.CVCObject
+import org.ejbca.cvc.CVCertificate
+import org.ejbca.cvc.CertificateParser
+import org.ejbca.cvc.exception.ConstructionException
+import org.ejbca.cvc.exception.ParseException
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.security.cert.CRL
+import java.security.cert.CRLException
+import java.security.cert.Certificate
+import java.security.cert.CertificateException
+import java.security.cert.CertificateFactorySpi
 
 /**
  * Card verifiable certificate factory.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1751 $
- *
+ * 
  * @see CardVerifiableCertificate
  */
-public class CVCertificateFactorySpi extends CertificateFactorySpi {
+class CVCertificateFactorySpi : CertificateFactorySpi() {
+    /**
+     * Generates the certificate based on an input source.
+     * 
+     * @param inputStream the input source
+     * 
+     * @throws CertificateException on parsing errors
+     */
+    @Throws(CertificateException::class)
+    override fun engineGenerateCertificate(inputStream: InputStream?): Certificate {
+        try {
+            /* Read certificate as byte[] */
+            val tlvIn = TLVInputStream(inputStream)
+            val tag = tlvIn.readTag()
+            if (tag != CV_CERTIFICATE_TAG) {
+                throw CertificateException(
+                    "Expected CV_CERTIFICATE_TAG, found " + Integer.toHexString(
+                        tag
+                    )
+                )
+            }
+            /* int length = */
+            tlvIn.readLength()
+            val value = tlvIn.readValue()
 
-  private static final int CV_CERTIFICATE_TAG = 0x7F21;
-
-  /**
-   * Generates the certificate based on an input source.
-   *
-   * @param inputStream the input source
-   *
-   * @throws CertificateException on parsing errors
-   */
-  @Override
-  public Certificate engineGenerateCertificate(InputStream inputStream) throws CertificateException {
-    try {
-      /* Read certificate as byte[] */
-      TLVInputStream tlvIn = new TLVInputStream(inputStream);
-      int tag = tlvIn.readTag();
-      if (tag != CV_CERTIFICATE_TAG) {
-        throw new CertificateException("Expected CV_CERTIFICATE_TAG, found " + Integer.toHexString(tag));
-      }
-      /* int length = */ tlvIn.readLength();
-      byte[] value = tlvIn.readValue();
-
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      TLVOutputStream tlvOut = new TLVOutputStream(out);
-      tlvOut.writeTag(CV_CERTIFICATE_TAG);
-      tlvOut.writeValue(value);
-      tlvOut.close();
-      CVCObject parsedObject = CertificateParser.parseCertificate(out.toByteArray());
-      return new CardVerifiableCertificate((org.ejbca.cvc.CVCertificate)parsedObject);
-    } catch (IOException ioe) {
-      throw new CertificateException(ioe);
-    } catch (ConstructionException ce) {
-      throw new CertificateException(ce);
-    } catch (ParseException pe) {
-      throw new CertificateException(pe);
+            val out = ByteArrayOutputStream()
+            val tlvOut = TLVOutputStream(out)
+            tlvOut.writeTag(CV_CERTIFICATE_TAG)
+            tlvOut.writeValue(value)
+            tlvOut.close()
+            val parsedObject: CVCObject? = CertificateParser.parseCertificate(out.toByteArray())
+            return CardVerifiableCertificate(parsedObject as CVCertificate?)
+        } catch (ioe: IOException) {
+            throw CertificateException(ioe)
+        } catch (ce: ConstructionException) {
+            throw CertificateException(ce)
+        } catch (pe: ParseException) {
+            throw CertificateException(pe)
+        }
     }
-  }
 
-  /**
-   * Not implemented.
-   *
-   * @param inputStream input stream
-   */
-  @Override
-  public CRL engineGenerateCRL(InputStream inputStream) throws CRLException {
-    return null; // TODO
-  }
+    /**
+     * Not implemented.
+     * 
+     * @param inputStream input stream
+     */
+    @Throws(CRLException::class)
+    override fun engineGenerateCRL(inputStream: InputStream?): CRL? {
+        return null // TODO
+    }
 
-  /**
-   * Not implemented.
-   *
-   * @param inputStream input stream
-   */
-  @Override
-  public Collection<? extends CRL> engineGenerateCRLs(InputStream inputStream) throws CRLException {
-    return null; // TODO
-  }
+    /**
+     * Not implemented.
+     * 
+     * @param inputStream input stream
+     */
+    @Throws(CRLException::class)
+    override fun engineGenerateCRLs(inputStream: InputStream?): MutableCollection<out CRL?>? {
+        return null // TODO
+    }
 
-  @Override
-  public Collection<? extends Certificate> engineGenerateCertificates(InputStream in) throws CertificateException {
-    return null; // TODO
-  }
+    @Throws(CertificateException::class)
+    override fun engineGenerateCertificates(`in`: InputStream?): MutableCollection<out Certificate?>? {
+        return null // TODO
+    }
+
+    companion object {
+        private const val CV_CERTIFICATE_TAG = 0x7F21
+    }
 }

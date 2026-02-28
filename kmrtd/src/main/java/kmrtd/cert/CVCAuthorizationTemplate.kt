@@ -19,314 +19,173 @@
  *
  * $Id: CVCAuthorizationTemplate.java 1853 2021-06-26 18:13:26Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.cert
 
-package kmrtd.cert;
+import kmrtd.cert.cvc.Permission
+import kmrtd.cert.cvc.Role
+import org.ejbca.cvc.AccessRightEnum
+import org.ejbca.cvc.AuthorizationRoleEnum
 
-import org.ejbca.cvc.AccessRightEnum;
-import org.ejbca.cvc.AuthorizationRoleEnum;
 
 /**
  * Card verifiable certificate authorization template.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1853 $
  */
-public class CVCAuthorizationTemplate {
+data class CVCAuthorizationTemplate(
+    val role: Role,
+    val accessRight: Permission
+) {
 
-  /**
-   * The authorization role.
-   *
-   * @author The JMRTD team (info@jmrtd.org)
-   *
-   * @version $Revision: 1853 $
-   */
-  public enum Role {
-    /** Certificate authority. */
-    CVCA(0xC0),
 
-    /** Document verifier domestic. */
-    DV_D(0x80),
-
-    /** Document verifier foreign. */
-    DV_F(0x40),
-
-    /** Inspection system. */
-    IS(0x00);
-
-    private byte value;
-
+    /*
+        */
     /**
-     * Creates a role for the given value.
-     *
-     * @param value the value code
-     */
-    private Role(int value) {
-      this.value = (byte)value;
+     * Returns a textual representation of this authorization template.
+     * 
+     * @return a textual representation of this authorization template
+     *//*
+    override fun toString(): String {
+        return role.toString() + accessRight.toString()
     }
 
+    */
     /**
-     * Returns the value as a bitmap.
-     *
-     * @return a bitmap
-     */
-    public byte getValue() {
-      return value;
+     * Checks equality.
+     * 
+     * @param otherObj the other object
+     * 
+     * @return whether the other object is equal to this object
+     *//*
+    override fun equals(otherObj: Any?): Boolean {
+        if (otherObj == null) {
+            return false
+        }
+        if (otherObj === this) {
+            return true
+        }
+        if (this.javaClass != otherObj.javaClass) {
+            return false
+        }
+
+        val otherTemplate = otherObj as kmrtd.cert.CVCAuthorizationTemplate
+        return this.role == otherTemplate.role && this.accessRight == otherTemplate.accessRight
     }
-  }
 
-  /**
-   * The authorization permission.
-   *
-   * @author The JMRTD team (info@jmrtd.org)
-   *
-   * @version $Revision: 1853 $
-   */
-  public enum Permission {
-    /** No read access. */
-    READ_ACCESS_NONE(0x00),
-
-    /** Read access to DG3. */
-    READ_ACCESS_DG3(0x01),
-
-    /** Read access to DG4. */
-    READ_ACCESS_DG4(0x02),
-
-    /** Read access to DG3 and DG4. */
-    READ_ACCESS_DG3_AND_DG4(0x03);
-
-    private byte value;
-
+    */
     /**
-     * Constructs a permission for the given value.
-     *
-     * @param value a value code
-     */
-    private Permission(int value) {
-      this.value = (byte)value;
+     * Returns a hash code of this object.
+     * 
+     * @return the hash code
+     *//*
+    override fun hashCode(): Int {
+        return 2 * role.value + 3 * accessRight.value + 61
+    }*/
+
+    companion object {
+        /**
+         * Translates a permission to an EJBCA typed equivalent permission.
+         * 
+         * @param permission a permission
+         * 
+         * @return the EJBCA typed equivalent of the given permission
+         */
+        @JvmStatic
+        fun fromPermission(permission: Permission?): AccessRightEnum {
+            try {
+                return when (permission) {
+                    Permission.READ_ACCESS_NONE -> AccessRightEnum.READ_ACCESS_NONE
+                    Permission.READ_ACCESS_DG3 -> AccessRightEnum.READ_ACCESS_DG3
+                    Permission.READ_ACCESS_DG4 -> AccessRightEnum.READ_ACCESS_DG4
+                    Permission.READ_ACCESS_DG3_AND_DG4 -> AccessRightEnum.READ_ACCESS_DG3_AND_DG4
+                    else -> throw IllegalArgumentException("Error getting permission for $permission")
+                }
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Error getting permission from AuthZ template", e)
+            }
+        }
+
+        /**
+         * Translates a role to an EJBCA typed equivalent role.
+         * 
+         * @param role a role
+         * 
+         * @return the EJBCA typed equivalent role
+         */
+        @JvmStatic
+        fun fromRole(role: Role?): AuthorizationRoleEnum {
+            try {
+                return when (role) {
+                    Role.CVCA -> AuthorizationRoleEnum.CVCA
+                    Role.DV_D -> AuthorizationRoleEnum.DV_D
+                    Role.DV_F -> AuthorizationRoleEnum.DV_F
+                    Role.IS -> AuthorizationRoleEnum.IS
+                    else -> throw IllegalArgumentException("Error getting role from AuthZ template $role")
+                }
+            } catch (e: Exception) {
+                throw IllegalArgumentException("Error getting role from AuthZ template", e)
+            }
+        }
+
+        /**
+         * Factory method
+         */
+        @JvmStatic
+        fun from(template: org.ejbca.cvc.CVCAuthorizationTemplate): CVCAuthorizationTemplate =
+            CVCAuthorizationTemplate(
+                role = toRole(template),
+                accessRight = toPermission(template)
+            )
+
+
+        /**
+         * Translates an EJBCA typed role to a role.
+         * 
+         * @param template the EJBCA typed role
+         * 
+         * @return the equivalent role
+         */
+        private fun toRole(template: org.ejbca.cvc.CVCAuthorizationTemplate): Role {
+            try {
+                return when (val role = template.authorizationField.getRole()) {
+                    AuthorizationRoleEnum.CVCA -> Role.CVCA
+                    AuthorizationRoleEnum.DV_D -> Role.DV_D
+                    AuthorizationRoleEnum.DV_F -> Role.DV_F
+                    AuthorizationRoleEnum.IS -> Role.IS
+                    else -> throw IllegalArgumentException("Unsupported role $role")
+                }
+            } catch (nsfe: NoSuchFieldException) {
+                throw IllegalArgumentException("Error getting role from AuthZ template", nsfe)
+            }
+        }
+
+        /**
+         * Translates an EJBCA typed permission to an equivalent permission.
+         * 
+         * @param template the EJBCA typed permission
+         * 
+         * @return the equivalent permission
+         */
+        private fun toPermission(template: org.ejbca.cvc.CVCAuthorizationTemplate): Permission {
+            try {
+                return when (val accessRight = template.authorizationField.getAccessRight()) {
+                    AccessRightEnum.READ_ACCESS_NONE -> Permission.READ_ACCESS_NONE
+                    AccessRightEnum.READ_ACCESS_DG3 -> Permission.READ_ACCESS_DG3
+                    AccessRightEnum.READ_ACCESS_DG4 -> Permission.READ_ACCESS_DG4
+                    AccessRightEnum.READ_ACCESS_DG3_AND_DG4 -> Permission.READ_ACCESS_DG3_AND_DG4
+                    else -> throw IllegalArgumentException("Unsupported access right $accessRight")
+                }
+            } catch (nsfe: NoSuchFieldException) {
+                throw IllegalArgumentException("Unsupported access right", nsfe)
+            }
+        }
     }
-
-    /**
-     * Whether this permission implies the other permission.
-     *
-     * @param other some other permission
-     *
-     * @return a boolean
-     */
-    public boolean implies(Permission other) {
-      switch (this) {
-        case READ_ACCESS_NONE:
-          return other == READ_ACCESS_NONE;
-        case READ_ACCESS_DG3:
-          return other == READ_ACCESS_DG3;
-        case READ_ACCESS_DG4:
-          return other == READ_ACCESS_DG4;
-        case READ_ACCESS_DG3_AND_DG4:
-          return other == READ_ACCESS_DG3 || other == READ_ACCESS_DG4 || other == READ_ACCESS_DG3_AND_DG4;
-        default:
-          return false;
-      }
-    }
-
-    /**
-     * Returns the tag as a bitmap.
-     *
-     * @return a bitmap
-     */
-    public byte getValue() {
-      return value;
-    }
-  }
-
-  private Role role;
-  private Permission accessRight;
-
-  /**
-   * Constructs an authorization template based on an EJBCA authorization template.
-   *
-   * @param template the authZ template to wrap
-   */
-  protected CVCAuthorizationTemplate(org.ejbca.cvc.CVCAuthorizationTemplate template) {
-    this.role = toRole(template);
-    this.accessRight = toPermission(template);
-
-  }
-
-  /**
-   * Constructs an authorization template.
-   *
-   * @param role the role
-   * @param accessRight the access rights
-   */
-  public CVCAuthorizationTemplate(Role role, Permission accessRight) {
-    this.role = role;
-    this.accessRight = accessRight;
-  }
-
-  /**
-   * Returns the role.
-   *
-   * @return the role
-   */
-  public Role getRole() {
-    return role;
-  }
-
-  /**
-   * Returns the access rights.
-   *
-   * @return the access rights
-   */
-  public Permission getAccessRight() {
-    return accessRight;
-  }
-
-  /**
-   * Returns a textual representation of this authorization template.
-   *
-   * @return a textual representation of this authorization template
-   */
-  @Override
-  public String toString() {
-    return role.toString() + accessRight.toString();
-  }
-
-  /**
-   * Checks equality.
-   *
-   * @param otherObj the other object
-   *
-   * @return whether the other object is equal to this object
-   */
-  @Override
-  public boolean equals(Object otherObj) {
-    if (otherObj == null) {
-      return false;
-    }
-    if (otherObj == this) {
-      return true;
-    }
-    if (!this.getClass().equals(otherObj.getClass())) {
-      return false;
-    }
-
-    CVCAuthorizationTemplate otherTemplate = (CVCAuthorizationTemplate) otherObj;
-    return this.role == otherTemplate.role && this.accessRight == otherTemplate.accessRight;
-  }
-
-  /**
-   * Returns a hash code of this object.
-   *
-   * @return the hash code
-   */
-  @Override
-  public int hashCode() {
-    return 2 * role.value + 3 * accessRight.value + 61;
-  }
-
-  /**
-   * Translates a permission to an EJBCA typed equivalent permission.
-   *
-   * @param permission a permission
-   *
-   * @return the EJBCA typed equivalent of the given permission
-   */
-  static org.ejbca.cvc.AccessRightEnum fromPermission(Permission permission) {
-    try{
-      switch (permission) {
-        case READ_ACCESS_NONE:
-          return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_NONE;
-        case READ_ACCESS_DG3:
-          return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3;
-        case READ_ACCESS_DG4:
-          return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG4;
-        case READ_ACCESS_DG3_AND_DG4:
-          return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3_AND_DG4;
-        default:
-          throw new IllegalArgumentException("Error getting permission for " + permission);
-      }
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Error getting permission from AuthZ template", e);
-    }
-  }
-
-  /**
-   * Translates a role to an EJBCA typed equivalent role.
-   *
-   * @param role a role
-   *
-   * @return the EJBCA typed equivalent role
-   */
-  static org.ejbca.cvc.AuthorizationRoleEnum fromRole(Role role) {
-    try {
-      switch (role) {
-        case CVCA:
-          return org.ejbca.cvc.AuthorizationRoleEnum.CVCA;
-        case DV_D:
-          return org.ejbca.cvc.AuthorizationRoleEnum.DV_D;
-        case DV_F:
-          return org.ejbca.cvc.AuthorizationRoleEnum.DV_F;
-        case IS:
-          return org.ejbca.cvc.AuthorizationRoleEnum.IS;
-        default:
-          throw new IllegalArgumentException("Error getting role from AuthZ template " + role);
-      }
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Error getting role from AuthZ template", e);
-    }
-  }
-
-  /**
-   * Translates an EJBCA typed role to a role.
-   *
-   * @param template the EJBCA typed role
-   *
-   * @return the equivalent role
-   */
-  private static Role toRole(org.ejbca.cvc.CVCAuthorizationTemplate template) {
-    try {
-      AuthorizationRoleEnum role = template.getAuthorizationField().getRole();
-      switch(role) {
-        case CVCA:
-          return Role.CVCA;
-        case DV_D:
-          return Role.DV_D;
-        case DV_F:
-          return Role.DV_F;
-        case IS:
-          return Role.IS;
-        default:
-          throw new IllegalArgumentException("Unsupported role " + role);
-      }
-    } catch (NoSuchFieldException nsfe) {
-      throw new IllegalArgumentException("Error getting role from AuthZ template", nsfe);
-    }
-  }
-
-  /**
-   * Translates an EJBCA typed permission to an equivalent permission.
-   *
-   * @param template the EJBCA typed permission
-   *
-   * @return the equivalent permission
-   */
-  private static Permission toPermission(org.ejbca.cvc.CVCAuthorizationTemplate template) {
-    try {
-      AccessRightEnum accessRight = template.getAuthorizationField().getAccessRight();
-      switch(accessRight) {
-        case READ_ACCESS_NONE:
-          return Permission.READ_ACCESS_NONE;
-        case READ_ACCESS_DG3:
-          return Permission.READ_ACCESS_DG3;
-        case READ_ACCESS_DG4:
-          return Permission.READ_ACCESS_DG4;
-        case READ_ACCESS_DG3_AND_DG4:
-          return Permission.READ_ACCESS_DG3_AND_DG4;
-        default:
-          throw new IllegalArgumentException("Unsupported access right " + accessRight);
-      }
-    } catch (NoSuchFieldException nsfe) {
-      throw new IllegalArgumentException("Unsupported access right", nsfe);
-    }
-  }
 }
