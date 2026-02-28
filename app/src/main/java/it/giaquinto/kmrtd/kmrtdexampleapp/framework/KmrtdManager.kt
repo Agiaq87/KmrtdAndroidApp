@@ -685,7 +685,7 @@ class KmrtdManager {
             challenge
         )
 
-        val signature = Signature.getInstance("SHA256withRSA")
+        val signature = Signature.getInstance(signatureAlgorithm)
         signature.initVerify(dg15File.publicKey)
         signature.update(challenge)
         return signature.verify(response.response)
