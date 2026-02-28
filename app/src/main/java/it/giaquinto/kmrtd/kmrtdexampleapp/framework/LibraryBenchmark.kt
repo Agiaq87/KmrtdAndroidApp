@@ -1,7 +1,12 @@
 package it.giaquinto.kmrtd.kmrtdexampleapp.framework
 
-import android.os.SystemClock
 import android.util.Log
+import org.kmrtd.lds.SODFile
+import org.kmrtd.lds.icao.COMFile
+import org.kmrtd.lds.icao.DG14File
+import org.kmrtd.lds.icao.DG15File
+import org.kmrtd.lds.icao.DG1File
+import org.kmrtd.lds.icao.DG2File
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
@@ -264,12 +269,12 @@ class LibraryBenchmark {
      */
     private fun parseWithJmrtd(name: String, inputStream: InputStream): Any? {
         return when (name.uppercase()) {
-            "COM"  -> org.jmrtd.lds.icao.COMFile(inputStream)
-            "DG1"  -> org.jmrtd.lds.icao.DG1File(inputStream)
-            "DG2"  -> org.jmrtd.lds.icao.DG2File(inputStream)
-            "DG14" -> org.jmrtd.lds.icao.DG14File(inputStream)
-            "DG15" -> org.jmrtd.lds.icao.DG15File(inputStream)
-            "SOD"  -> org.jmrtd.lds.SODFile(inputStream)
+            "COM"  -> COMFile(inputStream)
+            "DG1"  -> DG1File(inputStream)
+            "DG2"  -> DG2File(inputStream)
+            "DG14" -> DG14File(inputStream)
+            "DG15" -> DG15File(inputStream)
+            "SOD"  -> SODFile(inputStream)
             else   -> {
                 Log.w(TAG, "Parser jmrtd non disponibile per: $name")
                 null

@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import it.giaquinto.kmrtd.kmrtdexampleapp.R
-import org.jmrtd.support.DocumentNumber
-import org.jmrtd.support.ICAODate
+import org.kmrtd.support.DocumentNumber
+import org.kmrtd.support.ICAODate
 import it.giaquinto.kmrtd.kmrtdexampleapp.model.MRZInput
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.viewmodel.HomeViewModel
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.widget.DateCheckerWidget
