@@ -6,6 +6,7 @@ import kmrtd.lds.DataGroup
 import kmrtd.lds.iso19794.FaceImageInfo
 import kmrtd.lds.iso19794.support.EyeColor
 import kmrtd.lds.iso19794.support.FaceImageType
+import kmrtd.lds.iso19794.support.Feature
 import kmrtd.lds.iso19794.support.HairColor
 import kmrtd.lds.iso19794.support.ImageColorSpace
 import kmrtd.lds.iso19794.support.ImageDataType
@@ -34,6 +35,7 @@ class KmrtdResultBuilder {
     var imageDataType: ImageDataType? = null
     var faceImageDataType: FaceImageType? = null
     var sourceType: SourceType? = null
+    var feature: Set<Feature>? = null
     var firstName: String? = null
     var gender: Gender? = null
     var holder: String? = null

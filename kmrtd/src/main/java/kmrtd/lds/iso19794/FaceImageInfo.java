@@ -37,12 +37,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import kmrtd.lds.AbstractImageInfo;
 import kmrtd.lds.iso19794.support.EyeColor;
 import kmrtd.lds.iso19794.support.FaceImageInfoConstants;
 import kmrtd.lds.iso19794.support.FaceImageType;
+import kmrtd.lds.iso19794.support.Feature;
 import kmrtd.lds.iso19794.support.FeaturePoint;
 import kmrtd.lds.iso19794.support.HairColor;
 import kmrtd.lds.iso19794.support.ImageColorSpace;
@@ -342,8 +344,8 @@ public class FaceImageInfo extends AbstractImageInfo {
    *
    * @return feature mask
    */
-  public int getFeatureMask() {
-    return featureMask;
+  public Set<Feature> getFeatureMask() {
+    return Feature.fromMask(featureMask);
   }
 
   /**

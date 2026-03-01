@@ -504,6 +504,8 @@ class KmrtdManager {
                 imageDataType = it.imageDataType
                 faceImageDataType = it.faceImageType
                 hairColor = it.hairColor
+                feature = it.featureMask
+                sourceType = it.sourceType
                 // Added from KMRTD
                 gender = it.gender
 
