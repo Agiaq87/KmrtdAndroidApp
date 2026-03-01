@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import kmrtd.lds.AbstractImageInfo;
+import kmrtd.lds.iso19794.support.Expression;
 import kmrtd.lds.iso19794.support.EyeColor;
 import kmrtd.lds.iso19794.support.FaceImageInfoConstants;
 import kmrtd.lds.iso19794.support.FaceImageType;
@@ -84,7 +85,7 @@ public class FaceImageInfo extends AbstractImageInfo {
   private EyeColor eyeColor;
   private int hairColor;
   private int featureMask;
-  private int expression;
+  private short expression;
   private int[] poseAngle;
   private int[] poseAngleUncertainty;
   private FeaturePoint[] featurePoints;
@@ -122,7 +123,7 @@ public class FaceImageInfo extends AbstractImageInfo {
   public FaceImageInfo(Gender gender, EyeColor eyeColor,
       int featureMask,
       int hairColor,
-      int expression,
+                       short expression,
       int[] poseAngle, int[] poseAngleUncertainty,
       int faceImageType,
       int colorSpace,
@@ -286,8 +287,8 @@ public class FaceImageInfo extends AbstractImageInfo {
    *
    * @return expression
    */
-  public int getExpression() {
-    return expression;
+  public Expression getExpression() {
+    return Expression.toExpression(expression);
   }
 
   /**

@@ -506,6 +506,7 @@ class KmrtdManager {
                 hairColor = it.hairColor
                 feature = it.featureMask
                 sourceType = it.sourceType
+                expression = it.expression
                 // Added from KMRTD
                 gender = it.gender
 
