@@ -5,7 +5,11 @@ import net.sf.scuba.data.Gender
 import kmrtd.lds.DataGroup
 import kmrtd.lds.iso19794.FaceImageInfo
 import kmrtd.lds.iso19794.support.EyeColor
+import kmrtd.lds.iso19794.support.FaceImageType
 import kmrtd.lds.iso19794.support.HairColor
+import kmrtd.lds.iso19794.support.ImageColorSpace
+import kmrtd.lds.iso19794.support.ImageDataType
+import kmrtd.lds.iso19794.support.SourceType
 import java.util.Date
 
 class KmrtdResultBuilder {
@@ -26,6 +30,10 @@ class KmrtdResultBuilder {
     var expirationDateString: String? = null
     var eyeColor: EyeColor? = null
     var hairColor: HairColor? = null
+    var imageColorSpace: ImageColorSpace? = null
+    var imageDataType: ImageDataType? = null
+    var faceImageDataType: FaceImageType? = null
+    var sourceType: SourceType? = null
     var firstName: String? = null
     var gender: Gender? = null
     var holder: String? = null

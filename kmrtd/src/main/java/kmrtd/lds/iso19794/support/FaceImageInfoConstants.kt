@@ -1,3 +1,9 @@
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.lds.iso19794.support
 
 object FaceImageInfoConstants {
@@ -48,14 +54,18 @@ object FaceImageInfoConstants {
     const val FACE_IMAGE_TYPE_FULL_FRONTAL: Int = 0x01
     const val FACE_IMAGE_TYPE_TOKEN_FRONTAL: Int = 0x02
 
-    const val IMAGE_DATA_TYPE_JPEG: Int = 0x00
-    const val IMAGE_DATA_TYPE_JPEG2000: Int = 0x01
+    const val IMAGE_DATA_TYPE_UNCOMPRESSED_NO_BIT_PACKING: Int = 0x00
+    const val IMAGE_DATA_TYPE_UNCOMPRESSED_BIT_PACKING: Int = 0x01
+    const val IMAGE_DATA_TYPE_JPEG2000: Int = 0x04
+    const val IMAGE_DATAT_TYPE_PNG: Int = 0x05
 
     const val IMAGE_COLOR_SPACE_UNSPECIFIED: Int = 0x00
-    const val IMAGE_COLOR_SPACE_RGB24: Int = 0x01
+    const val IMAGE_COLOR_SPACE_RGB24_STANDARD_REQUIRED: Int = 0x01
     const val IMAGE_COLOR_SPACE_YUV422: Int = 0x02
     const val IMAGE_COLOR_SPACE_GRAY8: Int = 0x03
     const val IMAGE_COLOR_SPACE_OTHER: Int = 0x04
+    const val IMAGE_COLOR_SPACE_UNKNOWN: Int = 0xFF
+
 
     const val SOURCE_TYPE_UNSPECIFIED: Int = 0x00
     const val SOURCE_TYPE_STATIC_PHOTO_UNKNOWN_SOURCE: Int = 0x01

@@ -6,6 +6,8 @@
  */
 package kmrtd.lds.iso19794.support
 
+import kmrtd.support.StandardRequires
+
 /**
  * Face image type code based on Section 5.7.1 of ISO 19794-5.
  *
@@ -13,24 +15,24 @@ package kmrtd.lds.iso19794.support
  * [see](https://egovstandards.gov.in/sites/default/files/Face_Image_Data_Standard_Ver1.0.pdf)
  * @author The JMRTD team (info@jmrtd.org)
  * @author Alessandro Giaquinto (agiaquinto87@gmail.com)
- * @version $Revision: 1808 $
+ * @version 2.0
  */
-enum class FaceImageType(private val code: Int) {
+enum class FaceImageType(val code: Int) : StandardRequires<FaceImageType> {
     BASIC(FaceImageInfoConstants.FACE_IMAGE_TYPE_BASIC),
     FULL_FRONTAL(FaceImageInfoConstants.FACE_IMAGE_TYPE_FULL_FRONTAL),
     TOKEN_FRONTAL(FaceImageInfoConstants.FACE_IMAGE_TYPE_TOKEN_FRONTAL);
 
-    fun toInt(): Int =
-        code
+    override fun standardRequires(): List<FaceImageType> =
+        listOf(FaceImageType.FULL_FRONTAL)
 
     companion object {
         @JvmStatic
-        fun toFaceImageType(code: Int): FaceImageType =
+        fun toFaceImageType(code: Int): FaceImageType? =
             when (code) {
                 FaceImageInfoConstants.FACE_IMAGE_TYPE_BASIC -> BASIC
                 FaceImageInfoConstants.FACE_IMAGE_TYPE_FULL_FRONTAL -> FULL_FRONTAL
                 FaceImageInfoConstants.FACE_IMAGE_TYPE_TOKEN_FRONTAL -> TOKEN_FRONTAL
-                else -> throw IllegalArgumentException("Unknown face image type code: $code")
+                else -> null
             }
     }
 }

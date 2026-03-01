@@ -500,7 +500,11 @@ class KmrtdManager {
 
                 eyeColor = it.eyeColor
                 // Added from KMRTD
+                imageColorSpace = it.colorSpace
+                imageDataType = it.imageDataType
+                faceImageDataType = it.faceImageType
                 hairColor = it.hairColor
+                // Added from KMRTD
                 gender = it.gender
 
                 _state.value = KmrtdState.DG2File

@@ -6,8 +6,6 @@
  */
 package kmrtd.lds.iso19794.support
 
-import kmrtd.lds.iso19794.FaceImageInfo
-
 /** Eye color code based on Section 5.5.4 of ISO 19794-5.  */
 enum class EyeColor(
     /**

@@ -27,8 +27,6 @@
  */
 package kmrtd.lds.iso19794;
 
-import static kmrtd.lds.iso19794.support.FaceImageInfoConstants.EXPRESSION_SQUINTING;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -44,8 +42,12 @@ import java.util.logging.Logger;
 import kmrtd.lds.AbstractImageInfo;
 import kmrtd.lds.iso19794.support.EyeColor;
 import kmrtd.lds.iso19794.support.FaceImageInfoConstants;
+import kmrtd.lds.iso19794.support.FaceImageType;
 import kmrtd.lds.iso19794.support.FeaturePoint;
 import kmrtd.lds.iso19794.support.HairColor;
+import kmrtd.lds.iso19794.support.ImageColorSpace;
+import kmrtd.lds.iso19794.support.ImageDataType;
+import kmrtd.lds.iso19794.support.SourceType;
 
 import net.sf.scuba.data.Gender;
 
@@ -316,7 +318,7 @@ public class FaceImageInfo extends AbstractImageInfo {
    */
   private static String toMimeType(int compressionAlg) {
     return switch (compressionAlg) {
-      case FaceImageInfoConstants.IMAGE_DATA_TYPE_JPEG -> JPEG_MIME_TYPE;
+      case FaceImageInfoConstants.IMAGE_DATA_TYPE_UNCOMPRESSED_NO_BIT_PACKING -> JPEG_MIME_TYPE;
       case FaceImageInfoConstants.IMAGE_DATA_TYPE_JPEG2000 -> JPEG2000_MIME_TYPE;
       default -> {
         LOGGER.warning("Unknown image type: " + compressionAlg);
@@ -331,8 +333,8 @@ public class FaceImageInfo extends AbstractImageInfo {
    *
    * @return face image type
    */
-  public int getFaceImageType() {
-    return faceImageType;
+  public FaceImageType getFaceImageType() {
+    return FaceImageType.toFaceImageType(faceImageType);
   }
 
   /**
@@ -359,8 +361,8 @@ public class FaceImageInfo extends AbstractImageInfo {
    *
    * @return source type
    */
-  public int getSourceType() {
-    return sourceType;
+  public SourceType getSourceType() {
+    return SourceType.toSourceType(sourceType);
   }
 
   /**
@@ -368,8 +370,8 @@ public class FaceImageInfo extends AbstractImageInfo {
    *
    * @return image data type
    */
-  public int getImageDataType() {
-    return imageDataType;
+  public ImageDataType getImageDataType() {
+    return ImageDataType.toImageDataType(imageDataType);
   }
 
   /**
@@ -378,8 +380,8 @@ public class FaceImageInfo extends AbstractImageInfo {
    *
    * @return image color space
    */
-  public int getColorSpace() {
-    return colorSpace;
+  public ImageColorSpace getColorSpace() {
+    return ImageColorSpace.toImageColorSpace(colorSpace);
   }
 
   /**
