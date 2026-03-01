@@ -1,10 +1,6 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.irisimage
+
+import kmrtd.lds.iso39794.EncodableEnum
 
 enum class HorizontalOrientationCode(override val code: Int) :
     EncodableEnum<HorizontalOrientationCode> {
@@ -15,7 +11,7 @@ enum class HorizontalOrientationCode(override val code: Int) :
     companion object {
         @JvmStatic
         fun fromCode(code: Int): HorizontalOrientationCode? {
-            return EncodableEnum.fromCode<HorizontalOrientationCode>(
+            return EncodableEnum.Companion.fromCode<HorizontalOrientationCode>(
                 code,
                 HorizontalOrientationCode::class.java
             )

@@ -1,13 +1,9 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.fingerimage
 
-enum class CaptureDeviceTechnologyIdCode(override val code: Int) :
-    EncodableEnum<CaptureDeviceTechnologyIdCode> {
+import kmrtd.lds.iso39794.EncodableEnum
+
+enum class FingerImageCaptureDeviceTechnologyIdCode(override val code: Int) :
+    EncodableEnum<FingerImageCaptureDeviceTechnologyIdCode> {
     UNKNOWN_CAPTURE_DEVICE_TECHNOLOGY(0),
     OTHER_CAPTURE_DEVICE_TECHNOLOGY(1),
     SCANNED_INK_ON_PAPER(2),
@@ -33,10 +29,10 @@ enum class CaptureDeviceTechnologyIdCode(override val code: Int) :
 
     companion object {
         @JvmStatic
-        fun fromCode(code: Int): CaptureDeviceTechnologyIdCode? {
-            return EncodableEnum.fromCode<CaptureDeviceTechnologyIdCode>(
+        fun fromCode(code: Int): FingerImageCaptureDeviceTechnologyIdCode? {
+            return EncodableEnum.Companion.fromCode<FingerImageCaptureDeviceTechnologyIdCode>(
                 code,
-                CaptureDeviceTechnologyIdCode::class.java
+                FingerImageCaptureDeviceTechnologyIdCode::class.java
             )
         }
     }

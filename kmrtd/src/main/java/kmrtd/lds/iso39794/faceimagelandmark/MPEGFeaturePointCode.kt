@@ -1,10 +1,7 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.faceimagelandmark
+
+import kmrtd.lds.iso39794.EncodableEnum
+import kmrtd.lds.iso39794.FaceImageLandmarkKind
 
 enum class MPEGFeaturePointCode(override val code: Int) :
     EncodableEnum<MPEGFeaturePointCode>, FaceImageLandmarkKind {
@@ -100,7 +97,7 @@ enum class MPEGFeaturePointCode(override val code: Int) :
     companion object {
         @JvmStatic
         fun fromCode(code: Int): MPEGFeaturePointCode? {
-            return EncodableEnum.fromCode<MPEGFeaturePointCode>(
+            return EncodableEnum.Companion.fromCode<MPEGFeaturePointCode>(
                 code,
                 MPEGFeaturePointCode::class.java
             )

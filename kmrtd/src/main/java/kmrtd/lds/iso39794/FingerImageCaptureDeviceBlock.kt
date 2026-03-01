@@ -42,14 +42,16 @@ package kmrtd.lds.iso39794
 
 import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.fingerimage.FingerImageCaptureDeviceTechnologyIdCode
+
 data class FingerImageCaptureDeviceBlock(
     /** Identification of the model capture device.  */
     val model: RegistryIdBlock,
-    val captureDeviceTechnologyIdCode: CaptureDeviceTechnologyIdCode?,
+    val fingerImageCaptureDeviceTechnologyIdCode: FingerImageCaptureDeviceTechnologyIdCode?,
     /** Identification of certifications.  */
     val certifications: List<RegistryIdBlock>
 ) : Block() {
-    /*public static enum CaptureDeviceTechnologyIdCode implements EncodableEnum<CaptureDeviceTechnologyIdCode> {
+    /*public static enum <FingerImage> CaptureDeviceTechnologyIdCode implements EncodableEnum<CaptureDeviceTechnologyIdCode> {
        UNKNOWN_CAPTURE_DEVICE_TECHNOLOGY(0),
        OTHER_CAPTURE_DEVICE_TECHNOLOGY(1),
        SCANNED_INK_ON_PAPER(2),
@@ -162,7 +164,7 @@ data class FingerImageCaptureDeviceBlock(
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 put(0, model.aSN1Object)
-                captureDeviceTechnologyIdCode?.let {
+                fingerImageCaptureDeviceTechnologyIdCode?.let {
                     put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
                 }
                 put(2, ISO39794Util.encodeBlocks(certifications))
@@ -212,7 +214,9 @@ data class FingerImageCaptureDeviceBlock(
             ) {
                 return FingerImageCaptureDeviceBlock(
                     model = RegistryIdBlock.from(taggedObjects[0]),
-                    captureDeviceTechnologyIdCode = CaptureDeviceTechnologyIdCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[1])),
+                    fingerImageCaptureDeviceTechnologyIdCode = FingerImageCaptureDeviceTechnologyIdCode.fromCode(
+                        ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[1])
+                    ),
                     certifications = RegistryIdBlock.decodeRegistryIdBlocks(taggedObjects[2]!!)
                 )
             }

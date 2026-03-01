@@ -1,10 +1,7 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.faceimagelandmark
+
+import kmrtd.lds.iso39794.EncodableEnum
+import kmrtd.lds.iso39794.FaceImageLandmarkKind
 
 enum class AnthropometricLandmarkNameCode(override val code: Int) :
     EncodableEnum<AnthropometricLandmarkNameCode>, FaceImageLandmarkKind {
@@ -73,7 +70,7 @@ enum class AnthropometricLandmarkNameCode(override val code: Int) :
     companion object {
         @JvmStatic
         fun fromCode(code: Int): AnthropometricLandmarkNameCode? {
-            return EncodableEnum.fromCode<AnthropometricLandmarkNameCode>(
+            return EncodableEnum.Companion.fromCode<AnthropometricLandmarkNameCode>(
                 code,
                 AnthropometricLandmarkNameCode::class.java
             )

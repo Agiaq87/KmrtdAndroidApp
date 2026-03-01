@@ -42,6 +42,10 @@ package kmrtd.lds.iso39794
 
 import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.faceimagelandmark.AnthropometricLandmarkNameCode
+import kmrtd.lds.iso39794.faceimagelandmark.AnthropometricLandmarkPointIdCode
+import kmrtd.lds.iso39794.faceimagelandmark.AnthropometricLandmarkPointNameCode
+import kmrtd.lds.iso39794.faceimagelandmark.MPEGFeaturePointCode
 
 interface FaceImageLandmarkKind {
     override fun hashCode(): Int

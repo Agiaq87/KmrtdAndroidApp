@@ -1,12 +1,9 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.faceimage2d
 
-enum class ImageDataFormatCode(override val code: Int, val mimeType: String) : EncodableEnum<ImageDataFormatCode> {
+import kmrtd.lds.iso39794.EncodableEnum
+
+enum class ImageDataFormatCode(override val code: Int, val mimeType: String) :
+    EncodableEnum<ImageDataFormatCode> {
     UNKNOWN(0, "image/raw"),
     JPEG(2, "image/jpeg"),
     JPEG2000_LOSSY(3, "image/jp2"),
@@ -15,7 +12,7 @@ enum class ImageDataFormatCode(override val code: Int, val mimeType: String) : E
     companion object {
         @JvmStatic
         fun fromCode(code: Int): ImageDataFormatCode? {
-            return EncodableEnum.fromCode<ImageDataFormatCode>(
+            return EncodableEnum.Companion.fromCode<ImageDataFormatCode>(
                 code,
                 ImageDataFormatCode::class.java
             )

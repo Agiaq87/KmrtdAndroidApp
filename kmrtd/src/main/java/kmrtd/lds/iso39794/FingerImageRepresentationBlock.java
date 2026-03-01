@@ -56,6 +56,7 @@ import org.bouncycastle.asn1.DERVisibleString;
 import kmrtd.ASN1Util;
 import kmrtd.cbeff.CBEFFInfo;
 import kmrtd.lds.ImageInfo;
+import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode;
 
 public class FingerImageRepresentationBlock extends Block implements ImageInfo {
 

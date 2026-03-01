@@ -50,6 +50,12 @@ import org.bouncycastle.asn1.DEROctetString;
 
 import kmrtd.ASN1Util;
 import kmrtd.lds.ImageInfo;
+import kmrtd.lds.iso39794.irisimage.CompressionHistoryCode;
+import kmrtd.lds.iso39794.irisimage.EyeLabelCode;
+import kmrtd.lds.iso39794.irisimage.HorizontalOrientationCode;
+import kmrtd.lds.iso39794.irisimage.IrisImageKindCode;
+import kmrtd.lds.iso39794.irisimage.RangingErrorCode;
+import kmrtd.lds.iso39794.irisimage.VerticalOrientationCode;
 
 public class IrisImageRepresentationBlock extends Block implements ImageInfo {
 

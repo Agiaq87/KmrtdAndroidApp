@@ -237,7 +237,7 @@ public class FaceImageRepresentationBlock extends Block implements ImageInfo {
     if (imageRepresentation2DBlock == null) {
       return 0;
     }
-    FaceImageInformation2DBlock faceImageInformation2DBlock = imageRepresentation2DBlock.imageInformation2DBlock;
+    FaceImageInformation2DBlock faceImageInformation2DBlock = imageRepresentation2DBlock.getImageInformation2DBlock();
     if (faceImageInformation2DBlock == null) {
       return 0;
     }
@@ -253,7 +253,7 @@ public class FaceImageRepresentationBlock extends Block implements ImageInfo {
     if (imageRepresentation2DBlock == null) {
       return 0;
     }
-    FaceImageInformation2DBlock faceImageInformation2DBlock = imageRepresentation2DBlock.imageInformation2DBlock;
+    FaceImageInformation2DBlock faceImageInformation2DBlock = imageRepresentation2DBlock.getImageInformation2DBlock();
     if (faceImageInformation2DBlock == null) {
       return 0;
     }

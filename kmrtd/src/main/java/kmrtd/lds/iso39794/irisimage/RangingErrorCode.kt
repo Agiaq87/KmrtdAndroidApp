@@ -1,10 +1,6 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.irisimage
+
+import kmrtd.lds.iso39794.EncodableEnum
 
 enum class RangingErrorCode(override val code: Int) : EncodableEnum<RangingErrorCode> {
     UNASSIGNED(0),
@@ -14,7 +10,10 @@ enum class RangingErrorCode(override val code: Int) : EncodableEnum<RangingError
     companion object {
         @JvmStatic
         fun fromCode(code: Int): RangingErrorCode? {
-            return EncodableEnum.fromCode<RangingErrorCode>(code, RangingErrorCode::class.java)
+            return EncodableEnum.Companion.fromCode<RangingErrorCode>(
+                code,
+                RangingErrorCode::class.java
+            )
         }
     }
 }

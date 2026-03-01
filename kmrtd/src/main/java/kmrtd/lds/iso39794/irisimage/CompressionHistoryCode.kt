@@ -1,10 +1,6 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.irisimage
+
+import kmrtd.lds.iso39794.EncodableEnum
 
 enum class CompressionHistoryCode(override val code: Int) : EncodableEnum<CompressionHistoryCode> {
     UNDEFINED(0),
@@ -14,7 +10,7 @@ enum class CompressionHistoryCode(override val code: Int) : EncodableEnum<Compre
     companion object {
         @JvmStatic
         fun fromCode(code: Int): CompressionHistoryCode? {
-            return EncodableEnum.fromCode<CompressionHistoryCode>(
+            return EncodableEnum.Companion.fromCode<CompressionHistoryCode>(
                 code,
                 CompressionHistoryCode::class.java
             )

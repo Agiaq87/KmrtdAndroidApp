@@ -108,7 +108,7 @@ data class FaceImageCoordinateTextureImageBlock(
          * }
          */
         @JvmStatic
-        fun from(asn1Encodable: ASN1Encodable): FaceImageCoordinateTextureImageBlock {
+        fun from(asn1Encodable: ASN1Encodable?): FaceImageCoordinateTextureImageBlock {
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
 
             return FaceImageCoordinateTextureImageBlock(

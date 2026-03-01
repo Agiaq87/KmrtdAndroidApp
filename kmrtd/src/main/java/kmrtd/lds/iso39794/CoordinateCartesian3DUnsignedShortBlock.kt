@@ -112,6 +112,7 @@ data class CoordinateCartesian3DUnsignedShortBlock(
          *   z               [2] INTEGER (0..65535)
          * }
          */
+        @JvmStatic
         fun from(asn1Encodable: ASN1Encodable?): CoordinateCartesian3DUnsignedShortBlock {
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
 

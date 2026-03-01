@@ -1,10 +1,6 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.faceimage2d
+
+import kmrtd.lds.iso39794.EncodableEnum
 
 enum class LossyTransformationAttemptsCode(override val code: Int) :
     EncodableEnum<LossyTransformationAttemptsCode> {
@@ -16,7 +12,7 @@ enum class LossyTransformationAttemptsCode(override val code: Int) :
     companion object {
         @JvmStatic
         fun fromCode(code: Int): LossyTransformationAttemptsCode? {
-            return EncodableEnum.fromCode<LossyTransformationAttemptsCode>(
+            return EncodableEnum.Companion.fromCode<LossyTransformationAttemptsCode>(
                 code,
                 LossyTransformationAttemptsCode::class.java
             )

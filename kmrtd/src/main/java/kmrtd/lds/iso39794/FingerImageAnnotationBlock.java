@@ -45,6 +45,7 @@ import java.util.Objects;
 import org.bouncycastle.asn1.ASN1Encodable;
 
 import kmrtd.ASN1Util;
+import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode;
 
 public class FingerImageAnnotationBlock extends Block {
 

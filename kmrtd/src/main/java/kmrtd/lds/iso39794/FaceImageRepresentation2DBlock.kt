@@ -46,7 +46,7 @@ import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1TaggedObject
 import org.bouncycastle.asn1.DEROctetString
 import kmrtd.ASN1Util
-import kmrtd.lds.iso39794.ImageDataFormatCode.Companion.toMimeType
+import kmrtd.lds.iso39794.faceimage2d.ImageDataFormatCode.Companion.toMimeType
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 

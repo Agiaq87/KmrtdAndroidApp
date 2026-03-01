@@ -1,10 +1,6 @@
-/*
- * Modified work Copyright (C) 2026 Alessandro Giaquinto
- * Kotlin port of JMRTD
- *
- * Licensed under LGPL 3.0
- */
-package kmrtd.lds.iso39794
+package kmrtd.lds.iso39794.irisimage
+
+import kmrtd.lds.iso39794.EncodableEnum
 
 enum class IrisImageKindCode(override val code: Int) : EncodableEnum<IrisImageKindCode> {
     UNCROPPED(1),
@@ -15,7 +11,10 @@ enum class IrisImageKindCode(override val code: Int) : EncodableEnum<IrisImageKi
     companion object {
         @JvmStatic
         fun fromCode(code: Int): IrisImageKindCode? {
-            return EncodableEnum.fromCode<IrisImageKindCode>(code, IrisImageKindCode::class.java)
+            return EncodableEnum.Companion.fromCode<IrisImageKindCode>(
+                code,
+                IrisImageKindCode::class.java
+            )
         }
     }
 }

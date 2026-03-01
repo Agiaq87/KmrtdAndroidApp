@@ -44,6 +44,10 @@ import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1TaggedObject
 import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.faceimage2d.FaceImageKind2DCode
+import kmrtd.lds.iso39794.faceimage2d.ImageColourSpaceCode
+import kmrtd.lds.iso39794.faceimage2d.ImageDataFormatCode
+import kmrtd.lds.iso39794.faceimage2d.LossyTransformationAttemptsCode
 
 data class FaceImageInformation2DBlock(
     val imageSizeBlock: ImageSizeBlock?,

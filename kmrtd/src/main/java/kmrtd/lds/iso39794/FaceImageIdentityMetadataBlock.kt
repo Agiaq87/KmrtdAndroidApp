@@ -50,6 +50,9 @@ import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1TaggedObject
 import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.faceimageidentity.EyeColourCode
+import kmrtd.lds.iso39794.faceimageidentity.GenderCode
+import kmrtd.lds.iso39794.faceimageidentity.HairColourCode
 
 data class FaceImageIdentityMetadataBlock(
     val genderCode: GenderCode?,
