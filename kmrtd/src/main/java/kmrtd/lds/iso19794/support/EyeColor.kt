@@ -13,7 +13,7 @@ enum class EyeColor(
      *
      * @param code the ISO19794-5 integer code for the color
      */
-    private val code: Int
+    val code: Int
 ) {
     UNSPECIFIED(FaceImageInfoConstants.EYE_COLOR_UNSPECIFIED),
     BLACK(FaceImageInfoConstants.EYE_COLOR_BLACK),
@@ -25,14 +25,6 @@ enum class EyeColor(
     PINK(FaceImageInfoConstants.EYE_COLOR_PINK),
     UNKNOWN(FaceImageInfoConstants.EYE_COLOR_UNKNOWN);
 
-    /**
-     * Returns the integer code to use in ISO19794-5 encoding for this color.
-     *
-     * @return the integer code
-     */
-    fun toInt(): Int {
-        return code
-    }
 
     companion object {
         /**
@@ -45,7 +37,7 @@ enum class EyeColor(
         @JvmStatic
         fun toEyeColor(i: Int): EyeColor {
             for (c in entries) {
-                if (c.toInt() == i) {
+                if (c.code == i) {
                     return c
                 }
             }

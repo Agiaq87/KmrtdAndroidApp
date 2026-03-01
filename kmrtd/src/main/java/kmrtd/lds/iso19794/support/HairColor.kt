@@ -15,7 +15,7 @@ enum class HairColor(
      *
      * @param code the integer code for a color
      */
-    private val code: Int
+    val code: Int
 ) {
     UNSPECIFIED(FaceImageInfoConstants.HAIR_COLOR_UNSPECIFIED),
     BALD(FaceImageInfoConstants.HAIR_COLOR_BALD),
@@ -29,15 +29,6 @@ enum class HairColor(
     BLUE(FaceImageInfoConstants.HAIR_COLOR_BLUE),
     UNKNOWN(FaceImageInfoConstants.HAIR_COLOR_UNKNOWN);
 
-    /**
-     * Returns the code for this hair color.
-     *
-     * @return the code
-     */
-    fun toInt(): Int {
-        return code
-    }
-
     companion object {
         /**
          * Returns a hair color value for the given code.
@@ -49,7 +40,7 @@ enum class HairColor(
         @JvmStatic
         fun toHairColor(i: Int): HairColor {
             for (c in entries) {
-                if (c.toInt() == i) {
+                if (c.code == i) {
                     return c
                 }
             }
