@@ -19,539 +19,563 @@
  *
  * $Id: DG11File.java 1907 2026-02-06 09:24:02Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
+import kmrtd.lds.LDSFile
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Objects
 
 /**
  * File structure for the EF_DG11 file.
  * Datagroup 11 contains additional personal detail(s).
- *
+ * 
  * All fields are optional. See Section 16 of LDS-TR.
- * <ol>
- * <li>Name of Holder (Primary and Secondary Identifiers, in full)</li>
- * <li>Other Name(s)</li>
- * <li>Personal Number</li>
- * <li>Place of Birth</li>
- * <li>Date of Birth (in full)</li>
- * <li>Address</li>
- * <li>Telephone Number(s)</li>
- * <li>Profession</li>
- * <li>Title</li>
- * <li>Personal Summary</li>
- * <li>Proof of Citizenship [see 14.5.1]</li>
- * <li>Number of Other Valid Travel Documents</li>
- * <li>Other Travel Document Numbers</li>
- * <li>Custody Information</li>
- * </ol>
- *
+ * 
+ *  1. Name of Holder (Primary and Secondary Identifiers, in full)
+ *  1. Other Name(s)
+ *  1. Personal Number
+ *  1. Place of Birth
+ *  1. Date of Birth (in full)
+ *  1. Address
+ *  1. Telephone Number(s)
+ *  1. Profession
+ *  1. Title
+ *  1. Personal Summary
+ *  1. Proof of Citizenship [see 14.5.1]
+ *  1. Number of Other Valid Travel Documents
+ *  1. Other Travel Document Numbers
+ *  1. Custody Information
+ * 
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1907 $
  */
-public class DG11File extends AdditionalDetailDataGroup {
+class DG11File : AdditionalDetailDataGroup {
+    /**
+     * Returns the full name of the holder (primary and secondary identifiers).
+     * 
+     * @return the name of holder
+     */
+    var nameOfHolder: String? = null
+        private set
+    private var otherNames: MutableList<String?>? = null
 
-  private static final long serialVersionUID = 8566312538928662937L;
+    /**
+     * Returns the personal number.
+     * 
+     * @return the personal number
+     */
+    var personalNumber: String? = null
+        private set
 
-  public static final int TAG_LIST_TAG = 0x5C;
+    /**
+     * Returns the full date of birth.
+     * 
+     * @return the full date of birth
+     */
+    var fullDateOfBirth: String? = null
+        private set
 
-  public static final int FULL_NAME_TAG = 0x5F0E;
-  public static final int OTHER_NAME_TAG = 0x5F0F;
-  public static final int PERSONAL_NUMBER_TAG = 0x5F10;
-  public static final int FULL_DATE_OF_BIRTH_TAG = 0x5F2B; // In 'CCYYMMDD' format.
-  public static final int PLACE_OF_BIRTH_TAG = 0x5F11; // Fields separated by '<'
-  public static final int PERMANENT_ADDRESS_TAG = 0x5F42; // Fields separated by '<'
-  public static final int TELEPHONE_TAG = 0x5F12;
-  public static final int PROFESSION_TAG = 0x5F13;
-  public static final int TITLE_TAG = 0x5F14;
-  public static final int PERSONAL_SUMMARY_TAG = 0x5F15;
-  public static final int PROOF_OF_CITIZENSHIP_TAG = 0x5F16; // Compressed image per ISO/IEC 10918
-  public static final int OTHER_VALID_TD_NUMBERS_TAG = 0x5F17; // Separated by '<'
-  public static final int CUSTODY_INFORMATION_TAG = 0x5F18;
+    /**
+     * Returns the place of birth.
+     * 
+     * @return the place of birth
+     */
+    var placeOfBirth: MutableList<String?>? = null
+        private set
 
-  private static final String SDF = "yyyyMMdd";
+    /**
+     * Returns the permanent address.
+     * 
+     * @return the permanent address
+     */
+    var permanentAddress: MutableList<String?>? = null
+        private set
 
-  private String nameOfHolder;
-  private List<String> otherNames;
-  private String personalNumber;
-  private String fullDateOfBirth;
-  private List<String> placeOfBirth;
-  private List<String> permanentAddress;
-  private String telephone;
-  private String profession;
-  private String title;
-  private String personalSummary;
-  private byte[] proofOfCitizenship;
-  private List<String> otherValidTDNumbers;
-  private String custodyInformation;
+    /**
+     * Returns the telephone number.
+     * 
+     * @return the telephone
+     */
+    var telephone: String? = null
+        private set
 
-  private List<Integer> tagPresenceList;
+    /**
+     * Returns the holder's profession.
+     * 
+     * @return the profession
+     */
+    var profession: String? = null
+        private set
 
-  /**
-   * Constructs a file from binary representation.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException if reading fails
-   */
-  public DG11File(InputStream inputStream) throws IOException {
-    super(EF_DG11_TAG, inputStream);
-  }
+    /**
+     * Returns the holder's title.
+     * 
+     * @return the title
+     */
+    var title: String? = null
+        private set
 
-  /**
-   * Constructs a new file. Use <code>null</code> if data element is not present.
-   * Use <code>&#39;&lt;&#39;</code> as separator.
-   *
-   * @param nameOfHolder data element
-   * @param otherNames data element
-   * @param personalNumber data element
-   * @param fullDateOfBirth data element
-   * @param placeOfBirth data element
-   * @param permanentAddress data element
-   * @param telephone data element
-   * @param profession data element
-   * @param title data element
-   * @param personalSummary data element
-   * @param proofOfCitizenship data element
-   * @param otherValidTDNumbers data element
-   * @param custodyInformation data element
-   */
-  public DG11File(String nameOfHolder,
-      List<String> otherNames, String personalNumber,
-      Date fullDateOfBirth, List<String> placeOfBirth, List<String> permanentAddress,
-      String telephone, String profession, String title,
-      String personalSummary, byte[] proofOfCitizenship,
-      List<String> otherValidTDNumbers, String custodyInformation) {
-    this(nameOfHolder,
+    /**
+     * Returns the personal summary.
+     * 
+     * @return the personal summary
+     */
+    var personalSummary: String? = null
+        private set
+
+    /**
+     * Returns the proof of citizenship.
+     * 
+     * @return the proof of citizenship
+     */
+    var proofOfCitizenship: ByteArray?
+        private set
+
+    /**
+     * Returns the other valid travel document numbers.
+     * 
+     * @return the other valid travel document numbers
+     */
+    var otherValidTDNumbers: MutableList<String?>? = null
+        private set
+
+    /**
+     * Returns the custody information.
+     * 
+     * @return the custody information
+     */
+    var custodyInformation: String? = null
+        private set
+
+    private var tagPresenceList: MutableList<Int?>? = null
+
+    /**
+     * Constructs a file from binary representation.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException if reading fails
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG11_TAG, inputStream)
+
+    /**
+     * Constructs a new file. Use `null` if data element is not present.
+     * Use `'<'` as separator.
+     * 
+     * @param nameOfHolder data element
+     * @param otherNames data element
+     * @param personalNumber data element
+     * @param fullDateOfBirth data element
+     * @param placeOfBirth data element
+     * @param permanentAddress data element
+     * @param telephone data element
+     * @param profession data element
+     * @param title data element
+     * @param personalSummary data element
+     * @param proofOfCitizenship data element
+     * @param otherValidTDNumbers data element
+     * @param custodyInformation data element
+     */
+    constructor(
+        nameOfHolder: String?,
+        otherNames: MutableList<String?>?,
+        personalNumber: String?,
+        fullDateOfBirth: Date?,
+        placeOfBirth: MutableList<String?>?,
+        permanentAddress: MutableList<String?>?,
+        telephone: String?,
+        profession: String?,
+        title: String?,
+        personalSummary: String?,
+        proofOfCitizenship: ByteArray?,
+        otherValidTDNumbers: MutableList<String?>?,
+        custodyInformation: String?
+    ) : this(
+        nameOfHolder,
         otherNames, personalNumber,
-        fullDateOfBirth == null ? null: new SimpleDateFormat(SDF).format(fullDateOfBirth),
+        if (fullDateOfBirth == null) null else SimpleDateFormat(SDF).format(fullDateOfBirth),
         placeOfBirth, permanentAddress,
         telephone, profession, title,
         personalSummary, proofOfCitizenship,
-        otherValidTDNumbers, custodyInformation);
-  }
+        otherValidTDNumbers, custodyInformation
+    )
 
-  /**
-   * Constructs a new file. Use <code>null</code> if data element is not present.
-   * Use <code>&#39;&lt;&#39;</code> as separator.
-   *
-   * @param nameOfHolder data element
-   * @param otherNames data element
-   * @param personalNumber data element
-   * @param fullDateOfBirth data element
-   * @param placeOfBirth data element
-   * @param permanentAddress data element
-   * @param telephone data element
-   * @param profession data element
-   * @param title data element
-   * @param personalSummary data element
-   * @param proofOfCitizenship data element
-   * @param otherValidTDNumbers data element
-   * @param custodyInformation data element
-   */
-  public DG11File(String nameOfHolder,
-      List<String> otherNames, String personalNumber,
-      String fullDateOfBirth, List<String> placeOfBirth, List<String> permanentAddress,
-      String telephone, String profession, String title,
-      String personalSummary, byte[] proofOfCitizenship,
-      List<String> otherValidTDNumbers, String custodyInformation) {
-    super(EF_DG11_TAG);
-    this.nameOfHolder = nameOfHolder;
-    this.otherNames = otherNames == null ? null : new ArrayList<String>(otherNames);
-    this.personalNumber = personalNumber;
-    this.fullDateOfBirth = fullDateOfBirth;
-    if (placeOfBirth == null) {
-      this.placeOfBirth = null;
-    } else if (placeOfBirth.isEmpty()) {
-      this.placeOfBirth = Collections.singletonList("");
-    } else {
-      this.placeOfBirth = new ArrayList<String>(placeOfBirth);
-    }
-    if (permanentAddress == null) {
-      this.permanentAddress = null;
-    } else if (permanentAddress.isEmpty()) {
-      this.permanentAddress = Collections.singletonList("");
-    } else {
-      this.permanentAddress = new ArrayList<String>(permanentAddress);
-    }
-    this.telephone = telephone;
-    this.profession = profession;
-    this.title = title;
-    this.personalSummary = personalSummary;
-    this.proofOfCitizenship = proofOfCitizenship;
-    if (otherValidTDNumbers == null) {
-      this.otherValidTDNumbers = null;
-    } else if (otherValidTDNumbers.isEmpty()) {
-      this.otherValidTDNumbers = Collections.singletonList("");
-    } else {
-      this.otherValidTDNumbers = new ArrayList<String>(otherValidTDNumbers);
-    }
-    this.custodyInformation = custodyInformation;
-  }
-
-  /* Accessors below. */
-
-  @Override
-  public int getTag() {
-    return EF_DG11_TAG;
-  }
-
-  /**
-   * Returns the list of tags of fields actually present.
-   *
-   * @return list of tags
-   */
-  public List<Integer> getTagPresenceList() {
-    if (tagPresenceList != null) {
-      return tagPresenceList;
-    }
-    tagPresenceList = new ArrayList<Integer>(12);
-    if (nameOfHolder != null) {
-      tagPresenceList.add(FULL_NAME_TAG);
-    }
-    if (otherNames != null) {
-      tagPresenceList.add(OTHER_NAME_TAG);
-    }
-    if (personalNumber != null) {
-      tagPresenceList.add(PERSONAL_NUMBER_TAG);
-    }
-    if (fullDateOfBirth != null) {
-      tagPresenceList.add(FULL_DATE_OF_BIRTH_TAG);
-    }
-    if (placeOfBirth != null) {
-      tagPresenceList.add(PLACE_OF_BIRTH_TAG);
-    }
-    if (permanentAddress != null) {
-      tagPresenceList.add(PERMANENT_ADDRESS_TAG);
-    }
-    if (telephone != null) {
-      tagPresenceList.add(TELEPHONE_TAG);
-    }
-    if (profession != null) {
-      tagPresenceList.add(PROFESSION_TAG);
-    }
-    if (title != null) {
-      tagPresenceList.add(TITLE_TAG);
-    }
-    if (personalSummary != null) {
-      tagPresenceList.add(PERSONAL_SUMMARY_TAG);
-    }
-    if (proofOfCitizenship != null) {
-      tagPresenceList.add(PROOF_OF_CITIZENSHIP_TAG);
-    }
-    if (otherValidTDNumbers != null) {
-      tagPresenceList.add(OTHER_VALID_TD_NUMBERS_TAG);
-    }
-    if (custodyInformation != null) {
-      tagPresenceList.add(CUSTODY_INFORMATION_TAG);
-    }
-    return tagPresenceList;
-  }
-
-  /**
-   * Returns the full name of the holder (primary and secondary identifiers).
-   *
-   * @return the name of holder
-   */
-  public String getNameOfHolder() {
-    return nameOfHolder;
-  }
-
-  /**
-   * Returns the other names.
-   *
-   * @return the other names, or empty list when not present
-   */
-  public List<String> getOtherNames() {
-    return otherNames == null ? null : new ArrayList<String>(otherNames);
-  }
-
-  /**
-   * Returns the personal number.
-   *
-   * @return the personal number
-   */
-  public String getPersonalNumber() {
-    return personalNumber;
-  }
-
-  /**
-   * Returns the full date of birth.
-   *
-   * @return the full date of birth
-   */
-  public String getFullDateOfBirth() {
-    return fullDateOfBirth;
-  }
-
-  /**
-   * Returns the place of birth.
-   *
-   * @return the place of birth
-   */
-  public List<String> getPlaceOfBirth() {
-    return placeOfBirth;
-  }
-
-  /**
-   * Returns the permanent address.
-   *
-   * @return the permanent address
-   */
-  public List<String> getPermanentAddress() {
-    return permanentAddress;
-  }
-
-  /**
-   * Returns the telephone number.
-   *
-   * @return the telephone
-   */
-  public String getTelephone() {
-    return telephone;
-  }
-
-  /**
-   * Returns the holder's profession.
-   *
-   * @return the profession
-   */
-  public String getProfession() {
-    return profession;
-  }
-
-  /**
-   * Returns the holder's title.
-   *
-   * @return the title
-   */
-  public String getTitle() {
-    return title;
-  }
-
-  /**
-   * Returns the personal summary.
-   *
-   * @return the personal summary
-   */
-  public String getPersonalSummary() {
-    return personalSummary;
-  }
-
-  /**
-   * Returns the proof of citizenship.
-   *
-   * @return the proof of citizenship
-   */
-  public byte[] getProofOfCitizenship() {
-    return proofOfCitizenship;
-  }
-
-  /**
-   * Returns the other valid travel document numbers.
-   *
-   * @return the other valid travel document numbers
-   */
-  public List<String> getOtherValidTDNumbers() {
-    return otherValidTDNumbers;
-  }
-
-  /**
-   * Returns the custody information.
-   *
-   * @return the custody information
-   */
-  public String getCustodyInformation() {
-    return custodyInformation;
-  }
-
-  /**
-   * Returns a textual representation of this file.
-   *
-   * @return a textual representation of this file
-   */
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append("DG11File [")
-        .append(nameOfHolder == null ? "" : nameOfHolder).append(", ")
-        .append(otherNames == null || otherNames.isEmpty() ? "[]" : otherNames).append(", ")
-        .append(personalNumber == null ? "" : personalNumber).append(", ")
-        .append(fullDateOfBirth == null ? "" : fullDateOfBirth).append(", ")
-        .append(placeOfBirth == null || placeOfBirth.isEmpty() ? "[]" : placeOfBirth.toString()).append(", ")
-        .append(permanentAddress == null || permanentAddress.isEmpty() ? "[]" : permanentAddress.toString()).append(", ")
-        .append(telephone == null ? "" : telephone).append(", ")
-        .append(profession == null ? "" : profession).append(", ")
-        .append(title == null ? "" : title).append(", ")
-        .append(personalSummary == null ? "" : personalSummary).append(", ")
-        .append(proofOfCitizenship == null ? "" : "image (" + proofOfCitizenship.length + ")").append(", ")
-        .append(otherValidTDNumbers == null || otherValidTDNumbers.isEmpty() ? "[]" : otherValidTDNumbers.toString()).append(", ")
-        .append(custodyInformation == null ? "" : custodyInformation)
-        .append("]")
-        .toString();
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(proofOfCitizenship);
-    result = prime * result + Objects.hash(custodyInformation, fullDateOfBirth, nameOfHolder, otherNames,
-        otherValidTDNumbers, permanentAddress, personalNumber, personalSummary, placeOfBirth, profession,
-        telephone, title);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    /**
+     * Constructs a new file. Use `null` if data element is not present.
+     * Use `'<'` as separator.
+     * 
+     * @param nameOfHolder data element
+     * @param otherNames data element
+     * @param personalNumber data element
+     * @param fullDateOfBirth data element
+     * @param placeOfBirth data element
+     * @param permanentAddress data element
+     * @param telephone data element
+     * @param profession data element
+     * @param title data element
+     * @param personalSummary data element
+     * @param proofOfCitizenship data element
+     * @param otherValidTDNumbers data element
+     * @param custodyInformation data element
+     */
+    constructor(
+        nameOfHolder: String?,
+        otherNames: MutableList<String?>?,
+        personalNumber: String?,
+        fullDateOfBirth: String?,
+        placeOfBirth: MutableList<String?>?,
+        permanentAddress: MutableList<String?>?,
+        telephone: String?,
+        profession: String?,
+        title: String?,
+        personalSummary: String?,
+        proofOfCitizenship: ByteArray?,
+        otherValidTDNumbers: MutableList<String?>?,
+        custodyInformation: String?
+    ) : super(LDSFile.Companion.EF_DG11_TAG) {
+        this.nameOfHolder = nameOfHolder
+        this.otherNames = if (otherNames == null) null else ArrayList<String?>(otherNames)
+        this.personalNumber = personalNumber
+        this.fullDateOfBirth = fullDateOfBirth
+        if (placeOfBirth == null) {
+            this.placeOfBirth = null
+        } else if (placeOfBirth.isEmpty()) {
+            this.placeOfBirth = mutableListOf<String?>("")
+        } else {
+            this.placeOfBirth = ArrayList<String?>(placeOfBirth)
+        }
+        if (permanentAddress == null) {
+            this.permanentAddress = null
+        } else if (permanentAddress.isEmpty()) {
+            this.permanentAddress = mutableListOf<String?>("")
+        } else {
+            this.permanentAddress = ArrayList<String?>(permanentAddress)
+        }
+        this.telephone = telephone
+        this.profession = profession
+        this.title = title
+        this.personalSummary = personalSummary
+        this.proofOfCitizenship = proofOfCitizenship
+        if (otherValidTDNumbers == null) {
+            this.otherValidTDNumbers = null
+        } else if (otherValidTDNumbers.isEmpty()) {
+            this.otherValidTDNumbers = mutableListOf<String?>("")
+        } else {
+            this.otherValidTDNumbers = ArrayList<String?>(otherValidTDNumbers)
+        }
+        this.custodyInformation = custodyInformation
     }
 
-    DG11File other = (DG11File) obj;
-    return Objects.equals(custodyInformation, other.custodyInformation)
-        && Objects.equals(fullDateOfBirth, other.fullDateOfBirth)
-        && Objects.equals(nameOfHolder, other.nameOfHolder)
-        && Objects.equals(otherNames, other.otherNames)
-        && Objects.equals(otherValidTDNumbers, other.otherValidTDNumbers)
-        && Objects.equals(permanentAddress, other.permanentAddress)
-        && Objects.equals(personalNumber, other.personalNumber)
-        && Objects.equals(personalSummary, other.personalSummary)
-        && Objects.equals(placeOfBirth, other.placeOfBirth)
-        && Objects.equals(profession, other.profession)
-        && Arrays.equals(proofOfCitizenship, other.proofOfCitizenship)
-        && Objects.equals(getTagPresenceList(), other.getTagPresenceList())
-        && Objects.equals(telephone, other.telephone)
-        && Objects.equals(title, other.title);
-  }
+    /* Accessors below. */
+    override fun getTag(): Int {
+        return LDSFile.Companion.EF_DG11_TAG
+    }
 
-  /**
-   * Reads a field from a stream.
-   *
-   * @param expectedTag the tag to expect
-   * @param tlvInputStream the stream to read from
-   *
-   * @throws IOException on error reading from the stream
-   */
-  @Override
-  protected void readField(int expectedTag, TLVInputStream tlvInputStream) throws IOException {
-    int tag = tlvInputStream.readTag();
-    if (tag != CONTENT_SPECIFIC_CONSTRUCTED_TAG && tag != expectedTag) {
-      throw new IllegalArgumentException("Expected " + Integer.toHexString(expectedTag) + ", but found " + Integer.toHexString(tag));
+    /**
+     * Returns the list of tags of fields actually present.
+     * 
+     * @return list of tags
+     */
+    override fun getTagPresenceList(): MutableList<Int?> {
+        if (tagPresenceList != null) {
+            return tagPresenceList!!
+        }
+        tagPresenceList = ArrayList<Int?>(12)
+        if (nameOfHolder != null) {
+            tagPresenceList!!.add(FULL_NAME_TAG)
+        }
+        if (otherNames != null) {
+            tagPresenceList!!.add(OTHER_NAME_TAG)
+        }
+        if (personalNumber != null) {
+            tagPresenceList!!.add(PERSONAL_NUMBER_TAG)
+        }
+        if (fullDateOfBirth != null) {
+            tagPresenceList!!.add(FULL_DATE_OF_BIRTH_TAG)
+        }
+        if (placeOfBirth != null) {
+            tagPresenceList!!.add(PLACE_OF_BIRTH_TAG)
+        }
+        if (permanentAddress != null) {
+            tagPresenceList!!.add(PERMANENT_ADDRESS_TAG)
+        }
+        if (telephone != null) {
+            tagPresenceList!!.add(TELEPHONE_TAG)
+        }
+        if (profession != null) {
+            tagPresenceList!!.add(PROFESSION_TAG)
+        }
+        if (title != null) {
+            tagPresenceList!!.add(TITLE_TAG)
+        }
+        if (personalSummary != null) {
+            tagPresenceList!!.add(PERSONAL_SUMMARY_TAG)
+        }
+        if (proofOfCitizenship != null) {
+            tagPresenceList!!.add(PROOF_OF_CITIZENSHIP_TAG)
+        }
+        if (otherValidTDNumbers != null) {
+            tagPresenceList!!.add(OTHER_VALID_TD_NUMBERS_TAG)
+        }
+        if (custodyInformation != null) {
+            tagPresenceList!!.add(CUSTODY_INFORMATION_TAG)
+        }
+        return tagPresenceList!!
     }
-    tlvInputStream.readLength();
-    switch (tag) {
-    case FULL_NAME_TAG:
-      nameOfHolder = readString(tlvInputStream);
-      break;
-    case CONTENT_SPECIFIC_CONSTRUCTED_TAG:
-      otherNames = readContentSpecificFieldsList(tlvInputStream);
-      break;
-    case OTHER_NAME_TAG:
-      /* Work around non-compliant early samples. */
-      otherNames = Collections.singletonList(readString(tlvInputStream));
-      break;
-    case PERSONAL_NUMBER_TAG:
-      personalNumber = readString(tlvInputStream);
-      break;
-    case FULL_DATE_OF_BIRTH_TAG:
-      fullDateOfBirth = readFullDate(tlvInputStream);
-      break;
-    case PLACE_OF_BIRTH_TAG:
-      placeOfBirth = readList(tlvInputStream);
-      break;
-    case PERMANENT_ADDRESS_TAG:
-      permanentAddress = readList(tlvInputStream);
-      break;
-    case TELEPHONE_TAG:
-      telephone = readString(tlvInputStream);
-      break;
-    case PROFESSION_TAG:
-      profession = readString(tlvInputStream);
-      break;
-    case TITLE_TAG:
-      title = readString(tlvInputStream);
-      break;
-    case PERSONAL_SUMMARY_TAG:
-      personalSummary = readString(tlvInputStream);
-      break;
-    case PROOF_OF_CITIZENSHIP_TAG:
-      proofOfCitizenship = readBytes(tlvInputStream);
-      break;
-    case OTHER_VALID_TD_NUMBERS_TAG:
-      otherValidTDNumbers = readList(tlvInputStream);
-      break;
-    case CUSTODY_INFORMATION_TAG:
-      custodyInformation = readString(tlvInputStream);
-      break;
-    default:
-      throw new IllegalArgumentException("Unknown field tag in DG11: " + Integer.toHexString(tag));
-    }
-  }
 
-  @Override
-  protected void writeField(int tag, TLVOutputStream tlvOut) throws IOException {
-    switch (tag) {
-    case FULL_NAME_TAG:
-      writeString(tag, nameOfHolder, tlvOut);
-      break;
-    case OTHER_NAME_TAG:
-      writeContentSpecificFieldsList(OTHER_NAME_TAG, otherNames, tlvOut);
-      break;
-    case PERSONAL_NUMBER_TAG:
-      writeString(tag, personalNumber, tlvOut);
-      break;
-    case FULL_DATE_OF_BIRTH_TAG:
-      writeString(tag, fullDateOfBirth, tlvOut);
-      break;
-    case PLACE_OF_BIRTH_TAG:
-      writeList(tag, placeOfBirth, tlvOut);
-      break;
-    case PERMANENT_ADDRESS_TAG:
-      writeList(tag, permanentAddress, tlvOut);
-      break;
-    case TELEPHONE_TAG:
-      writeString(tag, telephone, tlvOut);
-      break;
-    case PROFESSION_TAG:
-      writeString(tag, profession, tlvOut);
-      break;
-    case TITLE_TAG:
-      writeString(tag, title, tlvOut);
-      break;
-    case PERSONAL_SUMMARY_TAG:
-      writeString(tag, personalSummary, tlvOut);
-      break;
-    case PROOF_OF_CITIZENSHIP_TAG:
-      tlvOut.writeTag(tag);
-      tlvOut.writeValue(proofOfCitizenship);
-      break;
-    case OTHER_VALID_TD_NUMBERS_TAG:
-      writeList(tag, otherValidTDNumbers, tlvOut);
-      break;
-    case CUSTODY_INFORMATION_TAG:
-      writeString(tag, custodyInformation, tlvOut);
-      break;
-    default:
-      throw new IllegalStateException("Unknown tag in DG11: " + Integer.toHexString(tag));
+    /**
+     * Returns the other names.
+     * 
+     * @return the other names, or empty list when not present
+     */
+    fun getOtherNames(): MutableList<String?>? {
+        return if (otherNames == null) null else ArrayList<String?>(otherNames)
     }
-  }
+
+    /**
+     * Returns a textual representation of this file.
+     * 
+     * @return a textual representation of this file
+     */
+    override fun toString(): String {
+        return StringBuilder()
+            .append("DG11File [")
+            .append(if (nameOfHolder == null) "" else nameOfHolder).append(", ")
+            .append(if (otherNames == null || otherNames!!.isEmpty()) "[]" else otherNames)
+            .append(", ")
+            .append(if (personalNumber == null) "" else personalNumber).append(", ")
+            .append(if (fullDateOfBirth == null) "" else fullDateOfBirth).append(", ")
+            .append(if (placeOfBirth == null || placeOfBirth!!.isEmpty()) "[]" else placeOfBirth.toString())
+            .append(", ")
+            .append(if (permanentAddress == null || permanentAddress!!.isEmpty()) "[]" else permanentAddress.toString())
+            .append(", ")
+            .append(if (telephone == null) "" else telephone).append(", ")
+            .append(if (profession == null) "" else profession).append(", ")
+            .append(if (title == null) "" else title).append(", ")
+            .append(if (personalSummary == null) "" else personalSummary).append(", ")
+            .append(if (proofOfCitizenship == null) "" else "image (" + proofOfCitizenship!!.size + ")")
+            .append(", ")
+            .append(if (otherValidTDNumbers == null || otherValidTDNumbers!!.isEmpty()) "[]" else otherValidTDNumbers.toString())
+            .append(", ")
+            .append(if (custodyInformation == null) "" else custodyInformation)
+            .append("]")
+            .toString()
+    }
+
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = 1
+        result = prime * result + proofOfCitizenship.contentHashCode()
+        result = prime * result + Objects.hash(
+            custodyInformation,
+            fullDateOfBirth,
+            nameOfHolder,
+            otherNames,
+            otherValidTDNumbers,
+            permanentAddress,
+            personalNumber,
+            personalSummary,
+            placeOfBirth,
+            profession,
+            telephone,
+            title
+        )
+        return result
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
+
+        val other = obj as DG11File
+        return custodyInformation == other.custodyInformation
+                && fullDateOfBirth == other.fullDateOfBirth
+                && nameOfHolder == other.nameOfHolder
+                && otherNames == other.otherNames
+                && otherValidTDNumbers == other.otherValidTDNumbers
+                && permanentAddress == other.permanentAddress
+                && personalNumber == other.personalNumber
+                && personalSummary == other.personalSummary
+                && placeOfBirth == other.placeOfBirth
+                && profession == other.profession
+                && proofOfCitizenship.contentEquals(other.proofOfCitizenship) && getTagPresenceList() == other.getTagPresenceList()
+                && telephone == other.telephone
+                && title == other.title
+    }
+
+    /**
+     * Reads a field from a stream.
+     * 
+     * @param expectedTag the tag to expect
+     * @param tlvInputStream the stream to read from
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    @Throws(IOException::class)
+    override fun readField(expectedTag: Int, tlvInputStream: TLVInputStream) {
+        val tag = tlvInputStream.readTag()
+        require(!(tag != AdditionalDetailDataGroup.Companion.CONTENT_SPECIFIC_CONSTRUCTED_TAG && tag != expectedTag)) {
+            "Expected " + Integer.toHexString(
+                expectedTag
+            ) + ", but found " + Integer.toHexString(tag)
+        }
+        tlvInputStream.readLength()
+        when (tag) {
+            FULL_NAME_TAG -> nameOfHolder =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            AdditionalDetailDataGroup.Companion.CONTENT_SPECIFIC_CONSTRUCTED_TAG -> otherNames =
+                AdditionalDetailDataGroup.Companion.readContentSpecificFieldsList(tlvInputStream)
+
+            OTHER_NAME_TAG ->       /* Work around non-compliant early samples. */
+                otherNames = mutableListOf<String?>(
+                    AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+                )
+
+            PERSONAL_NUMBER_TAG -> personalNumber =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            FULL_DATE_OF_BIRTH_TAG -> fullDateOfBirth =
+                AdditionalDetailDataGroup.Companion.readFullDate(tlvInputStream)
+
+            PLACE_OF_BIRTH_TAG -> placeOfBirth =
+                AdditionalDetailDataGroup.Companion.readList(tlvInputStream)
+
+            PERMANENT_ADDRESS_TAG -> permanentAddress =
+                AdditionalDetailDataGroup.Companion.readList(tlvInputStream)
+
+            TELEPHONE_TAG -> telephone =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            PROFESSION_TAG -> profession =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            TITLE_TAG -> title = AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+            PERSONAL_SUMMARY_TAG -> personalSummary =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            PROOF_OF_CITIZENSHIP_TAG -> proofOfCitizenship =
+                AdditionalDetailDataGroup.Companion.readBytes(tlvInputStream)
+
+            OTHER_VALID_TD_NUMBERS_TAG -> otherValidTDNumbers =
+                AdditionalDetailDataGroup.Companion.readList(tlvInputStream)
+
+            CUSTODY_INFORMATION_TAG -> custodyInformation =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            else -> throw IllegalArgumentException(
+                "Unknown field tag in DG11: " + Integer.toHexString(
+                    tag
+                )
+            )
+        }
+    }
+
+    @Throws(IOException::class)
+    override fun writeField(tag: Int, tlvOut: TLVOutputStream) {
+        when (tag) {
+            FULL_NAME_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                nameOfHolder,
+                tlvOut
+            )
+
+            OTHER_NAME_TAG -> AdditionalDetailDataGroup.Companion.writeContentSpecificFieldsList(
+                OTHER_NAME_TAG, otherNames, tlvOut
+            )
+
+            PERSONAL_NUMBER_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                personalNumber,
+                tlvOut
+            )
+
+            FULL_DATE_OF_BIRTH_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                fullDateOfBirth,
+                tlvOut
+            )
+
+            PLACE_OF_BIRTH_TAG -> AdditionalDetailDataGroup.Companion.writeList(
+                tag,
+                placeOfBirth,
+                tlvOut
+            )
+
+            PERMANENT_ADDRESS_TAG -> AdditionalDetailDataGroup.Companion.writeList(
+                tag,
+                permanentAddress,
+                tlvOut
+            )
+
+            TELEPHONE_TAG -> AdditionalDetailDataGroup.Companion.writeString(tag, telephone, tlvOut)
+            PROFESSION_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                profession,
+                tlvOut
+            )
+
+            TITLE_TAG -> AdditionalDetailDataGroup.Companion.writeString(tag, title, tlvOut)
+            PERSONAL_SUMMARY_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                personalSummary,
+                tlvOut
+            )
+
+            PROOF_OF_CITIZENSHIP_TAG -> {
+                tlvOut.writeTag(tag)
+                tlvOut.writeValue(proofOfCitizenship)
+            }
+
+            OTHER_VALID_TD_NUMBERS_TAG -> AdditionalDetailDataGroup.Companion.writeList(
+                tag,
+                otherValidTDNumbers,
+                tlvOut
+            )
+
+            CUSTODY_INFORMATION_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                custodyInformation,
+                tlvOut
+            )
+
+            else -> throw IllegalStateException("Unknown tag in DG11: " + Integer.toHexString(tag))
+        }
+    }
+
+    companion object {
+        private const val serialVersionUID = 8566312538928662937L
+
+        const val TAG_LIST_TAG: Int = 0x5C
+
+        const val FULL_NAME_TAG: Int = 0x5F0E
+        const val OTHER_NAME_TAG: Int = 0x5F0F
+        const val PERSONAL_NUMBER_TAG: Int = 0x5F10
+        const val FULL_DATE_OF_BIRTH_TAG: Int = 0x5F2B // In 'CCYYMMDD' format.
+        const val PLACE_OF_BIRTH_TAG: Int = 0x5F11 // Fields separated by '<'
+        const val PERMANENT_ADDRESS_TAG: Int = 0x5F42 // Fields separated by '<'
+        const val TELEPHONE_TAG: Int = 0x5F12
+        const val PROFESSION_TAG: Int = 0x5F13
+        const val TITLE_TAG: Int = 0x5F14
+        const val PERSONAL_SUMMARY_TAG: Int = 0x5F15
+        const val PROOF_OF_CITIZENSHIP_TAG: Int = 0x5F16 // Compressed image per ISO/IEC 10918
+        const val OTHER_VALID_TD_NUMBERS_TAG: Int = 0x5F17 // Separated by '<'
+        const val CUSTODY_INFORMATION_TAG: Int = 0x5F18
+
+        private const val SDF = "yyyyMMdd"
+    }
 }

@@ -19,188 +19,174 @@
  *
  * $Id: PACEKeySpec.java 1816 2019-07-15 13:02:26Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-
-import kmrtd.protocol.PACEProtocol;
-
-import net.sf.scuba.util.Hex;
+import kmrtd.protocol.PACEProtocol
+import net.sf.scuba.util.Hex
+import java.security.GeneralSecurityException
 
 /**
  * A key for PACE, can be CAN, MRZ, PIN, or PUK.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1816 $
- *
+ * 
  * (Contributions by g.giorkhelidze.)
  */
-public class PACEKeySpec implements AccessKeySpec {
+class PACEKeySpec(key: ByteArray, keyReference: Byte) : AccessKeySpec {
+    /**
+     * Returns the key bytes.
+     * 
+     * @return the key bytes
+     */
+    val key: ByteArray
 
-  private static final long serialVersionUID = -7113246293247012560L;
+    /**
+     * Returns the type of key, valid values are
+     * `MRZ_PACE_KEY_REFERENCE`, `CAN_PACE_KEY_REFERENCE`,
+     * `PIN_PACE_KEY_REFERENCE`, `PUK_PACE_KEY_REFERENCE`.
+     * 
+     * @return the type of key
+     */
+    val keyReference: Byte
 
-  private final byte[] key;
+    /**
+     * Constructs a PACE key from a string value.
+     * 
+     * @param key the string value containing CAN, PIN or PUK
+     * @param keyReference indicates the type of key, valid values are
+     * `MRZ_PACE_KEY_REFERENCE`, `CAN_PACE_KEY_REFERENCE`,
+     * `PIN_PACE_KEY_REFERENCE`, `PUK_PACE_KEY_REFERENCE`
+     */
+    constructor(key: String, keyReference: Byte) : this(Util.getBytes(key), keyReference)
 
-  private final byte keyReference;
-
-  /**
-   * Constructs a PACE key from a string value.
-   *
-   * @param key the string value containing CAN, PIN or PUK
-   * @param keyReference indicates the type of key, valid values are
-   *                     {@code MRZ_PACE_KEY_REFERENCE}, {@code CAN_PACE_KEY_REFERENCE},
-   *                     {@code PIN_PACE_KEY_REFERENCE}, {@code PUK_PACE_KEY_REFERENCE}
-   */
-  public PACEKeySpec(String key, byte keyReference) {
-    this(Util.getBytes(key), keyReference);
-  }
-
-  /**
-   * Constructs a key.
-   *
-   * @param key CAN, MRZ, PIN, PUK password bytes
-   * @param keyReference indicates the type of key, valid values are
-   *                     {@code MRZ_PACE_KEY_REFERENCE}, {@code CAN_PACE_KEY_REFERENCE},
-   *                     {@code PIN_PACE_KEY_REFERENCE}, {@code PUK_PACE_KEY_REFERENCE}
-   */
-  public PACEKeySpec(byte[] key, byte keyReference) {
-    super();
-    this.keyReference = keyReference;
-    this.key = key;
-  }
-
-  /**
-   * Creates a PACE key from relevant details from a Machine Readable Zone.
-   *
-   * @param mrz the details from the Machine Readable Zone
-   *
-   * @return the PACE key
-   *
-   * @throws GeneralSecurityException on error
-   */
-  public static PACEKeySpec createMRZKey(BACKeySpec mrz) throws GeneralSecurityException {
-    return new PACEKeySpec(PACEProtocol.computeKeySeedForPACE(mrz), PassportService.MRZ_PACE_KEY_REFERENCE);
-  }
-
-  /**
-   * Creates a PACE key from a Card Access Number.
-   *
-   * @param can the Card Access Number
-   *
-   * @return the PACE key
-   */
-  public static PACEKeySpec createCANKey(String can) {
-    return new PACEKeySpec(can, PassportService.CAN_PACE_KEY_REFERENCE);
-  }
-
-  /**
-   * Creates a PACE key from a PIN.
-   *
-   * @param pin the PIN
-   *
-   * @return the PACE key
-   */
-  public static PACEKeySpec createPINKey(String pin) {
-    return new PACEKeySpec(pin, PassportService.PIN_PACE_KEY_REFERENCE);
-  }
-
-  /**
-   * Creates a PACE key from a PUK.
-   *
-   * @param puk the PUK
-   *
-   * @return the PACE key
-   */
-  public static PACEKeySpec createPUKKey(String puk) {
-    return new PACEKeySpec(puk, PassportService.PUK_PACE_KEY_REFERENCE);
-  }
-
-  /**
-   * Returns the algorithm.
-   *
-   * @return the algorithm
-   */
-  public String getAlgorithm() {
-    return "PACE";
-  }
-
-  /**
-   * Returns the type of key, valid values are
-   * {@code MRZ_PACE_KEY_REFERENCE}, {@code CAN_PACE_KEY_REFERENCE},
-   * {@code PIN_PACE_KEY_REFERENCE}, {@code PUK_PACE_KEY_REFERENCE}.
-   *
-   * @return the type of key
-   */
-  public byte getKeyReference() {
-    return keyReference;
-  }
-
-  /**
-   * Returns the key bytes.
-   *
-   * @return the key bytes
-   */
-  public byte[] getKey() {
-    return key;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(key);
-    result = prime * result + keyReference;
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
+    /**
+     * Constructs a key.
+     * 
+     * @param key CAN, MRZ, PIN, PUK password bytes
+     * @param keyReference indicates the type of key, valid values are
+     * `MRZ_PACE_KEY_REFERENCE`, `CAN_PACE_KEY_REFERENCE`,
+     * `PIN_PACE_KEY_REFERENCE`, `PUK_PACE_KEY_REFERENCE`
+     */
+    init {
+        this.keyReference = keyReference
+        this.key = key
     }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    PACEKeySpec other = (PACEKeySpec) obj;
-    if (!Arrays.equals(key, other.key)) {
-      return false;
-    }
-    if (keyReference != other.keyReference) {
-      return false;
-    }
-    return true;
-  }
 
-  @Override
-  public String toString() {
-    return "PACEKeySpec [" +
-            "key: " + Hex.bytesToHexString(key) + ", " +
-            "keyReference: " + keyReferenceToString(keyReference) +
-            "]";
-  }
+    val algorithm: String
+        /**
+         * Returns the algorithm.
+         * 
+         * @return the algorithm
+         */
+        get() = "PACE"
 
-  /**
-   * Returns a textual representation of the given key reference parameter.
-   *
-   * @param keyReference a key reference parameter
-   *
-   * @return a textual representation of the key reference
-   */
-  private static String keyReferenceToString(byte keyReference) {
-      return switch (keyReference) {
-          case PassportService.MRZ_PACE_KEY_REFERENCE -> "MRZ";
-          case PassportService.CAN_PACE_KEY_REFERENCE -> "CAN";
-          case PassportService.PIN_PACE_KEY_REFERENCE -> "PIN";
-          case PassportService.PUK_PACE_KEY_REFERENCE -> "PUK";
-          case PassportService.NO_PACE_KEY_REFERENCE -> "NO";
-          default -> Integer.toString(keyReference);
-      };
-  }
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = 1
+        result = prime * result + key.contentHashCode()
+        result = prime * result + keyReference
+        return result
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
+        val other = obj as PACEKeySpec
+        if (!key.contentEquals(other.key)) {
+            return false
+        }
+        if (keyReference != other.keyReference) {
+            return false
+        }
+        return true
+    }
+
+    override fun toString(): String {
+        return "PACEKeySpec [" +
+                "key: " + Hex.bytesToHexString(key) + ", " +
+                "keyReference: " + keyReferenceToString(keyReference) +
+                "]"
+    }
+
+    companion object {
+        private val serialVersionUID = -7113246293247012560L
+
+        /**
+         * Creates a PACE key from relevant details from a Machine Readable Zone.
+         * 
+         * @param mrz the details from the Machine Readable Zone
+         * 
+         * @return the PACE key
+         * 
+         * @throws GeneralSecurityException on error
+         */
+        @Throws(GeneralSecurityException::class)
+        fun createMRZKey(mrz: BACKeySpec?): PACEKeySpec {
+            return PACEKeySpec(
+                PACEProtocol.Companion.computeKeySeedForPACE(mrz),
+                PassportService.Companion.MRZ_PACE_KEY_REFERENCE
+            )
+        }
+
+        /**
+         * Creates a PACE key from a Card Access Number.
+         * 
+         * @param can the Card Access Number
+         * 
+         * @return the PACE key
+         */
+        fun createCANKey(can: String): PACEKeySpec {
+            return PACEKeySpec(can, PassportService.Companion.CAN_PACE_KEY_REFERENCE)
+        }
+
+        /**
+         * Creates a PACE key from a PIN.
+         * 
+         * @param pin the PIN
+         * 
+         * @return the PACE key
+         */
+        fun createPINKey(pin: String): PACEKeySpec {
+            return PACEKeySpec(pin, PassportService.Companion.PIN_PACE_KEY_REFERENCE)
+        }
+
+        /**
+         * Creates a PACE key from a PUK.
+         * 
+         * @param puk the PUK
+         * 
+         * @return the PACE key
+         */
+        fun createPUKKey(puk: String): PACEKeySpec {
+            return PACEKeySpec(puk, PassportService.Companion.PUK_PACE_KEY_REFERENCE)
+        }
+
+        /**
+         * Returns a textual representation of the given key reference parameter.
+         * 
+         * @param keyReference a key reference parameter
+         * 
+         * @return a textual representation of the key reference
+         */
+        private fun keyReferenceToString(keyReference: Byte): String {
+            return when (keyReference) {
+                PassportService.Companion.MRZ_PACE_KEY_REFERENCE -> "MRZ"
+                PassportService.Companion.CAN_PACE_KEY_REFERENCE -> "CAN"
+                PassportService.Companion.PIN_PACE_KEY_REFERENCE -> "PIN"
+                PassportService.Companion.PUK_PACE_KEY_REFERENCE -> "PUK"
+                PassportService.Companion.NO_PACE_KEY_REFERENCE -> "NO"
+                else -> keyReference.toInt().toString()
+            }
+        }
+    }
 }
 

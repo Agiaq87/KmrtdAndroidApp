@@ -19,308 +19,350 @@
  *
  * $Id: ISO781611Decoder.java 1892 2025-03-18 15:15:52Z martijno $
  */
+package kmrtd.cbeff
 
-package kmrtd.cbeff;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVUtil;
-
-import kmrtd.cbeff.BiometricDataBlock;
+import kmrtd.cbeff.BiometricEncodingType.Companion.fromBDBTag
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVUtil
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.InputStream
+import java.util.logging.Logger
 
 /**
  * ISO 7816-11 decoder for BIR.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1892 $
- *
+ * 
  * @since 0.4.7
  */
-public class ISO781611Decoder<B extends BiometricDataBlock> implements ISO781611 {
+class ISO781611Decoder<B : BiometricDataBlock?>(private val bdbDecoders: MutableMap<Int?, BiometricDataBlockDecoder<B?>>) :
+    ISO781611 {
+    var encodingType: BiometricEncodingType? = null
+        private set
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd.cbeff");
-
-  private Map<Integer, BiometricDataBlockDecoder<B>> bdbDecoders;
-
-  private BiometricEncodingType encodingType;
-
-  /**
-   * Constructs an ISO7816-11 decoder that uses the given BDB decoder.
-   *
-   * @param bdbDecoder the BDB decoder to use
-   */
-  public ISO781611Decoder(BiometricDataBlockDecoder<B> bdbDecoder) {
-    this(toMap(bdbDecoder));
-  }
+    /**
+     * Constructs an ISO7816-11 decoder that uses the given BDB decoder.
+     * 
+     * @param bdbDecoder the BDB decoder to use
+     */
+    constructor(bdbDecoder: BiometricDataBlockDecoder<B?>?) : this(toMap<B?>(bdbDecoder))
 
 
-  public ISO781611Decoder(Map<Integer, BiometricDataBlockDecoder<B>> bdbDecoders) {
-    this.bdbDecoders = bdbDecoders;
-  }
-
-  /**
-   * Reads a BIT group from an input stream.
-   *
-   * @param inputStream the input stream to read from
-   *
-   * @return a complex CBEFF info representing the BIT group
-   *
-   * @throws IOException if reading fails
-   */
-  public ComplexCBEFFInfo<B> decode(InputStream inputStream) throws IOException {
-    return readBITGroup(inputStream);
-  }
-
-  public BiometricEncodingType getEncodingType() {
-    return encodingType;
-  }
-
-  /**
-   * Reads a BIT group from an input stream.
-   *
-   * @param inputStream the input stream to read from
-   *
-   * @return a complex CBEFF info representing the BIT group
-   *
-   * @throws IOException if reading fails
-   */
-  private ComplexCBEFFInfo<B> readBITGroup(InputStream inputStream) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    int tag = tlvIn.readTag();
-    if (tag != BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) {
-      throw new IllegalArgumentException("Expected tag " + Integer.toHexString(BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) + ", found " + Integer.toHexString(tag));
+    /**
+     * Reads a BIT group from an input stream.
+     * 
+     * @param inputStream the input stream to read from
+     * 
+     * @return a complex CBEFF info representing the BIT group
+     * 
+     * @throws IOException if reading fails
+     */
+    @Throws(IOException::class)
+    fun decode(inputStream: InputStream): ComplexCBEFFInfo<B?> {
+        return readBITGroup(inputStream)
     }
 
-    int length = tlvIn.readLength();
-    return readBITGroup(tag, length, inputStream);
-  }
+    /**
+     * Reads a BIT group from an input stream.
+     * 
+     * @param inputStream the input stream to read from
+     * 
+     * @return a complex CBEFF info representing the BIT group
+     * 
+     * @throws IOException if reading fails
+     */
+    @Throws(IOException::class)
+    private fun readBITGroup(inputStream: InputStream): ComplexCBEFFInfo<B?> {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val tag = tlvIn.readTag()
+        require(tag == ISO781611.Companion.BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) {
+            "Expected tag " + Integer.toHexString(
+                ISO781611.Companion.BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG
+            ) + ", found " + Integer.toHexString(tag)
+        }
 
-  /**
-   * Reads a BIT group value from an input stream.
-   *
-   * @param tag the tag that was already read, which should be a BIT group tag ({@code 7F61})
-   * @param length the length that was already read
-   * @param inputStream the input stream from which to read the value
-   *
-   * @return CBEFF info representing the BIT group that was read
-   *
-   * @throws IOException on error reading from the stream
-   */
-  private ComplexCBEFFInfo<B> readBITGroup(int tag, int length, InputStream inputStream) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    ComplexCBEFFInfo<B> result = new ComplexCBEFFInfo<B>();
-    if (tag != BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) { /* 7F61 */
-      throw new IllegalArgumentException("Expected tag " + Integer.toHexString(BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) + ", found " + Integer.toHexString(tag));
-    }
-    int bitCountTag = tlvIn.readTag();
-    if (bitCountTag != BIOMETRIC_INFO_COUNT_TAG) { /* 02 */
-      throw new IllegalArgumentException("Expected tag BIOMETRIC_INFO_COUNT_TAG (" + Integer.toHexString(BIOMETRIC_INFO_COUNT_TAG) + ") in CBEFF structure, found " + Integer.toHexString(bitCountTag));
-    }
-    int bitCountLength = tlvIn.readLength();
-    if (bitCountLength != 1) {
-      throw new IllegalArgumentException("BIOMETRIC_INFO_COUNT should have length 1, found length " + bitCountLength);
-    }
-    int bitCount = (tlvIn.readValue()[0] & 0xFF);
-    for (int i = 0; i < bitCount; i++) {
-      result.add(readBIT(inputStream, i));
+        val length = tlvIn.readLength()
+        return readBITGroup(tag, length, inputStream)
     }
 
-    /* TODO: possibly more content, e.g. 0x53 tag with random as per ICAO 9303 Supplement R7-p1_v2_sIII_0057 */
+    /**
+     * Reads a BIT group value from an input stream.
+     * 
+     * @param tag the tag that was already read, which should be a BIT group tag (`7F61`)
+     * @param length the length that was already read
+     * @param inputStream the input stream from which to read the value
+     * 
+     * @return CBEFF info representing the BIT group that was read
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    @Throws(IOException::class)
+    private fun readBITGroup(
+        tag: Int,
+        length: Int,
+        inputStream: InputStream
+    ): ComplexCBEFFInfo<B?> {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val result = ComplexCBEFFInfo<B?>()
+        require(tag == ISO781611.Companion.BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) {
+            "Expected tag " + Integer.toHexString(
+                ISO781611.Companion.BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG
+            ) + ", found " + Integer.toHexString(tag)
+        }
+        val bitCountTag = tlvIn.readTag()
+        require(bitCountTag == ISO781611.Companion.BIOMETRIC_INFO_COUNT_TAG) {
+            "Expected tag BIOMETRIC_INFO_COUNT_TAG (" + Integer.toHexString(
+                ISO781611.Companion.BIOMETRIC_INFO_COUNT_TAG
+            ) + ") in CBEFF structure, found " + Integer.toHexString(bitCountTag)
+        }
+        val bitCountLength = tlvIn.readLength()
+        require(bitCountLength == 1) { "BIOMETRIC_INFO_COUNT should have length 1, found length " + bitCountLength }
+        val bitCount = (tlvIn.readValue()[0].toInt() and 0xFF)
+        for (i in 0..<bitCount) {
+            result.add(readBIT(inputStream, i)!!)
+        }
 
-    return result;
-  }
-
-  /**
-   * Reads a single BIT from the input stream.
-   *
-   * @param inputStream the input stream to read from
-   * @param index index of this BIT within the BIT group
-   *
-   * @return a CBEFF info representing the BIT
-   *
-   * @throws IOException if reading fails
-   */
-  private CBEFFInfo<B> readBIT(InputStream inputStream, int index) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    int tag = tlvIn.readTag();
-    int length = tlvIn.readLength();
-    return readBIT(tag, length, inputStream, index);
-  }
-
-  /**
-   * Reads a single BIT from the input stream.
-   *
-   * @param tag the tag that was already read
-   * @param length the length that was already read
-   * @param inputStream the stream to read the BIT value from
-   * @param index the index of the BIT withing the BIT group
-   *
-   * @return a CBEFF info representing the BIT
-   *
-   * @throws IOException on error reading from the stream
-   */
-  private CBEFFInfo<B> readBIT(int tag, int length, InputStream inputStream, int index) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    if (tag != BIOMETRIC_INFORMATION_TEMPLATE_TAG /* 7F60 */) {
-      throw new IllegalArgumentException("Expected tag BIOMETRIC_INFORMATION_TEMPLATE_TAG (" + Integer.toHexString(BIOMETRIC_INFORMATION_TEMPLATE_TAG) + "), found " + Integer.toHexString(tag) + ", index is " + index);
+        /* TODO: possibly more content, e.g. 0x53 tag with random as per ICAO 9303 Supplement R7-p1_v2_sIII_0057 */
+        return result
     }
 
-    int bhtTag = tlvIn.readTag();
-    int bhtLength = tlvIn.readLength();
-
-    if ((bhtTag == SMT_TAG)) {
-      /* The BIT is protected... */
-      readStaticallyProtectedBIT(inputStream, bhtTag, bhtLength, index);
-    } else if ((bhtTag & 0xA0) == 0xA0) {
-      StandardBiometricHeader sbh = readBHT(inputStream, bhtTag, bhtLength, index);
-      B bdb = readBiometricDataBlock(inputStream, sbh, index);
-      return new SimpleCBEFFInfo<B>(bdb);
-    } else {
-      throw new IllegalArgumentException("Unsupported template tag: " + Integer.toHexString(bhtTag));
+    /**
+     * Reads a single BIT from the input stream.
+     * 
+     * @param inputStream the input stream to read from
+     * @param index index of this BIT within the BIT group
+     * 
+     * @return a CBEFF info representing the BIT
+     * 
+     * @throws IOException if reading fails
+     */
+    @Throws(IOException::class)
+    private fun readBIT(inputStream: InputStream, index: Int): CBEFFInfo<B?>? {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val tag = tlvIn.readTag()
+        val length = tlvIn.readLength()
+        return readBIT(tag, length, inputStream, index)
     }
 
-    return null; // FIXME
-  }
+    /**
+     * Reads a single BIT from the input stream.
+     * 
+     * @param tag the tag that was already read
+     * @param length the length that was already read
+     * @param inputStream the stream to read the BIT value from
+     * @param index the index of the BIT withing the BIT group
+     * 
+     * @return a CBEFF info representing the BIT
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    @Throws(IOException::class)
+    private fun readBIT(
+        tag: Int,
+        length: Int,
+        inputStream: InputStream,
+        index: Int
+    ): CBEFFInfo<B?>? {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        require(tag == ISO781611.Companion.BIOMETRIC_INFORMATION_TEMPLATE_TAG /* 7F60 */) {
+            "Expected tag BIOMETRIC_INFORMATION_TEMPLATE_TAG (" + Integer.toHexString(
+                ISO781611.Companion.BIOMETRIC_INFORMATION_TEMPLATE_TAG
+            ) + "), found " + Integer.toHexString(tag) + ", index is " + index
+        }
 
-  /**
-   * Reads the biometric header template from an input stream.
-   *  A1, A2, ...
-   *  Will contain DOs as described in ISO 7816-11 Annex C.
-   *
-   *  @param inputStream the stream to read from
-   *  @param bhtTag the tag of the biometric header
-   *  @param bhtLength the length of the header
-   *  @param index the index
-   *
-   *  @return the standard biometric header
-   *
-   *  @throws IOException on error reading from the stream
-   */
-  private StandardBiometricHeader readBHT(InputStream inputStream, int bhtTag, int bhtLength, int index) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    int expectedBHTTag = (BIOMETRIC_HEADER_TEMPLATE_BASE_TAG /* + index */) & 0xFF;
-    if (bhtTag != expectedBHTTag) {
-      LOGGER.warning("Expected tag " + Integer.toHexString(expectedBHTTag) + ", found " + Integer.toHexString(bhtTag));
-    }
-    Map<Integer, byte[]> elements = new HashMap<Integer, byte[]>();
-    int bytesRead = 0;
-    while (bytesRead < bhtLength) {
-      int tag = tlvIn.readTag();
-      bytesRead += TLVUtil.getTagLength(tag);
-      int length = tlvIn.readLength();
-      bytesRead += TLVUtil.getLengthLength(length);
-      byte[] value = tlvIn.readValue();
-      bytesRead += value.length;
-      elements.put(tag, value);
-    }
-    return new StandardBiometricHeader(elements);
-  }
+        val bhtTag = tlvIn.readTag()
+        val bhtLength = tlvIn.readLength()
 
-  /**
-   * Reads a biometric information template protected with secure messaging.
-   * Described in ISO7816-11 Annex D.
-   *
-   * @param inputStream source to read from
-   * @param tag should be {@code 0x7D}
-   * @param length the length of the BIT
-   * @param index index of the template
-   *
-   * @throws IOException on failure
-   */
-  private void readStaticallyProtectedBIT(InputStream inputStream, int tag, int length, int index) throws IOException {
-    TLVInputStream tlvBHTIn = new TLVInputStream(new ByteArrayInputStream(decodeSMTValue(inputStream)));
-    try {
-      int headerTemplateTag = tlvBHTIn.readTag();
-      int headerTemplateLength = tlvBHTIn.readLength();
-      StandardBiometricHeader sbh = readBHT(tlvBHTIn, headerTemplateTag, headerTemplateLength, index);
-      InputStream biometricDataBlockIn = new ByteArrayInputStream(decodeSMTValue(inputStream));
-      readBiometricDataBlock(biometricDataBlockIn, sbh, index);
-    } finally {
-      tlvBHTIn.close();
-    }
-  } /* FIXME: return type??? */
+        if ((bhtTag == ISO781611.Companion.SMT_TAG)) {
+            /* The BIT is protected... */
+            readStaticallyProtectedBIT(inputStream, bhtTag, bhtLength, index)
+        } else if ((bhtTag and 0xA0) == 0xA0) {
+            val sbh = readBHT(inputStream, bhtTag, bhtLength, index)
+            val bdb = readBiometricDataBlock(inputStream, sbh, index)
+            return SimpleCBEFFInfo<B?>(bdb)
+        } else {
+            throw IllegalArgumentException("Unsupported template tag: " + Integer.toHexString(bhtTag))
+        }
 
-  /**
-   * Decodes a (protected) data object.
-   * Encrypted payloads are not currently supported.
-   *
-   * @param inputStream the stream to read from
-   *
-   * @return the decoded value
-   *
-   * @throws IOException on error reading from the stream
-   */
-  private byte[] decodeSMTValue(InputStream inputStream) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    int doTag = tlvIn.readTag();
-    int doLength = tlvIn.readLength();
-    switch (doTag) {
-    case SMT_DO_PV /* 0x81 */:
-      /* NOTE: Plain value, just return whatever is in the payload */
-      return tlvIn.readValue();
-    case SMT_DO_CG /* 0x85 */:
-      /* NOTE: content of payload is encrypted */
-      throw new IllegalStateException("Access denied. Biometric Information Template is statically protected.");
-    case SMT_DO_CC /* 0x8E */:
-      /* NOTE: payload contains a MAC */
-      long skippedBytes = 0;
-      while (skippedBytes < doLength) {
-        skippedBytes += tlvIn.skip(doLength);
-      }
-      return null;
-    case SMT_DO_DS /* 0x9E */:
-      /* NOTE: payload contains a signature */
-      skippedBytes = 0;
-      while (skippedBytes < doLength) {
-        skippedBytes += tlvIn.skip(doLength);
-      }
-      return null;
-    default:
-      LOGGER.info("Unsupported data object tag " + Integer.toHexString(doTag));
-      return null;
+        return null // FIXME
     }
-  }
 
-  /**
-   * Reads a biometric data block from an input stream.
-   *
-   * @param inputStream the stream to read from
-   * @param sbh the biometric header that was already read
-   * @param index the index of the biometric data block within the BIT group
-   *
-   * @return the biometric data block
-   *
-   * @throws IOException on error reading from the stream
-   */
-  private B readBiometricDataBlock(InputStream inputStream, StandardBiometricHeader sbh, int index) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    int bioDataBlockTag = tlvIn.readTag();
-    if (bioDataBlockTag != BIOMETRIC_DATA_BLOCK_TAG /* 5F2E */ &&
-        bioDataBlockTag != BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG /* 7F2E */) {
-      throw new IllegalArgumentException("Expected tag BIOMETRIC_DATA_BLOCK_TAG (" + Integer.toHexString(BIOMETRIC_DATA_BLOCK_TAG)
-      + ") or BIOMETRIC_DATA_BLOCK_CONSTRUCTED_ALT (" + Integer.toHexString(BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG)
-      + "), found " + Integer.toHexString(bioDataBlockTag));
+    /**
+     * Reads the biometric header template from an input stream.
+     * A1, A2, ...
+     * Will contain DOs as described in ISO 7816-11 Annex C.
+     * 
+     * @param inputStream the stream to read from
+     * @param bhtTag the tag of the biometric header
+     * @param bhtLength the length of the header
+     * @param index the index
+     * 
+     * @return the standard biometric header
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    @Throws(IOException::class)
+    private fun readBHT(
+        inputStream: InputStream?,
+        bhtTag: Int,
+        bhtLength: Int,
+        index: Int
+    ): StandardBiometricHeader {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val expectedBHTTag =
+            (ISO781611.Companion.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG /* + index */) and 0xFF
+        if (bhtTag != expectedBHTTag) {
+            LOGGER.warning(
+                "Expected tag " + Integer.toHexString(expectedBHTTag) + ", found " + Integer.toHexString(
+                    bhtTag
+                )
+            )
+        }
+        val elements: MutableMap<Int?, ByteArray?> = HashMap<Int?, ByteArray?>()
+        var bytesRead = 0
+        while (bytesRead < bhtLength) {
+            val tag = tlvIn.readTag()
+            bytesRead += TLVUtil.getTagLength(tag)
+            val length = tlvIn.readLength()
+            bytesRead += TLVUtil.getLengthLength(length)
+            val value = tlvIn.readValue()
+            bytesRead += value.size
+            elements.put(tag, value)
+        }
+        return StandardBiometricHeader(elements)
     }
-    encodingType = BiometricEncodingType.fromBDBTag(bioDataBlockTag);
-    int length = tlvIn.readLength();
-    BiometricDataBlockDecoder<B> bdbDecoder = bdbDecoders.get(bioDataBlockTag);
-    if (bdbDecoder == null) {
-      throw new IllegalArgumentException("No decoder for biometric data block tag " + Integer.toHexString(bioDataBlockTag));
-    }
-    return bdbDecoder.decode(inputStream, sbh, index, length);
-  }
 
-  private static <R extends BiometricDataBlock> Map<Integer, BiometricDataBlockDecoder<R>> toMap(BiometricDataBlockDecoder<R> bdbDecoder) {
-    Map<Integer, BiometricDataBlockDecoder<R>> bdbDecoders = new HashMap<Integer, BiometricDataBlockDecoder<R>>();
-    bdbDecoders.put(BIOMETRIC_DATA_BLOCK_TAG, bdbDecoder); /* 5F2E */
-    bdbDecoders.put(BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG, bdbDecoder); /* 7F2E */
-    return bdbDecoders;
-  }
+    /**
+     * Reads a biometric information template protected with secure messaging.
+     * Described in ISO7816-11 Annex D.
+     * 
+     * @param inputStream source to read from
+     * @param tag should be `0x7D`
+     * @param length the length of the BIT
+     * @param index index of the template
+     * 
+     * @throws IOException on failure
+     */
+    @Throws(IOException::class)
+    private fun readStaticallyProtectedBIT(
+        inputStream: InputStream?,
+        tag: Int,
+        length: Int,
+        index: Int
+    ) {
+        val tlvBHTIn = TLVInputStream(ByteArrayInputStream(decodeSMTValue(inputStream)))
+        try {
+            val headerTemplateTag = tlvBHTIn.readTag()
+            val headerTemplateLength = tlvBHTIn.readLength()
+            val sbh = readBHT(tlvBHTIn, headerTemplateTag, headerTemplateLength, index)
+            val biometricDataBlockIn: InputStream =
+                ByteArrayInputStream(decodeSMTValue(inputStream))
+            readBiometricDataBlock(biometricDataBlockIn, sbh, index)
+        } finally {
+            tlvBHTIn.close()
+        }
+    } /* FIXME: return type??? */
+
+    /**
+     * Decodes a (protected) data object.
+     * Encrypted payloads are not currently supported.
+     * 
+     * @param inputStream the stream to read from
+     * 
+     * @return the decoded value
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    @Throws(IOException::class)
+    private fun decodeSMTValue(inputStream: InputStream?): ByteArray? {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val doTag = tlvIn.readTag()
+        val doLength = tlvIn.readLength()
+        when (doTag) {
+            ISO781611.Companion.SMT_DO_PV ->       /* NOTE: Plain value, just return whatever is in the payload */
+                return tlvIn.readValue()
+
+            ISO781611.Companion.SMT_DO_CG ->       /* NOTE: content of payload is encrypted */
+                throw IllegalStateException("Access denied. Biometric Information Template is statically protected.")
+
+            ISO781611.Companion.SMT_DO_CC -> {
+                /* NOTE: payload contains a MAC */
+                val skippedBytes: Long = 0
+                while (skippedBytes < doLength) {
+                    skippedBytes += tlvIn.skip(doLength.toLong())
+                }
+                return null
+            }
+
+            ISO781611.Companion.SMT_DO_DS -> {
+                /* NOTE: payload contains a signature */
+                skippedBytes = 0
+                while (skippedBytes < doLength) {
+                    skippedBytes += tlvIn.skip(doLength.toLong())
+                }
+                return null
+            }
+
+            else -> {
+                LOGGER.info("Unsupported data object tag " + Integer.toHexString(doTag))
+                return null
+            }
+        }
+    }
+
+    /**
+     * Reads a biometric data block from an input stream.
+     * 
+     * @param inputStream the stream to read from
+     * @param sbh the biometric header that was already read
+     * @param index the index of the biometric data block within the BIT group
+     * 
+     * @return the biometric data block
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    @Throws(IOException::class)
+    private fun readBiometricDataBlock(
+        inputStream: InputStream,
+        sbh: StandardBiometricHeader,
+        index: Int
+    ): B? {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val bioDataBlockTag = tlvIn.readTag()
+        require(
+            !(bioDataBlockTag != ISO781611.Companion.BIOMETRIC_DATA_BLOCK_TAG /* 5F2E */ &&
+                    bioDataBlockTag != ISO781611.Companion.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG /* 7F2E */)
+        ) {
+            ("Expected tag BIOMETRIC_DATA_BLOCK_TAG (" + Integer.toHexString(ISO781611.Companion.BIOMETRIC_DATA_BLOCK_TAG)
+                    + ") or BIOMETRIC_DATA_BLOCK_CONSTRUCTED_ALT (" + Integer.toHexString(ISO781611.Companion.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG)
+                    + "), found " + Integer.toHexString(bioDataBlockTag))
+        }
+        encodingType = fromBDBTag(bioDataBlockTag)
+        val length = tlvIn.readLength()
+        val bdbDecoder: BiometricDataBlockDecoder<B?> = bdbDecoders.get(bioDataBlockTag)!!
+        requireNotNull(bdbDecoder) {
+            "No decoder for biometric data block tag " + Integer.toHexString(
+                bioDataBlockTag
+            )
+        }
+        return bdbDecoder.decode(inputStream, sbh, index, length)
+    }
+
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd.cbeff")
+
+        private fun <R : BiometricDataBlock?> toMap(bdbDecoder: BiometricDataBlockDecoder<R?>?): MutableMap<Int?, BiometricDataBlockDecoder<R?>> {
+            val bdbDecoders: MutableMap<Int?, BiometricDataBlockDecoder<R?>> =
+                HashMap<Int?, BiometricDataBlockDecoder<R?>>()
+            bdbDecoders.put(ISO781611.Companion.BIOMETRIC_DATA_BLOCK_TAG, bdbDecoder!!) /* 5F2E */
+            bdbDecoders.put(
+                ISO781611.Companion.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG,
+                bdbDecoder
+            ) /* 7F2E */
+            return bdbDecoders
+        }
+    }
 }

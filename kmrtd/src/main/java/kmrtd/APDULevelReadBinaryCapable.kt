@@ -19,70 +19,79 @@
  *
  * $Id: APDULevelReadBinaryCapable.java 1850 2021-05-21 06:25:03Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.APDUWrapper
+import net.sf.scuba.smartcards.CardServiceException
 
 /**
- * The low-level capability for reading files using {@code SELECT} and {@code READ BINARY}
+ * The low-level capability for reading files using `SELECT` and `READ BINARY`
  * (both SFI and non-SFI) commands.
- *
+ * 
  * The actual file system on an ICAO compliant chip supports this.
- *
+ * 
  * @author The JMRTD team (info@jmrtd,org)
- *
+ * 
  * @version $Revision: 1850 $
- *
+ * 
  * @since 0.7.0
  */
-public interface APDULevelReadBinaryCapable {
+interface APDULevelReadBinaryCapable {
+    /**
+     * Sends a `SELECT APPLET` command to the card.
+     * 
+     * @param wrapper the secure messaging wrapper to use
+     * @param aid the applet to select
+     * 
+     * @throws CardServiceException on tranceive error
+     */
+    @Throws(CardServiceException::class)
+    fun sendSelectApplet(wrapper: APDUWrapper?, aid: ByteArray?)
 
-  /**
-   * Sends a {@code SELECT APPLET} command to the card.
-   *
-   * @param wrapper the secure messaging wrapper to use
-   * @param aid the applet to select
-   *
-   * @throws CardServiceException on tranceive error
-   */
-  void sendSelectApplet(APDUWrapper wrapper, byte[] aid) throws CardServiceException;
+    /**
+     * Sends a `SELECT MF` command to the card.
+     * 
+     * @throws CardServiceException on tranceive error
+     */
+    @Throws(CardServiceException::class)
+    fun sendSelectMF()
 
-  /**
-   * Sends a {@code SELECT MF} command to the card.
-   *
-   * @throws CardServiceException on tranceive error
-   */
-  void sendSelectMF() throws CardServiceException;
+    /**
+     * Selects a file by file identifier.
+     * 
+     * @param wrapper the APDU wrapper to use
+     * @param fid the file identifier
+     * 
+     * @throws CardServiceException on error
+     */
+    @Throws(CardServiceException::class)
+    fun sendSelectFile(wrapper: APDUWrapper?, fid: Short)
 
-  /**
-   * Selects a file by file identifier.
-   *
-   * @param wrapper the APDU wrapper to use
-   * @param fid the file identifier
-   *
-   * @throws CardServiceException on error
-   */
-  void sendSelectFile(APDUWrapper wrapper, short fid) throws CardServiceException;
-
-  /**
-   * Sends a {@code READ BINARY} command to the passport.
-   * Secure messaging will be applied to the command and response APDU.
-   *
-   * @param wrapper the secure messaging wrapper to use, or {@code null} for none
-   * @param sfi the short file identifier byte of the file to read as an int value (between 0 and 255)
-   *            only if {@code isSFIEnabled} is {@code true}, if not any value)
-   * @param offset offset into the file
-   *        (either a value between 0 and 255 if {@code isSFIEnabled} holds,
-   *        or a value between 0 and 65535 if not)
-   * @param le the expected length of the file to read
-   * @param isSFIEnabled a boolean indicating whether short file identifiers are used
-   * @param isTLVEncodedOffsetNeeded a boolean indicating whether it should be a long ({@code INS == 0xB1}) read
-   *
-   * @return a byte array of length at most {@code le} with (the specified part of) the contents of the currently selected file
-   *
-   * @throws CardServiceException if the command was not successful
-   */
-  byte[] sendReadBinary(APDUWrapper wrapper, int sfi, int offset, int le, boolean isSFIEnabled, boolean isTLVEncodedOffsetNeeded) throws CardServiceException;
+    /**
+     * Sends a `READ BINARY` command to the passport.
+     * Secure messaging will be applied to the command and response APDU.
+     * 
+     * @param wrapper the secure messaging wrapper to use, or `null` for none
+     * @param sfi the short file identifier byte of the file to read as an int value (between 0 and 255)
+     * only if `isSFIEnabled` is `true`, if not any value)
+     * @param offset offset into the file
+     * (either a value between 0 and 255 if `isSFIEnabled` holds,
+     * or a value between 0 and 65535 if not)
+     * @param le the expected length of the file to read
+     * @param isSFIEnabled a boolean indicating whether short file identifiers are used
+     * @param isTLVEncodedOffsetNeeded a boolean indicating whether it should be a long (`INS == 0xB1`) read
+     * 
+     * @return a byte array of length at most `le` with (the specified part of) the contents of the currently selected file
+     * 
+     * @throws CardServiceException if the command was not successful
+     */
+    @Throws(CardServiceException::class)
+    fun sendReadBinary(
+        wrapper: APDUWrapper?,
+        sfi: Int,
+        offset: Int,
+        le: Int,
+        isSFIEnabled: Boolean,
+        isTLVEncodedOffsetNeeded: Boolean
+    ): ByteArray?
 }

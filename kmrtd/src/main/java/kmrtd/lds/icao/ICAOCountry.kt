@@ -19,174 +19,176 @@
  *
  * $Id: ICAOCountry.java 1872 2023-03-10 21:52:01Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import net.sf.scuba.data.Country;
+import net.sf.scuba.data.Country
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
- * Special ICAO countries not covered in {@link net.sf.scuba.data.ISOCountry}.
+ * Special ICAO countries not covered in [net.sf.scuba.data.ISOCountry].
  * Contributed by Aleksandar Kamburov (wise_guybg).
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1872 $
  */
-public class ICAOCountry extends Country {
+class ICAOCountry : Country {
+    private var name: String? = null
+    private var nationality: String? = null
+    private var alpha2Code: String? = null
+    private var alpha3Code: String? = null
 
-  private static final long serialVersionUID = 2942942609311086138L;
+    /**
+     * Prevent caller from creating instance.
+     */
+    private constructor()
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-
-  public static final ICAOCountry DE = new ICAOCountry("DE", "D<<", "Germany", "German");
-  public static final ICAOCountry RKS = new ICAOCountry("KS", "RKS", "Republic of Kosovo", "Kosovar");
-
-  public static final ICAOCountry GBD = new ICAOCountry("GB","GBD","British Dependent territories citizen");
-  public static final ICAOCountry GBN = new ICAOCountry("GB","GBN","British National (Overseas)");
-  public static final ICAOCountry GBO = new ICAOCountry("GB","GBO","British Overseas citizen");
-  public static final ICAOCountry GBP = new ICAOCountry("GB","GBP","British Protected person");
-  public static final ICAOCountry GBS = new ICAOCountry("GB","GBS","British Subject");
-
-  public static final ICAOCountry XXA = new ICAOCountry("XX","XXA","Stateless person", "Stateless");
-  public static final ICAOCountry XXB = new ICAOCountry("XX","XXB","Refugee", "Refugee");
-  public static final ICAOCountry XXC = new ICAOCountry("XX","XXC","Refugee (other)", "Refugee (other)");
-  public static final ICAOCountry XXX = new ICAOCountry("XX","XXX","Unspecified", "Unspecified");
-
-  /** Part B: Europe. */
-  public static final ICAOCountry EUE = new ICAOCountry("EU", "EUE", "Europe", "European");
-
-  /** Part C: Codes for Use in United Nations Travel Documents. */
-  public static final ICAOCountry UNO = new ICAOCountry("UN","UNO","United Nations Organization");
-  public static final ICAOCountry UNA = new ICAOCountry("UN","UNA","United Nations Agency");
-  public static final ICAOCountry UNK = new ICAOCountry("UN","UNK","United Nations Interim Administration Mission in Kosovo");
-
-  /** Part D: Other issuing authorities. */
-  public static final ICAOCountry XBA = new ICAOCountry("XX", "XBA", "African Development Bank (ADB)");
-  public static final ICAOCountry XIM = new ICAOCountry("XX", "XIM", "African Export-Import Bank (AFREXIM bank)");
-  public static final ICAOCountry XCC = new ICAOCountry("XC", "XCC","Carribean Community or one of its emissaries (CARICOM)");
-  public static final ICAOCountry XCE = new ICAOCountry("XX", "XCE", "Council of Europe");
-  public static final ICAOCountry XCO = new ICAOCountry("XX", "XCO", "Common Market for Eastern an Southern Africa (COMESA)");
-  public static final ICAOCountry XEC = new ICAOCountry("XX", "XEC", "Economic Community of West African States (ECOWAS)");
-  public static final ICAOCountry XPO = new ICAOCountry("XP", "XPO", "International Criminal Police Organization (INTERPOL)");
-  public static final ICAOCountry XES = new ICAOCountry("XX", "XES", "Organization of Eastern Caribbean States (OECS)");
-  public static final ICAOCountry XMP = new ICAOCountry("XX", "XMP", "Parliamentary Assembly of the Mediterranean (PAM)");
-  public static final ICAOCountry XOM = new ICAOCountry("XO", "XOM","Sovereign Military Order of Malta or one of its emissaries");
-  public static final ICAOCountry XDC = new ICAOCountry("XX", "XDC", "Southern African Development Community");
-
-  private static final ICAOCountry[] VALUES = {
-      DE, RKS,
-      GBD, GBN, GBO, GBP, GBS,
-      XXA, XXB, XXC, XXX,
-      EUE,
-      UNO, UNA, UNK,
-      XBA, XIM, XCC, XCO, XEC, XPO, XOM
-  };
-
-  private String name;
-  private String nationality;
-  private String alpha2Code;
-  private String alpha3Code;
-
-  /**
-   * Prevent caller from creating instance.
-   */
-  private ICAOCountry() {
-  }
-
-  /**
-   * Constructs a country.
-   *
-   * @param alpha2Code the two-digit alpha code
-   * @param alpha3Code the three-digit alpha code
-   * @param name a name for the country
-   *        (which will also be used to indicate the nationality of the country)
-   */
-  private ICAOCountry(String alpha2Code, String alpha3Code, String name) {
-    this(alpha2Code, alpha3Code, name, name);
-  }
-
-  /**
-   * Constructs a country.
-   *
-   * @param alpha2Code the 2-letter alpha code
-   * @param alpha3Code the 3-letter alpha code
-   * @param name a name for the country
-   * @param nationality a name for nationals of the country
-   */
-  private ICAOCountry(String alpha2Code, String alpha3Code, String name, String nationality) {
-    this.alpha2Code = alpha2Code;
-    this.alpha3Code = alpha3Code;
-    this.name = name;
-    this.nationality = nationality;
-  }
-
-  /**
-   * Returns an ICAO country instance.
-   *
-   * @param alpha3Code a three-digit ICAO country code
-   *
-   * @return an ICAO country
-   */
-  public static Country getInstance(String alpha3Code) {
-    for (ICAOCountry country: VALUES) {
-      if (country.alpha3Code.equals(alpha3Code)) {
-        return country;
-      }
+    /**
+     * Constructs a country.
+     * 
+     * @param alpha2Code the 2-letter alpha code
+     * @param alpha3Code the 3-letter alpha code
+     * @param name a name for the country
+     * @param nationality a name for nationals of the country
+     */
+    /**
+     * Constructs a country.
+     * 
+     * @param alpha2Code the two-digit alpha code
+     * @param alpha3Code the three-digit alpha code
+     * @param name a name for the country
+     * (which will also be used to indicate the nationality of the country)
+     */
+    private constructor(
+        alpha2Code: String?,
+        alpha3Code: String,
+        name: String?,
+        nationality: String? = name
+    ) {
+        this.alpha2Code = alpha2Code
+        this.alpha3Code = alpha3Code
+        this.name = name
+        this.nationality = nationality
     }
-    try {
-      return Country.getInstance(alpha3Code);
-    } catch (Exception e) {
-      /* NOTE: ignore this exception if it's not a legal 3 digit code. */
-      LOGGER.log(Level.FINE, "Unknown country", e);
+
+    override fun valueOf(): Int {
+        return -1
     }
-    throw new IllegalArgumentException("Illegal ICAO country alpha 3 code " + alpha3Code);
-  }
 
-  @Override
-  public int valueOf() {
-    return -1;
-  }
+    /**
+     * Returns the full name of the country.
+     * 
+     * @return a country name
+     */
+    override fun getName(): String? {
+        return name
+    }
 
-  /**
-   * Returns the full name of the country.
-   *
-   * @return a country name
-   */
-  @Override
-  public String getName() {
-    return name;
-  }
+    /**
+     * Returns the adjectival form corresponding to the country.
+     * 
+     * @return the nationality
+     */
+    override fun getNationality(): String? {
+        return nationality
+    }
 
-  /**
-   * Returns the adjectival form corresponding to the country.
-   *
-   * @return the nationality
-   */
-  @Override
-  public String getNationality() {
-    return nationality;
-  }
+    /**
+     * Returns the two-digit country code.
+     * 
+     * @return a two-digit country code
+     */
+    override fun toAlpha2Code(): String? {
+        return alpha2Code
+    }
 
-  /**
-   * Returns the two-digit country code.
-   *
-   * @return a two-digit country code
-   */
-  @Override
-  public String toAlpha2Code() {
-    return alpha2Code;
-  }
+    /**
+     * Returns the three-digit country code.
+     * 
+     * @return a three-digit country code
+     */
+    override fun toAlpha3Code(): String {
+        return alpha3Code!!
+    }
 
-  /**
-   * Returns the three-digit country code.
-   *
-   * @return a three-digit country code
-   */
-  @Override
-  public String toAlpha3Code() {
-    return alpha3Code;
-  }
+    companion object {
+        private const val serialVersionUID = 2942942609311086138L
+
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+
+        val DE: ICAOCountry = ICAOCountry("DE", "D<<", "Germany", "German")
+        val RKS: ICAOCountry = ICAOCountry("KS", "RKS", "Republic of Kosovo", "Kosovar")
+
+        val GBD: ICAOCountry = ICAOCountry("GB", "GBD", "British Dependent territories citizen")
+        val GBN: ICAOCountry = ICAOCountry("GB", "GBN", "British National (Overseas)")
+        val GBO: ICAOCountry = ICAOCountry("GB", "GBO", "British Overseas citizen")
+        val GBP: ICAOCountry = ICAOCountry("GB", "GBP", "British Protected person")
+        val GBS: ICAOCountry = ICAOCountry("GB", "GBS", "British Subject")
+
+        val XXA: ICAOCountry = ICAOCountry("XX", "XXA", "Stateless person", "Stateless")
+        val XXB: ICAOCountry = ICAOCountry("XX", "XXB", "Refugee", "Refugee")
+        val XXC: ICAOCountry = ICAOCountry("XX", "XXC", "Refugee (other)", "Refugee (other)")
+        val XXX: ICAOCountry = ICAOCountry("XX", "XXX", "Unspecified", "Unspecified")
+
+        /** Part B: Europe.  */
+        val EUE: ICAOCountry = ICAOCountry("EU", "EUE", "Europe", "European")
+
+        /** Part C: Codes for Use in United Nations Travel Documents.  */
+        val UNO: ICAOCountry = ICAOCountry("UN", "UNO", "United Nations Organization")
+        val UNA: ICAOCountry = ICAOCountry("UN", "UNA", "United Nations Agency")
+        val UNK: ICAOCountry =
+            ICAOCountry("UN", "UNK", "United Nations Interim Administration Mission in Kosovo")
+
+        /** Part D: Other issuing authorities.  */
+        val XBA: ICAOCountry = ICAOCountry("XX", "XBA", "African Development Bank (ADB)")
+        val XIM: ICAOCountry = ICAOCountry("XX", "XIM", "African Export-Import Bank (AFREXIM bank)")
+        val XCC: ICAOCountry =
+            ICAOCountry("XC", "XCC", "Carribean Community or one of its emissaries (CARICOM)")
+        val XCE: ICAOCountry = ICAOCountry("XX", "XCE", "Council of Europe")
+        val XCO: ICAOCountry =
+            ICAOCountry("XX", "XCO", "Common Market for Eastern an Southern Africa (COMESA)")
+        val XEC: ICAOCountry =
+            ICAOCountry("XX", "XEC", "Economic Community of West African States (ECOWAS)")
+        val XPO: ICAOCountry =
+            ICAOCountry("XP", "XPO", "International Criminal Police Organization (INTERPOL)")
+        val XES: ICAOCountry =
+            ICAOCountry("XX", "XES", "Organization of Eastern Caribbean States (OECS)")
+        val XMP: ICAOCountry =
+            ICAOCountry("XX", "XMP", "Parliamentary Assembly of the Mediterranean (PAM)")
+        val XOM: ICAOCountry =
+            ICAOCountry("XO", "XOM", "Sovereign Military Order of Malta or one of its emissaries")
+        val XDC: ICAOCountry = ICAOCountry("XX", "XDC", "Southern African Development Community")
+
+        private val VALUES = arrayOf<ICAOCountry>(
+            DE, RKS,
+            GBD, GBN, GBO, GBP, GBS,
+            XXA, XXB, XXC, XXX,
+            EUE,
+            UNO, UNA, UNK,
+            XBA, XIM, XCC, XCO, XEC, XPO, XOM
+        )
+
+        /**
+         * Returns an ICAO country instance.
+         * 
+         * @param alpha3Code a three-digit ICAO country code
+         * 
+         * @return an ICAO country
+         */
+        fun getInstance(alpha3Code: String): Country? {
+            for (country in VALUES) {
+                if (country.alpha3Code == alpha3Code) {
+                    return country
+                }
+            }
+            try {
+                return Country.getInstance(alpha3Code)
+            } catch (e: Exception) {
+                /* NOTE: ignore this exception if it's not a legal 3 digit code. */
+                LOGGER.log(Level.FINE, "Unknown country", e)
+            }
+            throw IllegalArgumentException("Illegal ICAO country alpha 3 code " + alpha3Code)
+        }
+    }
 }

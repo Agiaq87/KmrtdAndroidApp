@@ -19,64 +19,55 @@
  *
  * $Id: PACEException.java 1851 2021-05-27 20:56:53Z martijno $
  */
-
-package kmrtd;
+package kmrtd
 
 /**
  * An exception to signal errors during execution of the PACE protocol.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1851 $
- *
- * @deprecated Use {@link CardServiceProtocolException} instead.
+ * 
  */
-@Deprecated
-public class PACEException extends CardServiceProtocolException {
+@Deprecated("Use {@link CardServiceProtocolException} instead.")
+class PACEException : CardServiceProtocolException {
+    /**
+     * Creates a `PACEException`.
+     * 
+     * @param msg a message
+     * @param step the protocol step that failed
+     */
+    constructor(msg: String, step: Int) : super(msg, step)
 
-  private static final long serialVersionUID = 8383980807753919040L;
+    /**
+     * Creates a `PACEException`.
+     * 
+     * @param msg a message
+     * @param step the protocol step that failed
+     * @param cause the exception causing this exception
+     */
+    constructor(msg: String, step: Int, cause: Throwable?) : super(msg, step, cause)
 
-  /**
-   * Creates a {@code PACEException}.
-   *
-   * @param msg a message
-   * @param step the protocol step that failed
-   */
-  public PACEException(String msg, int step) {
-    super(msg, step);
-  }
+    /**
+     * Creates a PACEException with a specific status word.
+     * 
+     * @param msg a message
+     * @param step the protocol step that failed
+     * @param sw the status word that caused this CardServiceException
+     */
+    constructor(msg: String, step: Int, sw: Int) : super(msg, step, sw)
 
-  /**
-   * Creates a {@code PACEException}.
-   *
-   * @param msg a message
-   * @param step the protocol step that failed
-   * @param cause the exception causing this exception
-   */
-  public PACEException(String msg, int step, Throwable cause) {
-    super(msg, step, cause);
-  }
+    /**
+     * Creates a PACEException with a specific status word.
+     * 
+     * @param msg a message
+     * @param step the protocol step that failed
+     * @param cause the exception causing this exception
+     * @param sw the status word that caused this CardServiceException
+     */
+    constructor(msg: String, step: Int, cause: Throwable?, sw: Int) : super(msg, step, cause, sw)
 
-  /**
-   * Creates a PACEException with a specific status word.
-   *
-   * @param msg a message
-   * @param step the protocol step that failed
-   * @param sw the status word that caused this CardServiceException
-   */
-  public PACEException(String msg, int step, int sw) {
-    super(msg, step, sw);
-  }
-
-  /**
-   * Creates a PACEException with a specific status word.
-   *
-   * @param msg a message
-   * @param step the protocol step that failed
-   * @param cause the exception causing this exception
-   * @param sw the status word that caused this CardServiceException
-   */
-  public PACEException(String msg, int step, Throwable cause, int sw) {
-    super(msg, step, cause, sw);
-  }
+    companion object {
+        private const val serialVersionUID = 8383980807753919040L
+    }
 }

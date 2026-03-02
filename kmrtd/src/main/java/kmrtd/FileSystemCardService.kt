@@ -19,45 +19,44 @@
  *
  * $Id: FileSystemCardService.java 1839 2020-08-27 06:28:31Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import net.sf.scuba.smartcards.CardFileInputStream;
-import net.sf.scuba.smartcards.CardService;
-import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.CardFileInputStream
+import net.sf.scuba.smartcards.CardService
+import net.sf.scuba.smartcards.CardServiceException
 
 /**
  * A card service that acts as a (file identifier indexed) file system.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1839 $
  */
-public abstract class FileSystemCardService extends CardService {
+abstract class FileSystemCardService : CardService() {
+    /**
+     * Returns an input stream to access the file indicated by the file identifier.
+     * 
+     * @param fid the file identifier
+     * 
+     * @return a stream to read from
+     * 
+     * @throws CardServiceException on error creating the stream
+     * 
+     */
+    @Deprecated("Use the other method with explicit max block size")
+    @Throws(CardServiceException::class)
+    abstract fun getInputStream(fid: Short): CardFileInputStream?
 
-  /**
-   * Returns an input stream to access the file indicated by the file identifier.
-   *
-   * @param fid the file identifier
-   *
-   * @return a stream to read from
-   *
-   * @throws CardServiceException on error creating the stream
-   *
-   * @deprecated Use the other method with explicit max block size
-   */
-  @Deprecated
-  public abstract CardFileInputStream getInputStream(short fid) throws CardServiceException;
-
-  /**
-   * Returns an input stream to access the file indicated by the file identifier.
-   *
-   * @param fid the file identifier
-   * @param maxBlockSize maximum block size to use for read binaries
-   *
-   * @return a stream to read from
-   *
-   * @throws CardServiceException on error creating the stream
-   */
-  public abstract CardFileInputStream getInputStream(short fid, int maxBlockSize) throws CardServiceException;
+    /**
+     * Returns an input stream to access the file indicated by the file identifier.
+     * 
+     * @param fid the file identifier
+     * @param maxBlockSize maximum block size to use for read binaries
+     * 
+     * @return a stream to read from
+     * 
+     * @throws CardServiceException on error creating the stream
+     */
+    @Throws(CardServiceException::class)
+    abstract fun getInputStream(fid: Short, maxBlockSize: Int): CardFileInputStream?
 }

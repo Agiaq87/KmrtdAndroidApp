@@ -19,228 +19,219 @@
  *
  * $Id: DefaultFileSystem.java 1908 2026-02-20 07:45:56Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import kmrtd.io.FragmentBuffer;
-import kmrtd.io.Fragment;
-import kmrtd.lds.CVCAFile;
-import kmrtd.lds.LDSFileUtil;
-import kmrtd.protocol.SecureMessagingWrapper;
-
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.smartcards.FileInfo;
-import net.sf.scuba.smartcards.FileSystemStructured;
-import net.sf.scuba.smartcards.ISO7816;
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.util.Hex;
+import kmrtd.io.Fragment
+import kmrtd.io.FragmentBuffer
+import kmrtd.lds.CVCAFile
+import kmrtd.lds.LDSFileUtil
+import kmrtd.protocol.SecureMessagingWrapper
+import net.sf.scuba.smartcards.APDUWrapper
+import net.sf.scuba.smartcards.CardServiceException
+import net.sf.scuba.smartcards.FileInfo
+import net.sf.scuba.smartcards.FileSystemStructured
+import net.sf.scuba.smartcards.ISO7816
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.util.Hex
+import java.io.ByteArrayInputStream
+import java.io.IOException
+import java.io.Serializable
+import java.util.logging.Level
+import java.util.logging.Logger
+import kotlin.math.min
 
 /**
  * A file system for ICAO MRTDs (and similar file systems).
  * This translates abstract high level selection and read binary commands to
  * concrete low level file related APDUs which are sent to the ICC through the
  * card service.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1908 $
- *
+ * 
  * @since 0.7.0
  */
-public class DefaultFileSystem implements FileSystemStructured {
+class DefaultFileSystem @JvmOverloads constructor(
+    service: APDULevelReadBinaryCapable,
+    isSFIEnabled: Boolean,
+    fidToSFI: MutableMap<Short?, Byte> = LDSFileUtil.FID_TO_SFI
+) : FileSystemStructured {
+    /** Indicates the file that is (or should be) selected.  */
+    private var selectedFID: Short
 
-  /** Invalid short identifier. */
-  public static final int NO_SFI = -1;
+    private val isSFIEnabled: Boolean
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
+    /**
+     * Returns the currently set maximum length to be requested in READ BINARY commands.
+     * 
+     * @return the currently set maximum length to be requested in READ BINARY commands
+     */
+    var maxReadBinaryLength: Int
+        private set
 
-  /** Number of bytes to read at start of file to determine file length. */
-  private static final int READ_AHEAD_LENGTH = 8;
+    /**
+     * A boolean indicating whether we actually already
+     * sent the SELECT command to select {@ code selectedFID}.
+     */
+    private var isSelected: Boolean
 
-  /** Indicates the file that is (or should be) selected. */
-  private short selectedFID;
+    private val service: APDULevelReadBinaryCapable
 
-  private final boolean isSFIEnabled;
+    private val fileInfos: MutableMap<Short?, DefaultFileInfo?>
 
-  private int maxReadBinaryLength;
+    private val fidToSFI: MutableMap<Short?, Byte>
 
-  /**
-   * A boolean indicating whether we actually already
-   * sent the SELECT command to select {@ code selectedFID}.
-   */
-  private boolean isSelected;
+    private var wrapper: APDUWrapper? = null
 
-  private final APDULevelReadBinaryCapable service;
+    private var oldWrapper: APDUWrapper? = null
 
-  private final Map<Short, DefaultFileInfo> fileInfos;
-
-  private final Map<Short, Byte> fidToSFI;
-
-  private APDUWrapper wrapper;
-
-  private APDUWrapper oldWrapper;
-
-  /**
-   * Creates a file system.
-   *
-   * @param service the card service supporting low-level {@code SELECT} and/or {@code READ BINARY} commands
-   * @param isSFIEnabled whether the file system should use short file identifiers in {@code READ BINARY} commands
-   */
-  public DefaultFileSystem(APDULevelReadBinaryCapable service, boolean isSFIEnabled) {
-    this(service, isSFIEnabled, LDSFileUtil.FID_TO_SFI);
-  }
-
-  /**
-   * Creates a file system.
-   *
-   * @param service the card service supporting low-level {@code SELECT} and/or {@code READ BINARY} commands
-   * @param isSFIEnabled whether the file system should use short file identifiers in {@code READ BINARY} commands
-   * @param fidToSFI maps file identifiers to short file identifiers
-   */
-  public DefaultFileSystem(APDULevelReadBinaryCapable service, boolean isSFIEnabled, Map<Short, Byte> fidToSFI) {
-    this.service = service;
-    this.fileInfos = new HashMap<Short, DefaultFileInfo>();
-    this.selectedFID = 0;
-    this.isSelected = false;
-    this.isSFIEnabled = isSFIEnabled;
-    this.fidToSFI = fidToSFI;
-    this.maxReadBinaryLength = PassportService.EXTENDED_MAX_TRANCEIVE_LENGTH;
-  }
-
-  /**
-   * Sets the current wrapper to the given APDU wrapper.
-   * Subsequent APDUs will be wrapped before sending to the ICC.
-   *
-   * @param wrapper an APDU wrapper
-   */
-  public void setWrapper(APDUWrapper wrapper) {
-    oldWrapper = this.wrapper;
-    this.wrapper = wrapper;
-  }
-
-  /**
-   * Returns the wrapper (secure messaging) currently in use.
-   *
-   * @return the wrapper
-   */
-  public APDUWrapper getWrapper() {
-    return wrapper;
-  }
-
-  /**
-   * Returns the currently set maximum length to be requested in READ BINARY commands.
-   *
-   * @return the currently set maximum length to be requested in READ BINARY commands
-   */
-  public int getMaxReadBinaryLength() {
-    return maxReadBinaryLength;
-  }
-
-  /**
-   * Returns the selected path.
-   *
-   * @return the path components
-   *
-   * @throws CardServiceException on error
-   */
-  public synchronized FileInfo[] getSelectedPath() throws CardServiceException {
-    try {
-      DefaultFileInfo fileInfo = getFileInfo();
-      if (fileInfo == null) {
-        return null;
-      } else {
-        return new DefaultFileInfo[] { fileInfo };
-      }
-    } catch (Exception e) {
-      return null;
+    /**
+     * Creates a file system.
+     * 
+     * @param service the card service supporting low-level `SELECT` and/or `READ BINARY` commands
+     * @param isSFIEnabled whether the file system should use short file identifiers in `READ BINARY` commands
+     * @param fidToSFI maps file identifiers to short file identifiers
+     */
+    /**
+     * Creates a file system.
+     * 
+     * @param service the card service supporting low-level `SELECT` and/or `READ BINARY` commands
+     * @param isSFIEnabled whether the file system should use short file identifiers in `READ BINARY` commands
+     */
+    init {
+        this.service = service
+        this.fileInfos = HashMap<Short?, DefaultFileInfo?>()
+        this.selectedFID = 0
+        this.isSelected = false
+        this.isSFIEnabled = isSFIEnabled
+        this.fidToSFI = fidToSFI
+        this.maxReadBinaryLength = PassportService.Companion.EXTENDED_MAX_TRANCEIVE_LENGTH
     }
-  }
 
-  /*
+    /**
+     * Sets the current wrapper to the given APDU wrapper.
+     * Subsequent APDUs will be wrapped before sending to the ICC.
+     * 
+     * @param wrapper an APDU wrapper
+     */
+    fun setWrapper(wrapper: APDUWrapper?) {
+        oldWrapper = this.wrapper
+        this.wrapper = wrapper
+    }
+
+    /**
+     * Returns the wrapper (secure messaging) currently in use.
+     * 
+     * @return the wrapper
+     */
+    fun getWrapper(): APDUWrapper? {
+        return wrapper
+    }
+
+    /**
+     * Returns the selected path.
+     * 
+     * @return the path components
+     * 
+     * @throws CardServiceException on error
+     */
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun getSelectedPath(): Array<FileInfo?>? {
+        try {
+            val fileInfo = this.fileInfo
+            if (fileInfo == null) {
+                return null
+            } else {
+                return arrayOf<DefaultFileInfo>(fileInfo)
+            }
+        } catch (e: Exception) {
+            return null
+        }
+    }
+
+    /*
    * NOTE: This doesn't actually send a select file command. ReadBinary will do so
    * if needed.
    */
-  /**
-   * Selects a file.
-   *
-   * @param fid indicates the file to select
-   *
-   * @throws CardServiceException on error communicating over the service
-   */
-  public synchronized void selectFile(short fid) throws CardServiceException {
-    if (selectedFID == fid) {
-      return;
+    /**
+     * Selects a file.
+     * 
+     * @param fid indicates the file to select
+     * 
+     * @throws CardServiceException on error communicating over the service
+     */
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun selectFile(fid: Short) {
+        if (selectedFID == fid) {
+            return
+        }
+
+        selectedFID = fid
+        isSelected = false
     }
 
-    selectedFID = fid;
-    isSelected = false;
-  }
+    /**
+     * Reads a block of bytes.
+     * 
+     * @param offset offset index in the selected file
+     * @param length the number of bytes to read
+     * 
+     * @return a copy of the bytes read
+     * 
+     * @throws CardServiceException on error
+     */
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun readBinary(offset: Int, length: Int): ByteArray? {
+        var length = length
+        var fileInfo: DefaultFileInfo? = null
+        try {
+            if (selectedFID <= 0) {
+                throw CardServiceException("No file selected")
+            }
 
-  /**
-   * Reads a block of bytes.
-   *
-   * @param offset offset index in the selected file
-   * @param length the number of bytes to read
-   *
-   * @return a copy of the bytes read
-   *
-   * @throws CardServiceException on error
-   */
-  public synchronized byte[] readBinary(int offset, int length) throws CardServiceException {
-    DefaultFileInfo fileInfo = null;
-    try {
-      if (selectedFID <= 0) {
-        throw new CardServiceException("No file selected");
-      }
+            /* Check buffer to see if we already have some of the bytes. */
+            fileInfo = this.fileInfo
+            checkNotNull(fileInfo) { "Could not get file info" }
 
-      /* Check buffer to see if we already have some of the bytes. */
-      fileInfo = getFileInfo();
-      if (fileInfo == null) {
-        throw new IllegalStateException("Could not get file info");
-      }
+            length = min(length, maxReadBinaryLength)
+            val fragment = fileInfo.getSmallestUnbufferedFragment(offset, length)
 
-      length = Math.min(length, maxReadBinaryLength);
-      Fragment fragment = fileInfo.getSmallestUnbufferedFragment(offset, length);
+            var responseLength = length
 
-      int responseLength = length;
+            var bytes: ByteArray? = null
+            if (fragment.length > 0) {
+                if (isSFIEnabled && offset < 256) {
+                    val sfi: Byte = fidToSFI.get(selectedFID)!!
+                    if (sfi == null) {
+                        throw NumberFormatException("Unknown FID " + Integer.toHexString(selectedFID.toInt()))
+                    }
+                    bytes = sendReadBinary(
+                        0x80 or (sfi.toInt() and 0xFF),
+                        fragment.offset,
+                        fragment.length,
+                        false
+                    )
+                    isSelected = true
+                } else {
+                    if (!isSelected) {
+                        sendSelectFile(selectedFID)
+                        isSelected = true
+                    }
+                    bytes = sendReadBinary(fragment.offset, fragment.length, offset > 32767)
+                }
 
-      byte[] bytes = null;
-      if (fragment.getLength() > 0) {
-        if (isSFIEnabled && offset < 256) {
-          Byte sfi = fidToSFI.get(selectedFID);
-          if (sfi == null) {
-            throw new NumberFormatException("Unknown FID " + Integer.toHexString(selectedFID));
-          }
-          bytes = sendReadBinary(0x80 | (sfi & 0xFF), fragment.getOffset(), fragment.getLength(), false);
-          isSelected = true;
-        } else {
-          if (!isSelected) {
-            sendSelectFile(selectedFID);
-            isSelected = true;
-          }
-          bytes = sendReadBinary(fragment.getOffset(), fragment.getLength(), offset > 32767);
-        }
+                checkNotNull(bytes) { "Could not read bytes" }
 
-        if (bytes == null) {
-          throw new IllegalStateException("Could not read bytes");
-        }
+                if (bytes.size > 0) {
+                    /* Update buffer with newly read bytes. */
+                    fileInfo.addFragment(fragment.offset, bytes)
+                }
 
-        if (bytes.length > 0) {
-          /* Update buffer with newly read bytes. */
-          fileInfo.addFragment(fragment.getOffset(), bytes);
-        }
-
-        /*
+                /*
          * If we request a block of data, create the return buffer from the actual response length, not the requested Le.
          * The latter causes issues when the returned block has a one byte padding (only 0x80) which ends up being removed but
          * the length is not kept track of, leaving an unwanted 0-byte at the end of the data block, which now has a length
@@ -248,263 +239,322 @@ public class DefaultFileSystem implements FileSystemStructured {
          *
          * Bug reproduced using org.jmrtd.AESSecureMessagingWrapper with AES-256.
          */
-        if (bytes.length < fragment.getLength()) {
-          responseLength = bytes.length;
+                if (bytes.size < fragment.length) {
+                    responseLength = bytes.size
+                }
+            }
+            /* Shrink wrap the bytes that are now buffered. */
+            /* NOTE: That arraycopy looks costly, consider using dest array and offset params instead of byte[] result... -- MO */
+            val buffer = fileInfo.getBuffer()
+
+            val result = ByteArray(responseLength)
+            System.arraycopy(buffer, offset, result, 0, responseLength)
+
+            return result
+        } catch (cse: CardServiceException) {
+            val sw = cse.getSW().toShort()
+            if ((sw.toInt() and ISO7816.SW_WRONG_LENGTH.toInt()) == ISO7816.SW_WRONG_LENGTH.toInt() && maxReadBinaryLength > PassportService.Companion.DEFAULT_MAX_BLOCKSIZE) {
+                wrapper = oldWrapper
+                maxReadBinaryLength = PassportService.Companion.DEFAULT_MAX_BLOCKSIZE
+                return byteArrayOf()
+            }
+
+            throw CardServiceException(
+                "Read binary failed on file " + (if (fileInfo == null) Integer.toHexString(
+                    selectedFID.toInt()
+                ) else fileInfo), cse
+            )
+        } catch (e: Exception) {
+            throw CardServiceException(
+                "Read binary failed on file " + (if (fileInfo == null) Integer.toHexString(
+                    selectedFID.toInt()
+                ) else fileInfo), e
+            )
         }
-      }
-      /* Shrink wrap the bytes that are now buffered. */
-      /* NOTE: That arraycopy looks costly, consider using dest array and offset params instead of byte[] result... -- MO */
-      byte[] buffer = fileInfo.getBuffer();
-
-      byte[] result = new byte[responseLength];
-      System.arraycopy(buffer, offset, result, 0, responseLength);
-
-      return result;
-    } catch (CardServiceException cse) {
-      short sw = (short)cse.getSW();
-      if ((sw & ISO7816.SW_WRONG_LENGTH) == ISO7816.SW_WRONG_LENGTH && maxReadBinaryLength > PassportService.DEFAULT_MAX_BLOCKSIZE) {
-        wrapper = oldWrapper;
-        maxReadBinaryLength = PassportService.DEFAULT_MAX_BLOCKSIZE;
-        return new byte[]{ };
-      }
-
-      throw new CardServiceException("Read binary failed on file " + (fileInfo == null ? Integer.toHexString(selectedFID) : fileInfo), cse);
-    } catch (Exception e) {
-      throw new CardServiceException("Read binary failed on file " + (fileInfo == null ? Integer.toHexString(selectedFID) : fileInfo), e);
-    }
-  }
-
-  /**
-   * Returns the file info object for the currently selected file. If this
-   * executes normally the result is non-null. If the file has not been
-   * read before this will send a READ_BINARY to determine length.
-   *
-   * @return a non-null MRTDFileInfo
-   *
-   * @throws CardServiceException on error
-   */
-  private synchronized DefaultFileInfo getFileInfo() throws CardServiceException {
-    if (selectedFID <= 0) {
-      throw new CardServiceException("No file selected");
     }
 
-    DefaultFileInfo fileInfo = fileInfos.get(selectedFID);
+    @get:Throws(CardServiceException::class)
+    @get:Synchronized
+    private val fileInfo: DefaultFileInfo?
+        /**
+         * Returns the file info object for the currently selected file. If this
+         * executes normally the result is non-null. If the file has not been
+         * read before this will send a READ_BINARY to determine length.
+         * 
+         * @return a non-null MRTDFileInfo
+         * 
+         * @throws CardServiceException on error
+         */
+        get() {
+            if (selectedFID <= 0) {
+                throw CardServiceException("No file selected")
+            }
 
-    /* If known file, use file info from cache. */
-    if (fileInfo != null) {
-      return fileInfo;
-    }
+            var fileInfo = fileInfos.get(selectedFID)
 
-    /* Not cached, actually read some bytes to determine file info. */
-    try {
-      /*
-       * Each passport file consists of a TLV structure, read ahead to determine length.
-       * EF.CVCA is the exception and has a fixed length of CVCAFile.LENGTH.
-       */
-      byte[] prefix = null;
-      if (isSFIEnabled) {
-        Byte sfi = fidToSFI.get(selectedFID);
-        if (sfi == null) {
-          throw new NumberFormatException("Unknown FID " + Integer.toHexString(selectedFID));
+            /* If known file, use file info from cache. */
+            if (fileInfo != null) {
+                return fileInfo
+            }
+
+            /* Not cached, actually read some bytes to determine file info. */
+            try {
+                /*
+                  * Each passport file consists of a TLV structure, read ahead to determine length.
+                  * EF.CVCA is the exception and has a fixed length of CVCAFile.LENGTH.
+                  */
+                var prefix: ByteArray? = null
+                if (isSFIEnabled) {
+                    val sfi: Byte = fidToSFI.get(selectedFID)!!
+                    if (sfi == null) {
+                        throw NumberFormatException(
+                            "Unknown FID " + Integer.toHexString(
+                                selectedFID.toInt()
+                            )
+                        )
+                    }
+                    prefix = sendReadBinary(
+                        0x80 or (sfi.toInt() and 0XFF),
+                        0,
+                        READ_AHEAD_LENGTH,
+                        false
+                    )
+                    isSelected = true
+                } else {
+                    if (!isSelected) {
+                        sendSelectFile(selectedFID)
+                        isSelected = true
+                    }
+                    prefix = sendReadBinary(
+                        0,
+                        READ_AHEAD_LENGTH,
+                        false
+                    )
+                }
+                if (prefix == null || prefix.size == 0) {
+                    LOGGER.warning(
+                        "Something is wrong with prefix, prefix = " + Hex.bytesToHexString(
+                            prefix
+                        )
+                    )
+                    return null
+                }
+
+                val fileLength: Int = getFileLength(
+                    selectedFID,
+                    READ_AHEAD_LENGTH,
+                    prefix
+                )
+                if (fileLength < prefix.size) {
+                    /* We got more than the file's length. Ignore trailing bytes. */
+                    prefix = prefix.copyOf(fileLength)
+                }
+                fileInfo = DefaultFileInfo(selectedFID, fileLength)
+                fileInfo.addFragment(0, prefix)
+                fileInfos.put(selectedFID, fileInfo)
+                return fileInfo
+            } catch (ioe: IOException) {
+                throw CardServiceException(
+                    "Error getting file info for " + Integer.toHexString(
+                        selectedFID.toInt()
+                    ), ioe
+                )
+            }
         }
-        prefix = sendReadBinary(0x80 | (sfi & 0XFF), 0, READ_AHEAD_LENGTH, false);
-        isSelected = true;
-      } else {
-        if (!isSelected) {
-          sendSelectFile(selectedFID);
-          isSelected = true;
+
+    /**
+     * Selects a file within the MRTD application.
+     * 
+     * @param fid a file identifier
+     * 
+     * @throws CardServiceException on error
+     */
+    @Synchronized
+    @Throws(CardServiceException::class)
+    fun sendSelectFile(fid: Short) {
+        service.sendSelectFile(wrapper, fid)
+    }
+
+    /**
+     * Sends a `READ BINARY` command for the already selected file to the passport,
+     * using the wrapper when a secure channel has been set up.
+     * 
+     * @param offset offset into the file
+     * @param le the expected length of the file to read
+     * @param isTLVEncodedOffsetNeeded whether to encode the offset in a TLV object (typically for offset larger than 32767)
+     * 
+     * @return a byte array of length `le` with (the specified part of) the contents of the currently selected file
+     * 
+     * @throws CardServiceException on tranceive error
+     */
+    @Synchronized
+    @Throws(CardServiceException::class)
+    fun sendReadBinary(offset: Int, le: Int, isTLVEncodedOffsetNeeded: Boolean): ByteArray? {
+        oldWrapper =
+            if (wrapper is SecureMessagingWrapper) SecureMessagingWrapper.Companion.getInstance(
+                wrapper as SecureMessagingWrapper
+            ) else wrapper
+        return service.sendReadBinary(wrapper, NO_SFI, offset, le, false, isTLVEncodedOffsetNeeded)
+    }
+
+    /**
+     * Sends a `READ BINARY` command using an explicit short file identifier to the passport,
+     * using the wrapper when a secure channel has been set up.
+     * 
+     * @param sfi the short file identifier byte as int value (between 0 and 255)
+     * @param offset offset into the file
+     * @param le the expected length of the file to read
+     * @param isTLVEncodedOffsetNeeded whether to encode the offset in a TLV object (typically for offset larger than 32767)
+     * 
+     * @return a byte array of length `le` with (the specified part of) the contents of the currently selected file
+     * 
+     * @throws CardServiceException on tranceive error
+     */
+    @Synchronized
+    @Throws(CardServiceException::class)
+    fun sendReadBinary(
+        sfi: Int,
+        offset: Int,
+        le: Int,
+        isTLVEncodedOffsetNeeded: Boolean
+    ): ByteArray? {
+        return service.sendReadBinary(wrapper, sfi, offset, le, true, isTLVEncodedOffsetNeeded)
+    }
+
+    /**
+     * A file info for the ICAO MRTD file system.
+     * 
+     * @author The JMRTD team (info@jmrtd.org)
+     * 
+     * @version $Revision: 1908 $
+     */
+    private class DefaultFileInfo(fid: Short, length: Int) : FileInfo(), Serializable {
+        private val fid: Short
+        private val buffer: FragmentBuffer
+
+        /**
+         * Constructs a file info.
+         * 
+         * @param fid indicates which file
+         * @param length length of the contents of the file
+         */
+        init {
+            this.fid = fid
+            this.buffer = FragmentBuffer(length)
         }
-        prefix = sendReadBinary(0, READ_AHEAD_LENGTH, false);
-      }
-      if (prefix == null || prefix.length == 0) {
-        LOGGER.warning("Something is wrong with prefix, prefix = " + Hex.bytesToHexString(prefix));
-        return null;
-      }
 
-      int fileLength = getFileLength(selectedFID, READ_AHEAD_LENGTH, prefix);
-      if (fileLength < prefix.length) {
-        /* We got more than the file's length. Ignore trailing bytes. */
-        prefix = Arrays.copyOf(prefix, fileLength);
-      }
-      fileInfo = new DefaultFileInfo(selectedFID, fileLength);
-      fileInfo.addFragment(0, prefix);
-      fileInfos.put(selectedFID, fileInfo);
-      return fileInfo;
-    } catch (IOException ioe) {
-      throw new CardServiceException("Error getting file info for " + Integer.toHexString(selectedFID), ioe);
-    }
-  }
+        /**
+         * Returns the buffer.
+         * 
+         * @return the buffer
+         */
+        fun getBuffer(): ByteArray {
+            return buffer.getBuffer()
+        }
 
-  /**
-   * Determines the file length by inspecting a prefix of bytes read from
-   * the (TLV contents of a) file.
-   *
-   * @param fid the file identifier
-   * @param le the requested length while requesting the prefix
-   * @param prefix the prefix read from the file
-   *
-   * @return the file length
-   *
-   * @throws IOException on error reading the prefix as a TLV sequence
-   */
-  private static int getFileLength(short fid, int le, byte[] prefix) throws IOException {
-    if (prefix.length < le) {
-      /* We got less than asked for, assume prefix is the complete file. */
-      return prefix.length;
-    }
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(prefix);
-    TLVInputStream tlvInputStream = new TLVInputStream(byteArrayInputStream);
-    try {
-      int tag = tlvInputStream.readTag();
-      if (tag == CVCAFile.CAR_TAG) {
-        return CVCAFile.LENGTH;
-      }
+        /**
+         * Returns the file identifier.
+         * 
+         * @return file identifier
+         */
+        override fun getFID(): Short {
+            return fid
+        }
 
-      /* Determine length based on TLV. */
-      int valueLength = tlvInputStream.readLength();
-      /* NOTE: we're using a specific property of ByteArrayInputStream's available method here! */
-      int tlLength = prefix.length - byteArrayInputStream.available();
-      int fileLength = tlLength + valueLength;
-      return fileLength;
-    } finally {
-      try {
-        tlvInputStream.close();
-      } catch (IOException ioe) {
-        /* Never happens. */
-        LOGGER.log(Level.FINE, "Error closing stream", ioe);
-      }
-    }
-  }
+        /**
+         * Returns the length of the file.
+         * 
+         * @return the length of the file
+         */
+        override fun getFileLength(): Int {
+            return buffer.getLength()
+        }
 
-  /**
-   * Selects a file within the MRTD application.
-   *
-   * @param fid a file identifier
-   *
-   * @throws CardServiceException on error
-   */
-  public synchronized void sendSelectFile(short fid) throws CardServiceException {
-    service.sendSelectFile(wrapper, fid);
-  }
+        /**
+         * Returns a textual representation of this file info.
+         * 
+         * @return a textual representation of this file info
+         */
+        override fun toString(): String {
+            return Integer.toHexString(fid.toInt())
+        }
 
-  /**
-   * Sends a {@code READ BINARY} command for the already selected file to the passport,
-   * using the wrapper when a secure channel has been set up.
-   *
-   * @param offset offset into the file
-   * @param le the expected length of the file to read
-   * @param isTLVEncodedOffsetNeeded whether to encode the offset in a TLV object (typically for offset larger than 32767)
-   *
-   * @return a byte array of length {@code le} with (the specified part of) the contents of the currently selected file
-   *
-   * @throws CardServiceException on tranceive error
-   */
-  public synchronized byte[] sendReadBinary(int offset, int le, boolean isTLVEncodedOffsetNeeded) throws CardServiceException {
-    oldWrapper = wrapper instanceof SecureMessagingWrapper ? SecureMessagingWrapper.getInstance((SecureMessagingWrapper)wrapper)  : wrapper;
-    return service.sendReadBinary(wrapper, NO_SFI, offset, le, false, isTLVEncodedOffsetNeeded);
-  }
+        /**
+         * Returns the smallest unbuffered fragment included in `offset` and `offset + length - 1`.
+         * 
+         * @param offset the offset
+         * @param length the length
+         * 
+         * @return a fragment smaller than or equal to the fragment indicated by `offset` and `length`
+         */
+        fun getSmallestUnbufferedFragment(offset: Int, length: Int): Fragment {
+            return buffer.getSmallestUnbufferedFragment(offset, length)
+        }
 
-  /**
-   * Sends a {@code READ BINARY} command using an explicit short file identifier to the passport,
-   * using the wrapper when a secure channel has been set up.
-   *
-   * @param sfi the short file identifier byte as int value (between 0 and 255)
-   * @param offset offset into the file
-   * @param le the expected length of the file to read
-   * @param isTLVEncodedOffsetNeeded whether to encode the offset in a TLV object (typically for offset larger than 32767)
-   *
-   * @return a byte array of length {@code le} with (the specified part of) the contents of the currently selected file
-   *
-   * @throws CardServiceException on tranceive error
-   */
-  public synchronized byte[] sendReadBinary(int sfi, int offset, int le, boolean isTLVEncodedOffsetNeeded) throws CardServiceException {
-    return service.sendReadBinary(wrapper, sfi, offset, le, true, isTLVEncodedOffsetNeeded);
-  }
+        /**
+         * Adds a fragment of bytes at a specific offset to this file.
+         * 
+         * @param offset the offset
+         * @param bytes the bytes to be added
+         */
+        fun addFragment(offset: Int, bytes: ByteArray?) {
+            buffer.addFragment(offset, bytes)
+        }
 
-  /**
-   * A file info for the ICAO MRTD file system.
-   *
-   * @author The JMRTD team (info@jmrtd.org)
-   *
-   * @version $Revision: 1908 $
-   */
-  private static class DefaultFileInfo extends FileInfo implements Serializable {
-
-    private static final long serialVersionUID = 6727369753765119839L;
-
-    private short fid;
-    private FragmentBuffer buffer;
-
-    /**
-     * Constructs a file info.
-     *
-     * @param fid indicates which file
-     * @param length length of the contents of the file
-     */
-    public DefaultFileInfo(short fid, int length) {
-      this.fid = fid;
-      this.buffer = new FragmentBuffer(length);
+        companion object {
+            private const val serialVersionUID = 6727369753765119839L
+        }
     }
 
-    /**
-     * Returns the buffer.
-     *
-     * @return the buffer
-     */
-    public byte[] getBuffer() {
-      return buffer.getBuffer();
-    }
+    companion object {
+        /** Invalid short identifier.  */
+        val NO_SFI: Int = -1
 
-    /**
-     * Returns the file identifier.
-     *
-     * @return file identifier
-     */
-    @Override
-    public short getFID() {
-      return fid;
-    }
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
 
-    /**
-     * Returns the length of the file.
-     *
-     * @return the length of the file
-     */
-    @Override
-    public int getFileLength() {
-      return buffer.getLength();
-    }
+        /** Number of bytes to read at start of file to determine file length.  */
+        private const val READ_AHEAD_LENGTH = 8
 
-    /**
-     * Returns a textual representation of this file info.
-     *
-     * @return a textual representation of this file info
-     */
-    @Override
-    public String toString() {
-      return Integer.toHexString(fid);
-    }
+        /**
+         * Determines the file length by inspecting a prefix of bytes read from
+         * the (TLV contents of a) file.
+         * 
+         * @param fid the file identifier
+         * @param le the requested length while requesting the prefix
+         * @param prefix the prefix read from the file
+         * 
+         * @return the file length
+         * 
+         * @throws IOException on error reading the prefix as a TLV sequence
+         */
+        @Throws(IOException::class)
+        private fun getFileLength(fid: Short, le: Int, prefix: ByteArray): Int {
+            if (prefix.size < le) {
+                /* We got less than asked for, assume prefix is the complete file. */
+                return prefix.size
+            }
+            val byteArrayInputStream = ByteArrayInputStream(prefix)
+            val tlvInputStream = TLVInputStream(byteArrayInputStream)
+            try {
+                val tag = tlvInputStream.readTag()
+                if (tag == CVCAFile.Companion.CAR_TAG.toInt()) {
+                    return CVCAFile.Companion.LENGTH
+                }
 
-    /**
-     * Returns the smallest unbuffered fragment included in <code>offset</code> and <code>offset + length - 1</code>.
-     *
-     * @param offset the offset
-     * @param length the length
-     *
-     * @return a fragment smaller than or equal to the fragment indicated by <code>offset</code> and <code>length</code>
-     */
-    public Fragment getSmallestUnbufferedFragment(int offset, int length) {
-      return buffer.getSmallestUnbufferedFragment(offset, length);
+                /* Determine length based on TLV. */
+                val valueLength = tlvInputStream.readLength()
+                /* NOTE: we're using a specific property of ByteArrayInputStream's available method here! */
+                val tlLength = prefix.size - byteArrayInputStream.available()
+                val fileLength = tlLength + valueLength
+                return fileLength
+            } finally {
+                try {
+                    tlvInputStream.close()
+                } catch (ioe: IOException) {
+                    /* Never happens. */
+                    LOGGER.log(Level.FINE, "Error closing stream", ioe)
+                }
+            }
+        }
     }
-
-    /**
-     * Adds a fragment of bytes at a specific offset to this file.
-     *
-     * @param offset the offset
-     * @param bytes the bytes to be added
-     */
-    public void addFragment(int offset, byte[] bytes) {
-      buffer.addFragment(offset, bytes);
-    }
-  }
 }

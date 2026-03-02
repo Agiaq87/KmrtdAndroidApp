@@ -32,148 +32,138 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.CoordinateCartesian2DUnsignedShortBlock.Companion.decodeCoordinateCartesian2DUnsignedShortBlocks
+import kmrtd.lds.iso39794.QualityBlock.Companion.decodeQualityBlocks
+import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode
+import org.bouncycastle.asn1.ASN1Encodable
+import java.util.Objects
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+class FingerImageSegmentBlock : Block {
+    val positionCode: FingerImagePositionCode?
+    val enclosingCoordinatesBlock: MutableList<CoordinateCartesian2DUnsignedShortBlock?>? // SIZE(2..MAX)
+    var orientation: Int? = null
+        private set
+    var qualityBlocks: MutableList<QualityBlock?>? = null
+        private set
+    var confidence: Int = 0
+        private set
 
-import org.bouncycastle.asn1.ASN1Encodable;
-
-import kmrtd.ASN1Util;
-import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode;
-
-public class FingerImageSegmentBlock extends Block {
-
-  private static final long serialVersionUID = -374626239054691564L;
-
-  private FingerImagePositionCode positionCode;
-  private List<CoordinateCartesian2DUnsignedShortBlock> enclosingCoordinatesBlock; // SIZE(2..MAX)
-  private Integer orientation;
-  private List<QualityBlock> qualityBlocks;
-  private int confidence;
-
-  public FingerImageSegmentBlock(FingerImagePositionCode positionCode,
-      List<CoordinateCartesian2DUnsignedShortBlock> enclosingCoordinatesBlock, Integer orientation,
-      List<QualityBlock> qualityBlocks, int confidence) {
-    this.positionCode = positionCode;
-    this.enclosingCoordinatesBlock = enclosingCoordinatesBlock;
-    this.orientation = orientation;
-    this.qualityBlocks = qualityBlocks;
-    this.confidence = confidence;
-  }
-
-  //    SegmentBlock ::= SEQUENCE {
-  //      position [0] Position,
-  //      enclosingCoordinatesBlock [1] CoordinatesBlock,
-  //      orientation [2] INTEGER (0..255) OPTIONAL,
-  //      qualityBlocks [3] QualityBlocks OPTIONAL,
-  //      confidence [4] ScoreOrError OPTIONAL,
-  //      ...
-  //  }
-
-  FingerImageSegmentBlock(ASN1Encodable asn1Encodable) {
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    positionCode = FingerImagePositionCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(0)));
-    enclosingCoordinatesBlock = CoordinateCartesian2DUnsignedShortBlock.decodeCoordinateCartesian2DUnsignedShortBlocks(taggedObjects.get(1));
-    if (taggedObjects.containsKey(2)) {
-      orientation = ASN1Util.decodeInt(taggedObjects.get(2));
-    }
-    if (taggedObjects.containsKey(3)) {
-      qualityBlocks = QualityBlock.decodeQualityBlocks(taggedObjects.get(3));
-    }
-    if (taggedObjects.containsKey(4)) {
-      confidence = ISO39794Util.decodeScoreOrError(taggedObjects.get(4));
-    }
-  }
-
-  public FingerImagePositionCode getPositionCode() {
-    return positionCode;
-  }
-
-  public List<CoordinateCartesian2DUnsignedShortBlock> getEnclosingCoordinatesBlock() {
-    return enclosingCoordinatesBlock;
-  }
-
-  public Integer getOrientation() {
-    return orientation;
-  }
-
-  public List<QualityBlock> getQualityBlocks() {
-    return qualityBlocks;
-  }
-
-  public int getConfidence() {
-    return confidence;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(confidence, enclosingCoordinatesBlock, orientation, positionCode, qualityBlocks);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    constructor(
+        positionCode: FingerImagePositionCode?,
+        enclosingCoordinatesBlock: MutableList<CoordinateCartesian2DUnsignedShortBlock?>?,
+        orientation: Int?,
+        qualityBlocks: MutableList<QualityBlock?>?,
+        confidence: Int
+    ) {
+        this.positionCode = positionCode
+        this.enclosingCoordinatesBlock = enclosingCoordinatesBlock
+        this.orientation = orientation
+        this.qualityBlocks = qualityBlocks
+        this.confidence = confidence
     }
 
-    FingerImageSegmentBlock other = (FingerImageSegmentBlock) obj;
-    return confidence == other.confidence && Objects.equals(enclosingCoordinatesBlock, other.enclosingCoordinatesBlock)
-        && Objects.equals(orientation, other.orientation) && positionCode == other.positionCode
-        && Objects.equals(qualityBlocks, other.qualityBlocks);
-  }
-
-  @Override
-  public String toString() {
-    return "FingerImageSegmentBlock ["
-        + "positionCode: " + positionCode
-        + ", enclosingCoordinatesBlock: " + enclosingCoordinatesBlock
-        + ", orientation: " + orientation
-        + ", qualityBlocks: " + qualityBlocks
-        + ", confidence: " + confidence
-        + "]";
-  }
-
-  /* PACAKAGE */
-
-  static List<FingerImageSegmentBlock> decodeFingerImageSegmentBlocks(ASN1Encodable asn1Encodable) {
-    if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
-      List<FingerImageSegmentBlock> blocks = new ArrayList<FingerImageSegmentBlock>(blockASN1Objects.size());
-      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
-        blocks.add(new FingerImageSegmentBlock(blockASN1Object));
-      }
-      return blocks;
-    } else {
-      return Collections.singletonList(new FingerImageSegmentBlock(asn1Encodable));
+    //    SegmentBlock ::= SEQUENCE {
+    //      position [0] Position,
+    //      enclosingCoordinatesBlock [1] CoordinatesBlock,
+    //      orientation [2] INTEGER (0..255) OPTIONAL,
+    //      qualityBlocks [3] QualityBlocks OPTIONAL,
+    //      confidence [4] ScoreOrError OPTIONAL,
+    //      ...
+    //  }
+    internal constructor(asn1Encodable: ASN1Encodable?) {
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        positionCode = FingerImagePositionCode.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(0))
+        )
+        enclosingCoordinatesBlock =
+            decodeCoordinateCartesian2DUnsignedShortBlocks(taggedObjects.get(1))
+        if (taggedObjects.containsKey(2)) {
+            orientation = ASN1Util.decodeInt(taggedObjects.get(2))
+        }
+        if (taggedObjects.containsKey(3)) {
+            qualityBlocks = decodeQualityBlocks(taggedObjects.get(3))
+        }
+        if (taggedObjects.containsKey(4)) {
+            confidence = ISO39794Util.decodeScoreOrError(taggedObjects.get(4))
+        }
     }
-  }
 
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    taggedObjects.put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(positionCode.code));
-    taggedObjects.put(1, ISO39794Util.encodeBlocks(enclosingCoordinatesBlock));
-    if (orientation != null) {
-      taggedObjects.put(2, ASN1Util.encodeInt(orientation));
+    public override fun hashCode(): Int {
+        return Objects.hash(
+            confidence,
+            enclosingCoordinatesBlock,
+            orientation,
+            positionCode,
+            qualityBlocks
+        )
     }
-    if (qualityBlocks != null) {
-      taggedObjects.put(3, ISO39794Util.encodeBlocks(qualityBlocks));
+
+    public override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
+
+        val other = obj as FingerImageSegmentBlock
+        return confidence == other.confidence && enclosingCoordinatesBlock == other.enclosingCoordinatesBlock
+                && orientation == other.orientation && positionCode == other.positionCode && qualityBlocks == other.qualityBlocks
     }
-    if (confidence >= 0) {
-      taggedObjects.put(4, ISO39794Util.encodeScoreOrError(confidence));
+
+    override fun toString(): String {
+        return ("FingerImageSegmentBlock ["
+                + "positionCode: " + positionCode
+                + ", enclosingCoordinatesBlock: " + enclosingCoordinatesBlock
+                + ", orientation: " + orientation
+                + ", qualityBlocks: " + qualityBlocks
+                + ", confidence: " + confidence
+                + "]")
     }
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
+
+    val aSN1Object: ASN1Encodable
+        get() {
+            val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+                HashMap<Int?, ASN1Encodable?>()
+            taggedObjects.put(
+                0,
+                ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(positionCode!!.code)
+            )
+            taggedObjects.put(1, ISO39794Util.encodeBlocks(enclosingCoordinatesBlock))
+            if (orientation != null) {
+                taggedObjects.put(2, ASN1Util.encodeInt(orientation!!))
+            }
+            if (qualityBlocks != null) {
+                taggedObjects.put(3, ISO39794Util.encodeBlocks(qualityBlocks))
+            }
+            if (confidence >= 0) {
+                taggedObjects.put(4, ISO39794Util.encodeScoreOrError(confidence))
+            }
+            return ASN1Util.encodeTaggedObjects(taggedObjects)
+        }
+
+    companion object {
+        private val serialVersionUID = -374626239054691564L
+
+        /* PACAKAGE */
+        fun decodeFingerImageSegmentBlocks(asn1Encodable: ASN1Encodable?): MutableList<FingerImageSegmentBlock?> {
+            if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+                val blockASN1Objects = ASN1Util.list(asn1Encodable)
+                val blocks: MutableList<FingerImageSegmentBlock?> =
+                    ArrayList<FingerImageSegmentBlock?>(blockASN1Objects.size)
+                for (blockASN1Object in blockASN1Objects) {
+                    blocks.add(FingerImageSegmentBlock(blockASN1Object))
+                }
+                return blocks
+            } else {
+                return mutableListOf<FingerImageSegmentBlock?>(FingerImageSegmentBlock(asn1Encodable))
+            }
+        }
+    }
 }

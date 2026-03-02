@@ -19,230 +19,224 @@
  *
  * $Id: IrisBiometricSubtypeInfo.java 1799 2018-10-30 16:25:48Z martijno $
  */
+package kmrtd.lds.iso19794
 
-package kmrtd.lds.iso19794;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-
-import kmrtd.lds.AbstractListInfo;
+import kmrtd.lds.AbstractListInfo
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * Iris biometric subtype data block (containing iris image data blocks)
  * based on Section 6.5.3 and Table 3 of
  * ISO/IEC 19794-6 2005.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1799 $
  */
-public class IrisBiometricSubtypeInfo extends AbstractListInfo<IrisImageInfo> {
+class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
+    /**
+     * Returns the image format used in the images encoded in this record.
+     * 
+     * @return the image format
+     */
+    val imageFormat: Int
 
-  private static final long serialVersionUID = -6588640634764878039L;
+    /**
+     * The biometric subtype (feature identifier).
+     * Result is one of [.EYE_UNDEF], [.EYE_RIGHT], [.EYE_LEFT].
+     * 
+     * @return the biometric subtype.
+     */
+    var biometricSubtype: Int = 0
+        private set
 
-  /** Biometric subtype value. */
-  public static final int EYE_UNDEF = 0;
-
-  /** Biometric subtype value. */
-  public static final int EYE_RIGHT = 1;
-
-  /** Biometric subtype value. */
-  public static final int EYE_LEFT = 2;
-
-  private int imageFormat;
-  private int biometricSubtype;
-
-  /**
-   * Constructs a biometric subtype info.
-   *
-   * @param biometricSubtype one of {@link #EYE_UNDEF}, {@link #EYE_RIGHT}, {@link #EYE_LEFT}
-   * @param imageFormat the image format as specified in the {@link IrisInfo} of which this is a part
-   * @param irisImageInfos the iris image info records
-   */
-  public IrisBiometricSubtypeInfo(int biometricSubtype, int imageFormat, List<IrisImageInfo> irisImageInfos) {
-    this.biometricSubtype = biometricSubtype;
-    this.imageFormat = imageFormat;
-    addAll(irisImageInfos);
-  }
-
-  /**
-   * Constructs an iris biometric subtype from binary encoding.
-   *
-   * @param in an input stream
-   * @param imageFormat the image format used
-   *
-   * @throws IOException if reading fails
-   */
-  public IrisBiometricSubtypeInfo(InputStream in, int imageFormat) throws IOException {
-    this.imageFormat = imageFormat;
-    readObject(in);
-  }
-
-  /**
-   * Reads an iris biometric subtype from input stream.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException if reading fails
-   */
-  @Override
-  public void readObject(InputStream inputStream) throws IOException {
-    DataInputStream dataIn = inputStream instanceof DataInputStream ? (DataInputStream)inputStream : new DataInputStream(inputStream);
-
-    /* Iris biometric subtype header */
-    this.biometricSubtype = dataIn.readUnsignedByte();      /* 1 */
-    int count = dataIn.readUnsignedShort();                 /* + 2 = 3 */
-
-    long constructedDataLength = 0L;
-
-    for (int i = 0; i < count; i++) {
-      IrisImageInfo imageInfo = new IrisImageInfo(inputStream, imageFormat);
-      constructedDataLength += imageInfo.getRecordLength();
-      add(imageInfo);
-    }
-    //		if (dataLength != constructedDataLength) {
-    //			throw new IllegalStateException("dataLength = " + dataLength + ", constructedDataLength = " + constructedDataLength);
-    //		}
-  }
-
-  /**
-   * Writes an iris biometric subtype to output stream.
-   *
-   * @param outputStream an output stream
-   *
-   * @throws IOException if writing fails
-   */
-  @Override
-  public void writeObject(OutputStream outputStream) throws IOException {
-    DataOutputStream dataOut = outputStream instanceof DataOutputStream ? (DataOutputStream)outputStream : new DataOutputStream(outputStream);
-
-    dataOut.writeByte(biometricSubtype & 0xFF);					/* 1 */
-
-    List<IrisImageInfo> irisImageInfos = getSubRecords();
-    dataOut.writeShort(irisImageInfos.size() & 0xFFFF);			/* + 2 = 3 */
-    for (IrisImageInfo irisImageInfo: irisImageInfos) {
-      irisImageInfo.writeObject(dataOut);
-    }
-  }
-
-  /**
-   * Returns the record length.
-   *
-   * @return the record length
-   */
-  public long getRecordLength() {
-    long result = 3;
-    List<IrisImageInfo> irisImageInfos = getSubRecords();
-    for (IrisImageInfo irisImageInfo: irisImageInfos) {
-      result += irisImageInfo.getRecordLength();
-    }
-    return result;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + biometricSubtype;
-    result = prime * result + imageFormat;
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!super.equals(obj)) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    /**
+     * Constructs a biometric subtype info.
+     * 
+     * @param biometricSubtype one of [.EYE_UNDEF], [.EYE_RIGHT], [.EYE_LEFT]
+     * @param imageFormat the image format as specified in the [IrisInfo] of which this is a part
+     * @param irisImageInfos the iris image info records
+     */
+    constructor(
+        biometricSubtype: Int,
+        imageFormat: Int,
+        irisImageInfos: MutableList<IrisImageInfo?>?
+    ) {
+        this.biometricSubtype = biometricSubtype
+        this.imageFormat = imageFormat
+        addAll(irisImageInfos)
     }
 
-    IrisBiometricSubtypeInfo other = (IrisBiometricSubtypeInfo) obj;
-    return biometricSubtype == other.biometricSubtype
-        && imageFormat == other.imageFormat;
-  }
-
-  @Override
-  public String toString() {
-    List<IrisImageInfo> irisImageInfos = getSubRecords();
-    return "IrisBiometricSubtypeInfo ["
-    + "biometric subtype: " + biometricSubtypeToString(biometricSubtype)
-    + ", imageCount = " + irisImageInfos.size()
-    + "]";
-  }
-
-  /**
-   * The biometric subtype (feature identifier).
-   * Result is one of {@link #EYE_UNDEF}, {@link #EYE_RIGHT}, {@link #EYE_LEFT}.
-   *
-   * @return the biometric subtype.
-   */
-  public int getBiometricSubtype() {
-    return biometricSubtype;
-  }
-
-  /**
-   * Returns the image format used in the images encoded in this record.
-   *
-   * @return the image format
-   */
-  public int getImageFormat() {
-    return imageFormat;
-  }
-
-  /**
-   * Returns the iris image infos embedded in this iris biometric subtype info.
-   *
-   * @return the embedded iris image infos
-   */
-  public List<IrisImageInfo> getIrisImageInfos() {
-    return getSubRecords();
-  }
-
-  /**
-   * Adds an iris image info to this iris biometric subtype info.
-   *
-   * @param irisImageInfo the iris image info to add
-   */
-  public void addIrisImageInfo(IrisImageInfo irisImageInfo) {
-    add(irisImageInfo);
-  }
-
-  /**
-   * Removes an iris image info from this iris biometric subtype info.
-   *
-   * @param index the index of the iris image info to remove
-   */
-  public void removeIrisImageInfo(int index) {
-    remove(index);
-  }
-
-  /* ONLY PRIVATE METHODS BELOW */
-
-  /**
-   * Returns a textual representation of the given biometric sub-type code.
-   *
-   * @param biometricSubtype the biometric sub-type code
-   *
-   * @return a human readable string such as {@code "Left eye"}, {@code "Right eye"}, or {@code "Undefined"}
-   */
-  private static String biometricSubtypeToString(int biometricSubtype) {
-    switch (biometricSubtype) {
-      case EYE_LEFT:
-        return "Left eye";
-      case EYE_RIGHT:
-        return "Right eye";
-      case EYE_UNDEF:
-        return "Undefined";
-      default:
-        throw new NumberFormatException("Unknown biometric subtype: " + Integer.toHexString(biometricSubtype));
+    /**
+     * Constructs an iris biometric subtype from binary encoding.
+     * 
+     * @param in an input stream
+     * @param imageFormat the image format used
+     * 
+     * @throws IOException if reading fails
+     */
+    constructor(`in`: InputStream, imageFormat: Int) {
+        this.imageFormat = imageFormat
+        readObject(`in`)
     }
-  }
+
+    /**
+     * Reads an iris biometric subtype from input stream.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException if reading fails
+     */
+    @Throws(IOException::class)
+    override fun readObject(inputStream: InputStream) {
+        val dataIn =
+            if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
+
+        /* Iris biometric subtype header */
+        this.biometricSubtype = dataIn.readUnsignedByte() /* 1 */
+        val count = dataIn.readUnsignedShort() /* + 2 = 3 */
+
+        var constructedDataLength = 0L
+
+        for (i in 0..<count) {
+            val imageInfo = IrisImageInfo(inputStream, imageFormat)
+            constructedDataLength += imageInfo.getRecordLength()
+            add(imageInfo)
+        }
+        //		if (dataLength != constructedDataLength) {
+        //			throw new IllegalStateException("dataLength = " + dataLength + ", constructedDataLength = " + constructedDataLength);
+        //		}
+    }
+
+    /**
+     * Writes an iris biometric subtype to output stream.
+     * 
+     * @param outputStream an output stream
+     * 
+     * @throws IOException if writing fails
+     */
+    @Throws(IOException::class)
+    override fun writeObject(outputStream: OutputStream?) {
+        val dataOut =
+            if (outputStream is DataOutputStream) outputStream else DataOutputStream(outputStream)
+
+        dataOut.writeByte(biometricSubtype and 0xFF) /* 1 */
+
+        val irisImageInfos = getSubRecords()
+        dataOut.writeShort(irisImageInfos.size and 0xFFFF) /* + 2 = 3 */
+        for (irisImageInfo in irisImageInfos) {
+            irisImageInfo.writeObject(dataOut)
+        }
+    }
+
+    val recordLength: Long
+        /**
+         * Returns the record length.
+         * 
+         * @return the record length
+         */
+        get() {
+            var result: Long = 3
+            val irisImageInfos = getSubRecords()
+            for (irisImageInfo in irisImageInfos) {
+                result += irisImageInfo.getRecordLength()
+            }
+            return result
+        }
+
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = super.hashCode()
+        result = prime * result + biometricSubtype
+        result = prime * result + imageFormat
+        return result
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (!super.equals(obj)) {
+            return false
+        }
+        if (javaClass != obj!!.javaClass) {
+            return false
+        }
+
+        val other = obj as IrisBiometricSubtypeInfo
+        return biometricSubtype == other.biometricSubtype
+                && imageFormat == other.imageFormat
+    }
+
+    override fun toString(): String {
+        val irisImageInfos = getSubRecords()
+        return ("IrisBiometricSubtypeInfo ["
+                + "biometric subtype: " + biometricSubtypeToString(biometricSubtype)
+                + ", imageCount = " + irisImageInfos.size
+                + "]")
+    }
+
+    val irisImageInfos: MutableList<IrisImageInfo?>
+        /**
+         * Returns the iris image infos embedded in this iris biometric subtype info.
+         * 
+         * @return the embedded iris image infos
+         */
+        get() = getSubRecords()
+
+    /**
+     * Adds an iris image info to this iris biometric subtype info.
+     * 
+     * @param irisImageInfo the iris image info to add
+     */
+    fun addIrisImageInfo(irisImageInfo: IrisImageInfo?) {
+        add(irisImageInfo)
+    }
+
+    /**
+     * Removes an iris image info from this iris biometric subtype info.
+     * 
+     * @param index the index of the iris image info to remove
+     */
+    fun removeIrisImageInfo(index: Int) {
+        remove(index)
+    }
+
+    companion object {
+        private val serialVersionUID = -6588640634764878039L
+
+        /** Biometric subtype value.  */
+        const val EYE_UNDEF: Int = 0
+
+        /** Biometric subtype value.  */
+        const val EYE_RIGHT: Int = 1
+
+        /** Biometric subtype value.  */
+        const val EYE_LEFT: Int = 2
+
+        /* ONLY PRIVATE METHODS BELOW */
+        /**
+         * Returns a textual representation of the given biometric sub-type code.
+         * 
+         * @param biometricSubtype the biometric sub-type code
+         * 
+         * @return a human readable string such as `"Left eye"`, `"Right eye"`, or `"Undefined"`
+         */
+        private fun biometricSubtypeToString(biometricSubtype: Int): String {
+            when (biometricSubtype) {
+                EYE_LEFT -> return "Left eye"
+                EYE_RIGHT -> return "Right eye"
+                EYE_UNDEF -> return "Undefined"
+                else -> throw NumberFormatException(
+                    "Unknown biometric subtype: " + Integer.toHexString(
+                        biometricSubtype
+                    )
+                )
+            }
+        }
+    }
 }

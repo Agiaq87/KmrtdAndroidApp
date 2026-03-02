@@ -19,33 +19,30 @@
  *
  * $Id: DG6File.java 1751 2018-01-15 15:35:45Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import kmrtd.lds.DisplayedImageDataGroup;
+import kmrtd.lds.DisplayedImageDataGroup
+import kmrtd.lds.LDSFile
+import java.io.InputStream
 
 /**
  * File structure for the EF_DG6 file.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1751 $
  */
-public class DG6File extends DisplayedImageDataGroup {
-
-  private static final long serialVersionUID = -583717105472408528L;
-
-  /**
-   * Constructs a new file from binary representation.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading input stream
-   */
-  public DG6File(InputStream inputStream) throws IOException {
-    super(EF_DG6_TAG, inputStream);
-  }
+class DG6File
+/**
+ * Constructs a new file from binary representation.
+ * 
+ * @param inputStream an input stream
+ * 
+ * @throws IOException on error reading input stream
+ */
+    (inputStream: InputStream?) :
+    DisplayedImageDataGroup(LDSFile.Companion.EF_DG6_TAG, inputStream) {
+    companion object {
+        private val serialVersionUID = -583717105472408528L
+    }
 }

@@ -19,95 +19,93 @@
  *
  * $Id: ImageInfo.java 1808 2019-03-07 21:32:19Z martijno $
  */
-
-package kmrtd.lds;
-
-import java.io.InputStream;
+package kmrtd.lds
 
 /**
  * Common interface type for records containing an encoded image.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1808 $
  */
-public interface ImageInfo extends LDSElement {
+interface ImageInfo : LDSElement {
+    /**
+     * Returns the (biometric) type of the image.
+     * One of
+     * [.TYPE_PORTRAIT],
+     * [.TYPE_SIGNATURE_OR_MARK],
+     * [.TYPE_FINGER],
+     * [.TYPE_IRIS].
+     * 
+     * @return type of image
+     */
+    val type: Int
 
-  /** Mime-type. */
-  static String JPEG_MIME_TYPE = "image/jpeg";
+    /**
+     * Returns the mime-type of the encoded image as a `String`.
+     * 
+     * @return mime-type string
+     */
+    val mimeType: String?
 
-  /** Mime-type. */
-  static String JPEG2000_MIME_TYPE = "image/jp2";
+    /**
+     * Returns the width of the image in pixels.
+     * 
+     * @return image width
+     */
+    val width: Int
 
-  /** Mime-type. */
-  static String WSQ_MIME_TYPE = "image/x-wsq";
+    /**
+     * Returns the height of the image in pixels.
+     * 
+     * @return image height
+     */
+    val height: Int
 
-  /** Type of image. */
-  static final int TYPE_UNKNOWN = -1;
+    /**
+     * Returns the length of the total record (header and data) in bytes.
+     * 
+     * @return the length of the record
+     */
+    val recordLength: Long
 
-  /** Type of image. */
-  static final int TYPE_PORTRAIT = 0;
+    /**
+     * Returns the length of the encoded image in bytes.
+     * 
+     * @return the length of the image bytes
+     */
+    val imageLength: Int
 
-  /** Type of image. */
-  static final int TYPE_SIGNATURE_OR_MARK = 1;
+    /**
+     * Returns an input stream from which the image bytes can be read.
+     * 
+     * @return image input stream
+     */
+    val imageInputStream: InputStream?
 
-  /** Type of image. */
-  static final int TYPE_FINGER = 2;
+    companion object {
+        /** Mime-type.  */
+        const val JPEG_MIME_TYPE: String = "image/jpeg"
 
-  /** Type of image. */
-  static final int TYPE_IRIS = 3;
+        /** Mime-type.  */
+        const val JPEG2000_MIME_TYPE: String = "image/jp2"
 
-  /**
-   * Returns the (biometric) type of the image.
-   * One of
-   * {@link #TYPE_PORTRAIT},
-   * {@link #TYPE_SIGNATURE_OR_MARK},
-   * {@link #TYPE_FINGER},
-   * {@link #TYPE_IRIS}.
-   *
-   * @return type of image
-   */
-  int getType();
+        /** Mime-type.  */
+        const val WSQ_MIME_TYPE: String = "image/x-wsq"
 
-  /**
-   * Returns the mime-type of the encoded image as a <code>String</code>.
-   *
-   * @return mime-type string
-   */
-  String getMimeType();
+        /** Type of image.  */
+        val TYPE_UNKNOWN: Int = -1
 
-  /**
-   * Returns the width of the image in pixels.
-   *
-   * @return image width
-   */
-  int getWidth();
+        /** Type of image.  */
+        const val TYPE_PORTRAIT: Int = 0
 
-  /**
-   * Returns the height of the image in pixels.
-   *
-   * @return image height
-   */
-  int getHeight();
+        /** Type of image.  */
+        const val TYPE_SIGNATURE_OR_MARK: Int = 1
 
-  /**
-   * Returns the length of the total record (header and data) in bytes.
-   *
-   * @return the length of the record
-   */
-  long getRecordLength();
+        /** Type of image.  */
+        const val TYPE_FINGER: Int = 2
 
-  /**
-   * Returns the length of the encoded image in bytes.
-   *
-   * @return the length of the image bytes
-   */
-  int getImageLength();
-
-  /**
-   * Returns an input stream from which the image bytes can be read.
-   *
-   * @return image input stream
-   */
-  InputStream getImageInputStream();
+        /** Type of image.  */
+        const val TYPE_IRIS: Int = 3
+    }
 }

@@ -19,110 +19,136 @@
  *
  * $Id: AAAPDUSender.java 1878 2023-07-31 13:19:51Z martijno $
  */
+package kmrtd.protocol
 
-package kmrtd.protocol;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import kmrtd.APDULevelAACapable;
-
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CardService;
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.smartcards.CommandAPDU;
-import net.sf.scuba.smartcards.ISO7816;
-import net.sf.scuba.smartcards.ResponseAPDU;
-import net.sf.scuba.util.Hex;
+import kmrtd.APDULevelAACapable
+import net.sf.scuba.smartcards.APDUWrapper
+import net.sf.scuba.smartcards.CardService
+import net.sf.scuba.smartcards.CardServiceException
+import net.sf.scuba.smartcards.CommandAPDU
+import net.sf.scuba.smartcards.ISO7816
+import net.sf.scuba.smartcards.ResponseAPDU
+import net.sf.scuba.util.Hex
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * A low-level APDU sender to support the Active Authentication protocol.
- *
+ * 
  * @author The JMRTD team
- *
+ * 
  * @version $Revision: 1878 $
- *
+ * 
  * @since 0.7.0
  */
-public class AAAPDUSender implements APDULevelAACapable {
+class AAAPDUSender(service: CardService?) : APDULevelAACapable {
+    private val secureMessagingSender: SecureMessagingAPDUSender
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd.protocol");
-
-  private SecureMessagingAPDUSender secureMessagingSender;
-
-  /**
-   * Creates an APDU sender for tranceiving Active Authentication protocol APDUs.
-   *
-   * @param service the card service for tranceiving APDUs
-   */
-  public AAAPDUSender(CardService service) {
-    this.secureMessagingSender = new SecureMessagingAPDUSender(service);
-  }
-
-  /**
-   * Sends an {@code INTERNAL AUTHENTICATE} command to the passport.
-   * This is part of AA.
-   *
-   * @param wrapper secure messaging wrapper
-   * @param signatureLength the (expected) length of the signature in bits
-   * @param rndIFD the challenge to send
-   *
-   * @return the response from the passport (status word removed)
-   *
-   * @throws CardServiceException on tranceive error
-   */
-  public synchronized byte[] sendInternalAuthenticate(APDUWrapper wrapper, int signatureLength, byte[] rndIFD) throws CardServiceException {
-    if (rndIFD == null || rndIFD.length != 8) {
-      throw new IllegalArgumentException("rndIFD wrong length");
+    /**
+     * Creates an APDU sender for tranceiving Active Authentication protocol APDUs.
+     * 
+     * @param service the card service for tranceiving APDUs
+     */
+    init {
+        this.secureMessagingSender = SecureMessagingAPDUSender(service)
     }
 
-    int le = signatureLength <= 231 * 8 ? 256 : 65536;
-    CommandAPDU commandAPDU = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_INTERNAL_AUTHENTICATE, 0x00, 0x00, rndIFD, le);
+    /**
+     * Sends an `INTERNAL AUTHENTICATE` command to the passport.
+     * This is part of AA.
+     * 
+     * @param wrapper secure messaging wrapper
+     * @param signatureLength the (expected) length of the signature in bits
+     * @param rndIFD the challenge to send
+     * 
+     * @return the response from the passport (status word removed)
+     * 
+     * @throws CardServiceException on tranceive error
+     */
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun sendInternalAuthenticate(
+        wrapper: APDUWrapper?,
+        signatureLength: Int,
+        rndIFD: ByteArray
+    ): ByteArray {
+        require(!(rndIFD == null || rndIFD.size != 8)) { "rndIFD wrong length" }
 
-    ResponseAPDU responseAPDU = null;
-    short sw = -1;
-    try {
-      responseAPDU = secureMessagingSender.transmit(wrapper, commandAPDU);
-      sw = (short)responseAPDU.getSW();
-    } catch (CardServiceException cse) {
-      LOGGER.log(Level.INFO, "Exception during transmission of command APDU = " + Hex.bytesToHexString(commandAPDU.getBytes()), cse);
-      sw = (short)cse.getSW();
+        val le = if (signatureLength <= 231 * 8) 256 else 65536
+        var commandAPDU = CommandAPDU(
+            ISO7816.CLA_ISO7816.toInt(),
+            ISO7816.INS_INTERNAL_AUTHENTICATE.toInt(),
+            0x00,
+            0x00,
+            rndIFD,
+            le
+        )
+
+        var responseAPDU: ResponseAPDU? = null
+        var sw: Short = -1
+        try {
+            responseAPDU = secureMessagingSender.transmit(wrapper, commandAPDU)
+            sw = responseAPDU.getSW().toShort()
+        } catch (cse: CardServiceException) {
+            LOGGER.log(
+                Level.INFO,
+                "Exception during transmission of command APDU = " + Hex.bytesToHexString(
+                    commandAPDU.getBytes()
+                ),
+                cse
+            )
+            sw = cse.getSW().toShort()
+        }
+
+        if (sw == ISO7816.SW_NO_ERROR && responseAPDU != null) {
+            return responseAPDU.getData()
+        }
+
+        if ((sw.toInt() and 0xFF00) == 0x6100 && le == 256) {
+            val normalLengthResponse = if (responseAPDU == null) null else responseAPDU.getData()
+
+            /* Something is wrong with that length. Try different length. */
+            commandAPDU = CommandAPDU(
+                ISO7816.CLA_ISO7816.toInt(),
+                ISO7816.INS_INTERNAL_AUTHENTICATE.toInt(),
+                0x00,
+                0x00,
+                rndIFD,
+                65536
+            )
+            responseAPDU = secureMessagingSender.transmit(wrapper, commandAPDU)
+            val extendedLengthResponse = if (responseAPDU == null) null else responseAPDU.getData()
+
+            if (normalLengthResponse == null && extendedLengthResponse == null) {
+                throw CardServiceException("Internal Authenticate failed", sw.toInt())
+            }
+            if (normalLengthResponse != null && extendedLengthResponse == null) {
+                return normalLengthResponse
+            }
+            if (normalLengthResponse == null && extendedLengthResponse != null) {
+                return extendedLengthResponse
+            }
+
+            /* Both are non-null. Send the one with the most data. */
+            if (normalLengthResponse!!.size > extendedLengthResponse!!.size) {
+                return normalLengthResponse
+            } else {
+                return extendedLengthResponse
+            }
+        } else if (responseAPDU != null && responseAPDU.getData() != null) {
+            /* If we got some data, return it, independent of what the status is. */
+            LOGGER.warning(
+                "Internal Authenticate may not have succeeded, got status word " + Integer.toHexString(
+                    sw.toInt() and 0xFFFF
+                )
+            )
+            return responseAPDU.getData()
+        }
+
+        throw CardServiceException("Internal Authenticate failed", sw.toInt())
     }
 
-    if (sw == ISO7816.SW_NO_ERROR && responseAPDU != null) {
-      return responseAPDU.getData();
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd.protocol")
     }
-
-    if ((sw & 0xFF00) == 0x6100 && le == 256) {
-      byte[] normalLengthResponse = responseAPDU == null ? null : responseAPDU.getData();
-
-      /* Something is wrong with that length. Try different length. */
-      commandAPDU = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_INTERNAL_AUTHENTICATE, 0x00, 0x00, rndIFD, 65536);
-      responseAPDU = secureMessagingSender.transmit(wrapper, commandAPDU);
-      byte[] extendedLengthResponse = responseAPDU == null ? null : responseAPDU.getData();
-
-      if (normalLengthResponse == null && extendedLengthResponse == null) {
-        throw new CardServiceException("Internal Authenticate failed", sw);
-      }
-      if (normalLengthResponse != null && extendedLengthResponse == null) {
-        return normalLengthResponse;
-      }
-      if (normalLengthResponse == null && extendedLengthResponse != null) {
-        return extendedLengthResponse;
-      }
-
-      /* Both are non-null. Send the one with the most data. */
-      if (normalLengthResponse.length > extendedLengthResponse.length) {
-        return normalLengthResponse;
-      } else {
-        return extendedLengthResponse;
-      }
-    } else if (responseAPDU != null && responseAPDU.getData() != null) {
-      /* If we got some data, return it, independent of what the status is. */
-      LOGGER.warning("Internal Authenticate may not have succeeded, got status word " + Integer.toHexString(sw & 0xFFFF));
-      return responseAPDU.getData();
-    }
-
-    throw new CardServiceException("Internal Authenticate failed", sw);
-  }
 }

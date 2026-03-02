@@ -19,385 +19,405 @@
  *
  * $Id: DG12File.java 1907 2026-02-06 09:24:02Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
+import kmrtd.lds.LDSFile
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Objects
 
 /**
  * File structure for the EF_DG12 file.
  * Datagroup 12 contains additional document detail(s).
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1907 $
  */
-public class DG12File extends AdditionalDetailDataGroup {
+class DG12File : AdditionalDetailDataGroup {
+    /**
+     * Returns the issuing authority.
+     * 
+     * @return the issuingAuthority
+     */
+    var issuingAuthority: String? = null
+        private set
 
-  private static final long serialVersionUID = -1979367459379125674L;
+    /**
+     * Returns the date of issuance.
+     * 
+     * @return the dateOfIssue
+     */
+    var dateOfIssue: String? = null
+        private set
 
-  public static final int ISSUING_AUTHORITY_TAG = 0x5F19;
-  public static final int DATE_OF_ISSUE_TAG = 0x5F26;  // yyyymmdd
-  public static final int NAME_OF_OTHER_PERSON_TAG = 0x5F1A; // formatted per ICAO 9303 rules
-  public static final int ENDORSEMENTS_AND_OBSERVATIONS_TAG = 0x5F1B;
-  public static final int TAX_OR_EXIT_REQUIREMENTS_TAG = 0x5F1C;
-  public static final int IMAGE_OF_FRONT_TAG = 0x5F1D; // Image per ISO/IEC 10918
-  public static final int IMAGE_OF_REAR_TAG = 0x5F1E; // Image per ISO/IEC 10918
-  public static final int DATE_AND_TIME_OF_PERSONALIZATION_TAG = 0x5F55; // yyyymmddhhmmss
-  public static final int PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG = 0x5F56;
-  public static final int CONTENT_SPECIFIC_CONSTRUCTED_TAG = 0xA0; // 5F1A is always used inside A0 constructed object
-  public static final int COUNT_TAG = 0x02; // Used in A0 constructed object to indicate single byte count of simple objects
+    /**
+     * Returns name of other person.
+     * 
+     * @return the nameOfOtherPerson
+     */
+    var namesOfOtherPersons: MutableList<String?>? = null
+        private set
 
-  private static final String SDF = "yyyyMMdd";
-  private static final String SDTF = "yyyyMMddhhmmss";
+    /**
+     * Returns endorsements and observations.
+     * 
+     * @return the endorsementsAndObservations
+     */
+    var endorsementsAndObservations: String? = null
+        private set
 
-  private String issuingAuthority;
-  private String dateOfIssue;
-  private List<String> namesOfOtherPersons;
-  private String endorsementsAndObservations;
-  private String taxOrExitRequirements;
-  private byte[] imageOfFront;
-  private byte[] imageOfRear;
-  private String dateAndTimeOfPersonalization;
-  private String personalizationSystemSerialNumber;
+    /**
+     * Returns tax or exit requirements.
+     * 
+     * @return the taxOrExitRequirements
+     */
+    var taxOrExitRequirements: String? = null
+        private set
 
-  private List<Integer> tagPresenceList;
+    /**
+     * Returns image of front.
+     * 
+     * @return the imageOfFront
+     */
+    var imageOfFront: ByteArray?
+        private set
 
-  /**
-   * Constructs a new file.
-   *
-   * @param issuingAuthority the issuing authority
-   * @param dateOfIssue the date of issue
-   * @param namesOfOtherPersons names of other persons
-   * @param endorsementsAndObservations endorsements and observations
-   * @param taxOrExitRequirements tax or exit requirements
-   * @param imageOfFront image of front
-   * @param imageOfRear image of rear
-   * @param dateAndTimeOfPersonalization date and time of personalization
-   * @param personalizationSystemSerialNumber personalization system serial number
-   */
-  public DG12File(String issuingAuthority, Date dateOfIssue,
-      List<String> namesOfOtherPersons, String endorsementsAndObservations,
-      String taxOrExitRequirements, byte[] imageOfFront,
-      byte[] imageOfRear, Date dateAndTimeOfPersonalization,
-      String personalizationSystemSerialNumber) {
-    this(issuingAuthority,
-        dateOfIssue == null ? null : new SimpleDateFormat(SDF).format(dateOfIssue),
+    /**
+     * Returns image of rear.
+     * 
+     * @return the imageOfRear
+     */
+    var imageOfRear: ByteArray?
+        private set
+
+    /**
+     * Returns the date and time of personalization.
+     * 
+     * @return the dateAndTimeOfPersonalization
+     */
+    var dateAndTimeOfPersonalization: String? = null
+        private set
+
+    /**
+     * Returns the personalization system serial number.
+     * 
+     * @return the personalizationSystemSerialNumber
+     */
+    var personalizationSystemSerialNumber: String? = null
+        private set
+
+    private var tagPresenceList: MutableList<Int?>? = null
+
+    /**
+     * Constructs a new file.
+     * 
+     * @param issuingAuthority the issuing authority
+     * @param dateOfIssue the date of issue
+     * @param namesOfOtherPersons names of other persons
+     * @param endorsementsAndObservations endorsements and observations
+     * @param taxOrExitRequirements tax or exit requirements
+     * @param imageOfFront image of front
+     * @param imageOfRear image of rear
+     * @param dateAndTimeOfPersonalization date and time of personalization
+     * @param personalizationSystemSerialNumber personalization system serial number
+     */
+    constructor(
+        issuingAuthority: String?, dateOfIssue: Date?,
+        namesOfOtherPersons: MutableList<String?>?, endorsementsAndObservations: String?,
+        taxOrExitRequirements: String?, imageOfFront: ByteArray?,
+        imageOfRear: ByteArray?, dateAndTimeOfPersonalization: Date?,
+        personalizationSystemSerialNumber: String?
+    ) : this(
+        issuingAuthority,
+        if (dateOfIssue == null) null else SimpleDateFormat(SDF).format(dateOfIssue),
         namesOfOtherPersons, endorsementsAndObservations,
         taxOrExitRequirements, imageOfFront,
         imageOfRear,
-        dateAndTimeOfPersonalization == null ? null : new SimpleDateFormat(SDTF).format(dateAndTimeOfPersonalization),
-        personalizationSystemSerialNumber);
-  }
+        if (dateAndTimeOfPersonalization == null) null else SimpleDateFormat(SDTF).format(
+            dateAndTimeOfPersonalization
+        ),
+        personalizationSystemSerialNumber
+    )
 
-  /**
-   * Constructs a new file.
-   *
-   * @param issuingAuthority the issuing authority
-   * @param dateOfIssue the date of issue
-   * @param namesOfOtherPersons names of other persons
-   * @param endorsementsAndObservations endorsements and observations
-   * @param taxOrExitRequirements tax or exit requirements
-   * @param imageOfFront image of front
-   * @param imageOfRear image of rear
-   * @param dateAndTimeOfPersonalization date and time of personalization
-   * @param personalizationSystemSerialNumber personalization system serial number
-   */
-  public DG12File(String issuingAuthority, String dateOfIssue,
-      List<String> namesOfOtherPersons, String endorsementsAndObservations,
-      String taxOrExitRequirements, byte[] imageOfFront,
-      byte[] imageOfRear, String dateAndTimeOfPersonalization,
-      String personalizationSystemSerialNumber) {
-    super(EF_DG12_TAG);
-    this.issuingAuthority = issuingAuthority;
-    this.dateOfIssue = dateOfIssue;
-    this.namesOfOtherPersons = namesOfOtherPersons == null ? null : new ArrayList<String>(namesOfOtherPersons);
-    this.endorsementsAndObservations = endorsementsAndObservations;
-    this.taxOrExitRequirements = taxOrExitRequirements;
-    this.imageOfFront = imageOfFront;
-    this.imageOfRear = imageOfRear;
-    this.dateAndTimeOfPersonalization = dateAndTimeOfPersonalization;
-    this.personalizationSystemSerialNumber = personalizationSystemSerialNumber;
-  }
-
-  /**
-   * Constructs a new file.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading from input stream
-   */
-  public DG12File(InputStream inputStream) throws IOException {
-    super(EF_DG12_TAG, inputStream);
-  }
-
-  /**
-   * Returns the tags of fields actually present in this file.
-   *
-   * @return a list of tags
-   */
-  @Override
-  public List<Integer> getTagPresenceList() {
-    if (tagPresenceList != null) {
-      return tagPresenceList;
+    /**
+     * Constructs a new file.
+     * 
+     * @param issuingAuthority the issuing authority
+     * @param dateOfIssue the date of issue
+     * @param namesOfOtherPersons names of other persons
+     * @param endorsementsAndObservations endorsements and observations
+     * @param taxOrExitRequirements tax or exit requirements
+     * @param imageOfFront image of front
+     * @param imageOfRear image of rear
+     * @param dateAndTimeOfPersonalization date and time of personalization
+     * @param personalizationSystemSerialNumber personalization system serial number
+     */
+    constructor(
+        issuingAuthority: String?, dateOfIssue: String?,
+        namesOfOtherPersons: MutableList<String?>?, endorsementsAndObservations: String?,
+        taxOrExitRequirements: String?, imageOfFront: ByteArray?,
+        imageOfRear: ByteArray?, dateAndTimeOfPersonalization: String?,
+        personalizationSystemSerialNumber: String?
+    ) : super(LDSFile.Companion.EF_DG12_TAG) {
+        this.issuingAuthority = issuingAuthority
+        this.dateOfIssue = dateOfIssue
+        this.namesOfOtherPersons =
+            if (namesOfOtherPersons == null) null else ArrayList<String?>(namesOfOtherPersons)
+        this.endorsementsAndObservations = endorsementsAndObservations
+        this.taxOrExitRequirements = taxOrExitRequirements
+        this.imageOfFront = imageOfFront
+        this.imageOfRear = imageOfRear
+        this.dateAndTimeOfPersonalization = dateAndTimeOfPersonalization
+        this.personalizationSystemSerialNumber = personalizationSystemSerialNumber
     }
-    tagPresenceList = new ArrayList<Integer>(10);
-    if (issuingAuthority != null) {
-      tagPresenceList.add(ISSUING_AUTHORITY_TAG);
+
+    /**
+     * Constructs a new file.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException on error reading from input stream
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG12_TAG, inputStream)
+
+    /**
+     * Returns the tags of fields actually present in this file.
+     * 
+     * @return a list of tags
+     */
+    override fun getTagPresenceList(): MutableList<Int?> {
+        if (tagPresenceList != null) {
+            return tagPresenceList!!
+        }
+        tagPresenceList = ArrayList<Int?>(10)
+        if (issuingAuthority != null) {
+            tagPresenceList!!.add(ISSUING_AUTHORITY_TAG)
+        }
+        if (dateOfIssue != null) {
+            tagPresenceList!!.add(DATE_OF_ISSUE_TAG)
+        }
+        if (namesOfOtherPersons != null) {
+            tagPresenceList!!.add(NAME_OF_OTHER_PERSON_TAG)
+        }
+        if (endorsementsAndObservations != null) {
+            tagPresenceList!!.add(ENDORSEMENTS_AND_OBSERVATIONS_TAG)
+        }
+        if (taxOrExitRequirements != null) {
+            tagPresenceList!!.add(TAX_OR_EXIT_REQUIREMENTS_TAG)
+        }
+        if (imageOfFront != null) {
+            tagPresenceList!!.add(IMAGE_OF_FRONT_TAG)
+        }
+        if (imageOfRear != null) {
+            tagPresenceList!!.add(IMAGE_OF_REAR_TAG)
+        }
+        if (dateAndTimeOfPersonalization != null) {
+            tagPresenceList!!.add(DATE_AND_TIME_OF_PERSONALIZATION_TAG)
+        }
+        if (personalizationSystemSerialNumber != null) {
+            tagPresenceList!!.add(PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG)
+        }
+        return tagPresenceList!!
     }
-    if (dateOfIssue != null) {
-      tagPresenceList.add(DATE_OF_ISSUE_TAG);
+
+    override fun getTag(): Int {
+        return LDSFile.Companion.EF_DG12_TAG
     }
-    if (namesOfOtherPersons != null) {
-      tagPresenceList.add(NAME_OF_OTHER_PERSON_TAG);
+
+    /**
+     * Returns a textual representation of this file.
+     * 
+     * @return a textual representation of this file
+     */
+    override fun toString(): String {
+        return StringBuilder()
+            .append("DG12File [")
+            .append(if (issuingAuthority == null) "" else issuingAuthority).append(", ")
+            .append(if (dateOfIssue == null) "" else dateOfIssue).append(", ")
+            .append(if (namesOfOtherPersons == null || namesOfOtherPersons!!.isEmpty()) "[]" else namesOfOtherPersons)
+            .append(", ")
+            .append(if (endorsementsAndObservations == null) "" else endorsementsAndObservations)
+            .append(", ")
+            .append(if (taxOrExitRequirements == null) "" else taxOrExitRequirements).append(", ")
+            .append(if (imageOfFront == null) "" else "image (" + imageOfFront!!.size + ")")
+            .append(", ")
+            .append(if (imageOfRear == null) "" else "image (" + imageOfRear!!.size + ")")
+            .append(", ")
+            .append(if (dateAndTimeOfPersonalization == null) "" else dateAndTimeOfPersonalization)
+            .append(", ")
+            .append(if (personalizationSystemSerialNumber == null) "" else personalizationSystemSerialNumber)
+            .append("]")
+            .toString()
     }
-    if (endorsementsAndObservations != null) {
-      tagPresenceList.add(ENDORSEMENTS_AND_OBSERVATIONS_TAG);
+
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = 1
+        result = prime * result + imageOfFront.contentHashCode()
+        result = prime * result + imageOfRear.contentHashCode()
+        result = (prime * result
+                + Objects.hash(
+            dateAndTimeOfPersonalization,
+            dateOfIssue,
+            endorsementsAndObservations,
+            issuingAuthority,
+            namesOfOtherPersons,
+            personalizationSystemSerialNumber,
+            taxOrExitRequirements
+        ))
+        return result
     }
-    if (taxOrExitRequirements != null) {
-      tagPresenceList.add(TAX_OR_EXIT_REQUIREMENTS_TAG);
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) return true
+        if (obj == null) return false
+        if (javaClass != obj.javaClass) return false
+        val other = obj as DG12File
+        return dateAndTimeOfPersonalization == other.dateAndTimeOfPersonalization
+                && dateOfIssue == other.dateOfIssue
+                && endorsementsAndObservations == other.endorsementsAndObservations
+                && imageOfFront.contentEquals(other.imageOfFront) && imageOfRear.contentEquals(other.imageOfRear) && issuingAuthority == other.issuingAuthority
+                && namesOfOtherPersons == other.namesOfOtherPersons
+                && personalizationSystemSerialNumber == other.personalizationSystemSerialNumber
+                && taxOrExitRequirements == other.taxOrExitRequirements
     }
-    if (imageOfFront != null) {
-      tagPresenceList.add(IMAGE_OF_FRONT_TAG);
+
+    @Throws(IOException::class)
+    override fun readField(expectedTag: Int, tlvInputStream: TLVInputStream) {
+        val tag = tlvInputStream.readTag()
+        require(!(tag != CONTENT_SPECIFIC_CONSTRUCTED_TAG && tag != expectedTag)) {
+            "Expected " + Integer.toHexString(
+                expectedTag
+            ) + ", but found " + Integer.toHexString(tag)
+        }
+        tlvInputStream.readLength()
+        when (tag) {
+            ISSUING_AUTHORITY_TAG -> issuingAuthority =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            DATE_OF_ISSUE_TAG -> dateOfIssue =
+                AdditionalDetailDataGroup.Companion.readFullDate(tlvInputStream)
+
+            CONTENT_SPECIFIC_CONSTRUCTED_TAG -> namesOfOtherPersons =
+                AdditionalDetailDataGroup.Companion.readContentSpecificFieldsList(tlvInputStream)
+
+            NAME_OF_OTHER_PERSON_TAG ->       /* Work around non-compliant early samples. */
+                namesOfOtherPersons = mutableListOf<String?>(
+                    AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+                )
+
+            ENDORSEMENTS_AND_OBSERVATIONS_TAG -> endorsementsAndObservations =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            TAX_OR_EXIT_REQUIREMENTS_TAG -> taxOrExitRequirements =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            IMAGE_OF_FRONT_TAG -> imageOfFront =
+                AdditionalDetailDataGroup.Companion.readBytes(tlvInputStream)
+
+            IMAGE_OF_REAR_TAG -> imageOfRear =
+                AdditionalDetailDataGroup.Companion.readBytes(tlvInputStream)
+
+            DATE_AND_TIME_OF_PERSONALIZATION_TAG -> dateAndTimeOfPersonalization =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG -> personalizationSystemSerialNumber =
+                AdditionalDetailDataGroup.Companion.readString(tlvInputStream)
+
+            else -> throw IllegalArgumentException(
+                "Unknown field tag in DG12: " + Integer.toHexString(
+                    tag
+                )
+            )
+        }
     }
-    if (imageOfRear != null) {
-      tagPresenceList.add(IMAGE_OF_REAR_TAG);
+
+    @Throws(IOException::class)
+    override fun writeField(tag: Int, tlvOut: TLVOutputStream) {
+        when (tag) {
+            ISSUING_AUTHORITY_TAG -> {
+                AdditionalDetailDataGroup.Companion.writeString(tag, issuingAuthority, tlvOut)
+            }
+
+            DATE_OF_ISSUE_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                dateOfIssue,
+                tlvOut
+            )
+
+            NAME_OF_OTHER_PERSON_TAG -> AdditionalDetailDataGroup.Companion.writeContentSpecificFieldsList(
+                tag,
+                namesOfOtherPersons,
+                tlvOut
+            )
+
+            ENDORSEMENTS_AND_OBSERVATIONS_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                endorsementsAndObservations,
+                tlvOut
+            )
+
+            TAX_OR_EXIT_REQUIREMENTS_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                taxOrExitRequirements,
+                tlvOut
+            )
+
+            IMAGE_OF_FRONT_TAG -> AdditionalDetailDataGroup.Companion.writeBytes(
+                tag,
+                imageOfFront,
+                tlvOut
+            )
+
+            IMAGE_OF_REAR_TAG -> AdditionalDetailDataGroup.Companion.writeBytes(
+                tag,
+                imageOfRear,
+                tlvOut
+            )
+
+            DATE_AND_TIME_OF_PERSONALIZATION_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                dateAndTimeOfPersonalization,
+                tlvOut
+            )
+
+            PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG -> AdditionalDetailDataGroup.Companion.writeString(
+                tag,
+                personalizationSystemSerialNumber,
+                tlvOut
+            )
+
+            else -> throw IllegalArgumentException(
+                "Unknown field tag in DG12: " + Integer.toHexString(
+                    tag
+                )
+            )
+        }
     }
-    if (dateAndTimeOfPersonalization != null) {
-      tagPresenceList.add(DATE_AND_TIME_OF_PERSONALIZATION_TAG);
+
+    companion object {
+        private val serialVersionUID = -1979367459379125674L
+
+        const val ISSUING_AUTHORITY_TAG: Int = 0x5F19
+        const val DATE_OF_ISSUE_TAG: Int = 0x5F26 // yyyymmdd
+        const val NAME_OF_OTHER_PERSON_TAG: Int = 0x5F1A // formatted per ICAO 9303 rules
+        const val ENDORSEMENTS_AND_OBSERVATIONS_TAG: Int = 0x5F1B
+        const val TAX_OR_EXIT_REQUIREMENTS_TAG: Int = 0x5F1C
+        const val IMAGE_OF_FRONT_TAG: Int = 0x5F1D // Image per ISO/IEC 10918
+        const val IMAGE_OF_REAR_TAG: Int = 0x5F1E // Image per ISO/IEC 10918
+        const val DATE_AND_TIME_OF_PERSONALIZATION_TAG: Int = 0x5F55 // yyyymmddhhmmss
+        const val PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG: Int = 0x5F56
+        const val CONTENT_SPECIFIC_CONSTRUCTED_TAG: Int =
+            0xA0 // 5F1A is always used inside A0 constructed object
+        const val COUNT_TAG: Int =
+            0x02 // Used in A0 constructed object to indicate single byte count of simple objects
+
+        private const val SDF = "yyyyMMdd"
+        private const val SDTF = "yyyyMMddhhmmss"
     }
-    if (personalizationSystemSerialNumber != null) {
-      tagPresenceList.add(PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG);
-    }
-    return tagPresenceList;
-  }
-
-  /**
-   * Returns the issuing authority.
-   *
-   * @return the issuingAuthority
-   */
-  public String getIssuingAuthority() {
-    return issuingAuthority;
-  }
-
-  /**
-   * Returns the date of issuance.
-   *
-   * @return the dateOfIssue
-   */
-  public String getDateOfIssue() {
-    return dateOfIssue;
-  }
-
-  /**
-   * Returns name of other person.
-   *
-   * @return the nameOfOtherPerson
-   */
-  public List<String> getNamesOfOtherPersons() {
-    return namesOfOtherPersons;
-  }
-
-  /**
-   * Returns endorsements and observations.
-   *
-   * @return the endorsementsAndObservations
-   */
-  public String getEndorsementsAndObservations() {
-    return endorsementsAndObservations;
-  }
-
-  /**
-   * Returns tax or exit requirements.
-   *
-   * @return the taxOrExitRequirements
-   */
-  public String getTaxOrExitRequirements() {
-    return taxOrExitRequirements;
-  }
-
-  /**
-   * Returns image of front.
-   *
-   * @return the imageOfFront
-   */
-  public byte[] getImageOfFront() {
-    return imageOfFront;
-  }
-
-  /**
-   * Returns image of rear.
-   *
-   * @return the imageOfRear
-   */
-  public byte[] getImageOfRear() {
-    return imageOfRear;
-  }
-
-  /**
-   * Returns the date and time of personalization.
-   *
-   * @return the dateAndTimeOfPersonalization
-   */
-  public String getDateAndTimeOfPersonalization() {
-    return dateAndTimeOfPersonalization;
-  }
-
-  /**
-   * Returns the personalization system serial number.
-   *
-   * @return the personalizationSystemSerialNumber
-   */
-  public String getPersonalizationSystemSerialNumber() {
-    return personalizationSystemSerialNumber;
-  }
-
-  @Override
-  public int getTag() {
-    return EF_DG12_TAG;
-  }
-
-  /**
-   * Returns a textual representation of this file.
-   *
-   * @return a textual representation of this file
-   */
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append("DG12File [")
-        .append(issuingAuthority == null ? "" : issuingAuthority).append(", ")
-        .append(dateOfIssue == null ? "" : dateOfIssue).append(", ")
-        .append(namesOfOtherPersons == null || namesOfOtherPersons.isEmpty() ? "[]" : namesOfOtherPersons).append(", ")
-        .append(endorsementsAndObservations == null ? "" : endorsementsAndObservations).append(", ")
-        .append(taxOrExitRequirements == null ? "" : taxOrExitRequirements).append(", ")
-        .append(imageOfFront == null ? "" : "image (" + imageOfFront.length + ")").append(", ")
-        .append(imageOfRear == null ? "" : "image (" + imageOfRear.length + ")").append(", ")
-        .append(dateAndTimeOfPersonalization == null ? "" : dateAndTimeOfPersonalization).append(", ")
-        .append(personalizationSystemSerialNumber== null ? "" : personalizationSystemSerialNumber)
-        .append("]")
-        .toString();
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(imageOfFront);
-    result = prime * result + Arrays.hashCode(imageOfRear);
-    result = prime * result
-        + Objects.hash(dateAndTimeOfPersonalization, dateOfIssue, endorsementsAndObservations, issuingAuthority,
-            namesOfOtherPersons, personalizationSystemSerialNumber, taxOrExitRequirements);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    DG12File other = (DG12File) obj;
-    return Objects.equals(dateAndTimeOfPersonalization, other.dateAndTimeOfPersonalization)
-        && Objects.equals(dateOfIssue, other.dateOfIssue)
-        && Objects.equals(endorsementsAndObservations, other.endorsementsAndObservations)
-        && Arrays.equals(imageOfFront, other.imageOfFront) && Arrays.equals(imageOfRear, other.imageOfRear)
-        && Objects.equals(issuingAuthority, other.issuingAuthority)
-        && Objects.equals(namesOfOtherPersons, other.namesOfOtherPersons)
-        && Objects.equals(personalizationSystemSerialNumber, other.personalizationSystemSerialNumber)
-        && Objects.equals(taxOrExitRequirements, other.taxOrExitRequirements);
-  }
-
-  @Override
-  protected void readField(int expectedTag, TLVInputStream tlvInputStream) throws IOException {
-    int tag = tlvInputStream.readTag();
-    if (tag != CONTENT_SPECIFIC_CONSTRUCTED_TAG && tag != expectedTag) {
-      throw new IllegalArgumentException("Expected " + Integer.toHexString(expectedTag) + ", but found " + Integer.toHexString(tag));
-    }
-    tlvInputStream.readLength();
-    switch (tag) {
-    case ISSUING_AUTHORITY_TAG:
-      issuingAuthority = readString(tlvInputStream);
-      break;
-    case DATE_OF_ISSUE_TAG:
-      dateOfIssue = readFullDate(tlvInputStream);
-      break;
-    case CONTENT_SPECIFIC_CONSTRUCTED_TAG:
-      namesOfOtherPersons = readContentSpecificFieldsList(tlvInputStream);
-      break;
-    case NAME_OF_OTHER_PERSON_TAG:
-      /* Work around non-compliant early samples. */
-      namesOfOtherPersons = Collections.singletonList(readString(tlvInputStream));
-      break;
-    case ENDORSEMENTS_AND_OBSERVATIONS_TAG:
-      endorsementsAndObservations = readString(tlvInputStream);
-      break;
-    case TAX_OR_EXIT_REQUIREMENTS_TAG:
-      taxOrExitRequirements = readString(tlvInputStream);
-      break;
-    case IMAGE_OF_FRONT_TAG:
-      imageOfFront = readBytes(tlvInputStream);
-      break;
-    case IMAGE_OF_REAR_TAG:
-      imageOfRear = readBytes(tlvInputStream);
-      break;
-    case DATE_AND_TIME_OF_PERSONALIZATION_TAG:
-      dateAndTimeOfPersonalization = readString(tlvInputStream);
-      break;
-    case PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG:
-      personalizationSystemSerialNumber = readString(tlvInputStream);
-      break;
-    default:
-      throw new IllegalArgumentException("Unknown field tag in DG12: " + Integer.toHexString(tag));
-    }
-  }
-
-  @Override
-  protected void writeField(int tag, TLVOutputStream tlvOut) throws IOException {
-    switch (tag) {
-    case ISSUING_AUTHORITY_TAG:;
-    writeString(tag, issuingAuthority, tlvOut);
-    break;
-    case DATE_OF_ISSUE_TAG:
-      writeString(tag, dateOfIssue, tlvOut);
-      break;
-    case NAME_OF_OTHER_PERSON_TAG:
-      writeContentSpecificFieldsList(tag, namesOfOtherPersons, tlvOut);
-      break;
-    case ENDORSEMENTS_AND_OBSERVATIONS_TAG:
-      writeString(tag, endorsementsAndObservations, tlvOut);
-      break;
-    case TAX_OR_EXIT_REQUIREMENTS_TAG:
-      writeString(tag, taxOrExitRequirements, tlvOut);
-      break;
-    case IMAGE_OF_FRONT_TAG:
-      writeBytes(tag, imageOfFront, tlvOut);
-      break;
-    case IMAGE_OF_REAR_TAG:
-      writeBytes(tag, imageOfRear, tlvOut);
-      break;
-    case DATE_AND_TIME_OF_PERSONALIZATION_TAG:
-      writeString(tag, dateAndTimeOfPersonalization, tlvOut);
-      break;
-    case PERSONALIZATION_SYSTEM_SERIAL_NUMBER_TAG:
-      writeString(tag, personalizationSystemSerialNumber, tlvOut);
-      break;
-    default:
-      throw new IllegalArgumentException("Unknown field tag in DG12: " + Integer.toHexString(tag));
-    }
-  }
 }

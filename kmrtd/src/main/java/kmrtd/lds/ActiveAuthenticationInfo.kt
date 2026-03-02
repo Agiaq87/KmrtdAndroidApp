@@ -19,17 +19,15 @@
  *
  * $Id: ActiveAuthenticationInfo.java 1858 2021-07-19 07:10:20Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Logger;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DLSequence;
+import org.bouncycastle.asn1.ASN1EncodableVector
+import org.bouncycastle.asn1.ASN1Integer
+import org.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.DLSequence
+import java.security.NoSuchAlgorithmException
+import java.util.logging.Logger
 
 /*
  * <pre>
@@ -51,281 +49,264 @@ import org.bouncycastle.asn1.DLSequence;
 /**
  * A concrete SecurityInfo structure that stores active authentication
  * info, see TR-LDS-PKI Maintenance V1.0.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1858 $
  */
-public class ActiveAuthenticationInfo extends SecurityInfo {
-
-  private static final long serialVersionUID = 6830847342039845308L;
-
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd.lds");
-
-  public static final int VERSION_1 = 1;
-
-  /** Specified in BSI TR 03111 Section 5.2.1. */
-  public static final String ECDSA_PLAIN_SIGNATURES = "0.4.0.127.0.7.1.1.4.1";
-  public static final String ECDSA_PLAIN_SHA1_OID = ECDSA_PLAIN_SIGNATURES + ".1"; /* 0.4.0.127.0.7.1.1.4.1.1, ecdsa-plain-SHA1 */
-  public static final String ECDSA_PLAIN_SHA224_OID = ECDSA_PLAIN_SIGNATURES + ".2"; /* 0.4.0.127.0.7.1.1.4.1.2, ecdsa-plain-SHA224 */
-  public static final String ECDSA_PLAIN_SHA256_OID = ECDSA_PLAIN_SIGNATURES + ".3"; /* 0.4.0.127.0.7.1.1.4.1.3, ecdsa-plain-SHA256 */
-  public static final String ECDSA_PLAIN_SHA384_OID = ECDSA_PLAIN_SIGNATURES + ".4"; /* 0.4.0.127.0.7.1.1.4.1.4, ecdsa-plain-SHA384 */
-  public static final String ECDSA_PLAIN_SHA512_OID = ECDSA_PLAIN_SIGNATURES + ".5"; /* 0.4.0.127.0.7.1.1.4.1.5, ecdsa-plain-SHA512 */
-  public static final String ECDSA_PLAIN_RIPEMD160_OID = ECDSA_PLAIN_SIGNATURES + ".6"; /* 0.4.0.127.0.7.1.1.4.1.6, ecdsa-plain-RIPEMD160 */
-
-  private String oid;
-  private int version;
-  private String signatureAlgorithmOID;
-
-  /**
-   * Constructs a new object.
-   *
-   * @param oid the id_AA identifier
-   * @param version has to be 1
-   * @param signatureAlgorithmOID the signature algorithm OID
-   */
-  ActiveAuthenticationInfo(String oid, int version, String signatureAlgorithmOID) {
-    this.oid = oid;
-    this.version = version;
-    this.signatureAlgorithmOID = signatureAlgorithmOID;
-    checkFields();
-  }
-
-  /**
-   * Constructs a new object.
-   *
-   * @param signatureAlgorithmOID the signature algorithm OID
-   */
-  public ActiveAuthenticationInfo(String signatureAlgorithmOID) {
-    this(ID_AA, VERSION_1, signatureAlgorithmOID);
-  }
-
-  /**
-   * Returns a DER object with this SecurityInfo data (DER sequence).
-   *
-   * @return a DER object with this SecurityInfo data
-   *
-   * @deprecated Remove this method from visible interface (because of dependency on BC API)
-   */
-  @Override
-  @Deprecated
-  public ASN1Primitive getDERObject() {
-    ASN1EncodableVector v = new ASN1EncodableVector();
-    v.add(new ASN1ObjectIdentifier(oid));
-    v.add(new ASN1Integer(version));
-    if (signatureAlgorithmOID != null) {
-      v.add(new ASN1ObjectIdentifier(signatureAlgorithmOID));
-    }
-    return new DLSequence(v);
-  }
-
-  /**
-   * Returns the protocol object identifier of this AA security info.
-   *
-   * @return an object identifier
-   */
-  @Override
-  public String getObjectIdentifier() {
-    return oid;
-  }
-
-  /**
-   * Returns the version of the Active Authentication protocol (should be 1).
-   *
-   * @return the version
-   */
-  public int getVersion() {
-    return version;
-  }
-
-  /**
-   * Returns the protocol object identifier as a human readable string.
-   *
-   * @return a string representing the protocol object identifier
-   */
-  @Override
-  public String getProtocolOIDString() {
-    return toProtocolOIDString(oid);
-  }
-
-  /**
-   * Returns the signature algorithm object identifier.
-   *
-   * @return signature algorithm OID
-   */
-  public String getSignatureAlgorithmOID() {
-    return signatureAlgorithmOID;
-  }
-
-  /**
-   * Returns a textual representation of this object.
-   *
-   * @return a textual representation of this object
-   */
-  @Override
-  public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append("ActiveAuthenticationInfo");
-    result.append(" [");
-    result.append("protocol: " + toProtocolOIDString(oid));
-    result.append(", ");
-    result.append("version: " + version);
-    result.append(", ");
-    result.append("signatureAlgorithmOID: " + toSignatureAlgorithmOIDString(getSignatureAlgorithmOID()));
-    result.append("]");
-    return result.toString();
-  }
-
-  /**
-   * Tests equality with respect to another object.
-   *
-   * @param other another object
-   *
-   * @return whether this object equals the other object
-   */
-  @Override
-  public boolean equals(Object other) {
-    if (other == null) {
-      return false;
-    }
-    if (other == this) {
-      return true;
-    }
-    if (!ActiveAuthenticationInfo.class.equals(other.getClass())) {
-      return false;
-    }
-    ActiveAuthenticationInfo otherActiveAuthenticationInfo = (ActiveAuthenticationInfo)other;
-    return getDERObject().equals(otherActiveAuthenticationInfo.getDERObject());
-  }
-
-  /**
-   * Returns the hash code of this object.
-   *
-   * @return the hash code
-   */
-  @Override
-  public int hashCode() {
-    return 12345
-        + 3 * (oid == null ? 0 : oid.hashCode())
-        + 5 * version
-        + 11 * (signatureAlgorithmOID == null ? 1 : signatureAlgorithmOID.hashCode());
-  }
-
-  /**
-   * Translates an OID string to a Java mnemonic algorithm string.
-   *
-   * @param oid the OID string
-   *
-   * @return a mnemonic algorithm string
-   *
-   * @throws NoSuchAlgorithmException if the OID was not recognized
-   */
-  public static String lookupMnemonicByOID(String oid) throws NoSuchAlgorithmException {
-    if (ECDSA_PLAIN_SHA1_OID.equals(oid)) {
-      return "SHA1withECDSA";
-    }
-    if (ECDSA_PLAIN_SHA224_OID.equals(oid)) {
-      return "SHA224withECDSA";
-    }
-    if (ECDSA_PLAIN_SHA256_OID.equals(oid)) {
-      return "SHA256withECDSA";
-    }
-    if (ECDSA_PLAIN_SHA384_OID.equals(oid)) {
-      return "SHA384withECDSA";
-    }
-    if (ECDSA_PLAIN_SHA512_OID.equals(oid)) {
-      return "SHA512withECDSA";
-    }
-    if (ECDSA_PLAIN_RIPEMD160_OID.equals(oid)) {
-      return "RIPEMD160withECDSA";
+class ActiveAuthenticationInfo internal constructor(
+    private val oid: String?,
+    /**
+     * Returns the version of the Active Authentication protocol (should be 1).
+     * 
+     * @return the version
+     */
+    val version: Int,
+    /**
+     * Returns the signature algorithm object identifier.
+     * 
+     * @return signature algorithm OID
+     */
+    val signatureAlgorithmOID: String?
+) : SecurityInfo() {
+    /**
+     * Constructs a new object.
+     * 
+     * @param oid the id_AA identifier
+     * @param version has to be 1
+     * @param signatureAlgorithmOID the signature algorithm OID
+     */
+    init {
+        checkFields()
     }
 
-    throw new NoSuchAlgorithmException("Unknown OID " + oid);
-  }
+    /**
+     * Constructs a new object.
+     * 
+     * @param signatureAlgorithmOID the signature algorithm OID
+     */
+    constructor(signatureAlgorithmOID: String?) : this(
+        SecurityInfo.Companion.ID_AA,
+        VERSION_1,
+        signatureAlgorithmOID
+    )
 
-  /* ONLY NON-PUBLIC METHODS BELOW */
-
-  /**
-   * Checks whether the given object identifier identifies a
-   * ActiveAuthenticationInfo structure.
-   *
-   * @param id
-   *            object identifier
-   * @return true if the match is positive
-   */
-  static boolean checkRequiredIdentifier(String id) {
-    return ID_AA.equals(id);
-  }
-
-  /**
-   * Checks the correctness of the data for this instance of {@code SecurityInfo}.
-   */
-  private void checkFields() {
-    try {
-      if (!checkRequiredIdentifier(oid)) {
-        throw new IllegalArgumentException("Wrong identifier: " + oid);
-      }
-      if (version != VERSION_1) {
-        LOGGER.warning("Wrong version: " + version);
-      }
-
-      /* FIXME check to see if signatureAlgorithmOID is valid. */
-
-      if (!ECDSA_PLAIN_SHA1_OID.equals(signatureAlgorithmOID)
-          && !ECDSA_PLAIN_SHA224_OID.equals(signatureAlgorithmOID)
-          && !ECDSA_PLAIN_SHA256_OID.equals(signatureAlgorithmOID)
-          && !ECDSA_PLAIN_SHA384_OID.equals(signatureAlgorithmOID)
-          && !ECDSA_PLAIN_SHA512_OID.equals(signatureAlgorithmOID)
-          && !ECDSA_PLAIN_RIPEMD160_OID.equals(signatureAlgorithmOID)) {
-        throw new IllegalArgumentException("Wrong signature algorithm OID: " + signatureAlgorithmOID);
-      }
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Malformed ActiveAuthenticationInfo", e);
-    }
-  }
-
-  /**
-   * Returns a human readable rendering of the given object identifier string.
-   *
-   * @param oid the object identifier (dotted notation)
-   *
-   * @return a human readable string representing the given object identifier
-   */
-  private String toProtocolOIDString(String oid) {
-    if (ID_AA.equals(oid)) {
-      return "id-AA";
+    /**
+     * Returns a DER object with this SecurityInfo data (DER sequence).
+     * 
+     * @return a DER object with this SecurityInfo data
+     * 
+     */
+    @Deprecated("Remove this method from visible interface (because of dependency on BC API)")
+    override fun getDERObject(): ASN1Primitive {
+        val v = ASN1EncodableVector()
+        v.add(ASN1ObjectIdentifier(oid))
+        v.add(ASN1Integer(version.toLong()))
+        if (signatureAlgorithmOID != null) {
+            v.add(ASN1ObjectIdentifier(signatureAlgorithmOID))
+        }
+        return DLSequence(v)
     }
 
-    return oid;
-  }
-
-  /**
-   * Returns a human readable rendering of the given object identifier string.
-   *
-   * @param oid the object identifier (dotted notation)
-   *
-   * @return a human readable string representing the given object identifier
-   */
-  public static String toSignatureAlgorithmOIDString(String oid) {
-    if (ECDSA_PLAIN_SHA1_OID.equals(oid)) {
-      return "ecdsa-plain-SHA1";
-    }
-    if (ECDSA_PLAIN_SHA224_OID.equals(oid)) {
-      return "ecdsa-plain-SHA224";
-    }
-    if (ECDSA_PLAIN_SHA256_OID.equals(oid)) {
-      return "ecdsa-plain-SHA256";
-    }
-    if (ECDSA_PLAIN_SHA384_OID.equals(oid)) {
-      return "ecdsa-plain-SHA384";
-    }
-    if (ECDSA_PLAIN_SHA512_OID.equals(oid)) {
-      return "ecdsa-plain-SHA512";
-    }
-    if (ECDSA_PLAIN_RIPEMD160_OID.equals(oid)) {
-      return "ecdsa-plain-RIPEMD160";
+    /**
+     * Returns the protocol object identifier of this AA security info.
+     * 
+     * @return an object identifier
+     */
+    override fun getObjectIdentifier(): String? {
+        return oid
     }
 
-    return oid;
-  }
+    /**
+     * Returns the protocol object identifier as a human readable string.
+     * 
+     * @return a string representing the protocol object identifier
+     */
+    override fun getProtocolOIDString(): String? {
+        return toProtocolOIDString(oid)
+    }
+
+    /**
+     * Returns a textual representation of this object.
+     * 
+     * @return a textual representation of this object
+     */
+    override fun toString(): String {
+        val result = StringBuilder()
+        result.append("ActiveAuthenticationInfo")
+        result.append(" [")
+        result.append("protocol: " + toProtocolOIDString(oid))
+        result.append(", ")
+        result.append("version: " + version)
+        result.append(", ")
+        result.append(
+            "signatureAlgorithmOID: " + toSignatureAlgorithmOIDString(
+                this.signatureAlgorithmOID
+            )
+        )
+        result.append("]")
+        return result.toString()
+    }
+
+    /**
+     * Tests equality with respect to another object.
+     * 
+     * @param other another object
+     * 
+     * @return whether this object equals the other object
+     */
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (other === this) {
+            return true
+        }
+        if (ActiveAuthenticationInfo::class.java != other.javaClass) {
+            return false
+        }
+        val otherActiveAuthenticationInfo = other as ActiveAuthenticationInfo
+        return getDERObject().equals(otherActiveAuthenticationInfo.getDERObject())
+    }
+
+    /**
+     * Returns the hash code of this object.
+     * 
+     * @return the hash code
+     */
+    override fun hashCode(): Int {
+        return (12345
+                + 3 * (if (oid == null) 0 else oid.hashCode()) + 5 * version + 11 * (if (signatureAlgorithmOID == null) 1 else signatureAlgorithmOID.hashCode()))
+    }
+
+    /**
+     * Checks the correctness of the data for this instance of `SecurityInfo`.
+     */
+    private fun checkFields() {
+        try {
+            require(checkRequiredIdentifier(oid)) { "Wrong identifier: " + oid }
+            if (version != VERSION_1) {
+                LOGGER.warning("Wrong version: " + version)
+            }
+
+            /* FIXME check to see if signatureAlgorithmOID is valid. */
+            require(!((ECDSA_PLAIN_SHA1_OID != signatureAlgorithmOID) && (ECDSA_PLAIN_SHA224_OID != signatureAlgorithmOID) && (ECDSA_PLAIN_SHA256_OID != signatureAlgorithmOID) && (ECDSA_PLAIN_SHA384_OID != signatureAlgorithmOID) && (ECDSA_PLAIN_SHA512_OID != signatureAlgorithmOID) && (ECDSA_PLAIN_RIPEMD160_OID != signatureAlgorithmOID))) { "Wrong signature algorithm OID: " + signatureAlgorithmOID }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Malformed ActiveAuthenticationInfo", e)
+        }
+    }
+
+    /**
+     * Returns a human readable rendering of the given object identifier string.
+     * 
+     * @param oid the object identifier (dotted notation)
+     * 
+     * @return a human readable string representing the given object identifier
+     */
+    private fun toProtocolOIDString(oid: String?): String? {
+        if (SecurityInfo.Companion.ID_AA == oid) {
+            return "id-AA"
+        }
+
+        return oid
+    }
+
+    companion object {
+        private const val serialVersionUID = 6830847342039845308L
+
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd.lds")
+
+        const val VERSION_1: Int = 1
+
+        /** Specified in BSI TR 03111 Section 5.2.1.  */
+        const val ECDSA_PLAIN_SIGNATURES: String = "0.4.0.127.0.7.1.1.4.1"
+        val ECDSA_PLAIN_SHA1_OID: String =
+            ECDSA_PLAIN_SIGNATURES + ".1" /* 0.4.0.127.0.7.1.1.4.1.1, ecdsa-plain-SHA1 */
+        val ECDSA_PLAIN_SHA224_OID: String =
+            ECDSA_PLAIN_SIGNATURES + ".2" /* 0.4.0.127.0.7.1.1.4.1.2, ecdsa-plain-SHA224 */
+        val ECDSA_PLAIN_SHA256_OID: String =
+            ECDSA_PLAIN_SIGNATURES + ".3" /* 0.4.0.127.0.7.1.1.4.1.3, ecdsa-plain-SHA256 */
+        val ECDSA_PLAIN_SHA384_OID: String =
+            ECDSA_PLAIN_SIGNATURES + ".4" /* 0.4.0.127.0.7.1.1.4.1.4, ecdsa-plain-SHA384 */
+        val ECDSA_PLAIN_SHA512_OID: String =
+            ECDSA_PLAIN_SIGNATURES + ".5" /* 0.4.0.127.0.7.1.1.4.1.5, ecdsa-plain-SHA512 */
+        val ECDSA_PLAIN_RIPEMD160_OID: String =
+            ECDSA_PLAIN_SIGNATURES + ".6" /* 0.4.0.127.0.7.1.1.4.1.6, ecdsa-plain-RIPEMD160 */
+
+        /**
+         * Translates an OID string to a Java mnemonic algorithm string.
+         * 
+         * @param oid the OID string
+         * 
+         * @return a mnemonic algorithm string
+         * 
+         * @throws NoSuchAlgorithmException if the OID was not recognized
+         */
+        @Throws(NoSuchAlgorithmException::class)
+        fun lookupMnemonicByOID(oid: String?): String {
+            if (ECDSA_PLAIN_SHA1_OID == oid) {
+                return "SHA1withECDSA"
+            }
+            if (ECDSA_PLAIN_SHA224_OID == oid) {
+                return "SHA224withECDSA"
+            }
+            if (ECDSA_PLAIN_SHA256_OID == oid) {
+                return "SHA256withECDSA"
+            }
+            if (ECDSA_PLAIN_SHA384_OID == oid) {
+                return "SHA384withECDSA"
+            }
+            if (ECDSA_PLAIN_SHA512_OID == oid) {
+                return "SHA512withECDSA"
+            }
+            if (ECDSA_PLAIN_RIPEMD160_OID == oid) {
+                return "RIPEMD160withECDSA"
+            }
+
+            throw NoSuchAlgorithmException("Unknown OID " + oid)
+        }
+
+        /* ONLY NON-PUBLIC METHODS BELOW */
+        /**
+         * Checks whether the given object identifier identifies a
+         * ActiveAuthenticationInfo structure.
+         * 
+         * @param id
+         * object identifier
+         * @return true if the match is positive
+         */
+        fun checkRequiredIdentifier(id: String?): Boolean {
+            return SecurityInfo.Companion.ID_AA == id
+        }
+
+        /**
+         * Returns a human readable rendering of the given object identifier string.
+         * 
+         * @param oid the object identifier (dotted notation)
+         * 
+         * @return a human readable string representing the given object identifier
+         */
+        fun toSignatureAlgorithmOIDString(oid: String?): String? {
+            if (ECDSA_PLAIN_SHA1_OID == oid) {
+                return "ecdsa-plain-SHA1"
+            }
+            if (ECDSA_PLAIN_SHA224_OID == oid) {
+                return "ecdsa-plain-SHA224"
+            }
+            if (ECDSA_PLAIN_SHA256_OID == oid) {
+                return "ecdsa-plain-SHA256"
+            }
+            if (ECDSA_PLAIN_SHA384_OID == oid) {
+                return "ecdsa-plain-SHA384"
+            }
+            if (ECDSA_PLAIN_SHA512_OID == oid) {
+                return "ecdsa-plain-SHA512"
+            }
+            if (ECDSA_PLAIN_RIPEMD160_OID == oid) {
+                return "ecdsa-plain-RIPEMD160"
+            }
+
+            return oid
+        }
+    }
 }

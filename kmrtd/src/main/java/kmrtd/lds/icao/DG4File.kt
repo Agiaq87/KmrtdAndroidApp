@@ -19,233 +19,246 @@
  *
  * $Id: DG4File.java 1905 2025-09-25 08:49:09Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.BiometricDataBlockDecoder;
-import kmrtd.cbeff.BiometricDataBlockEncoder;
-import kmrtd.cbeff.BiometricEncodingType;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.ISO781611Decoder;
-import kmrtd.cbeff.ISO781611Encoder;
-import kmrtd.cbeff.StandardBiometricHeader;
-import kmrtd.lds.CBEFFDataGroup;
-import kmrtd.lds.iso19794.IrisInfo;
-import kmrtd.lds.iso39794.IrisImageDataBlock;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
+import kmrtd.cbeff.BiometricDataBlock
+import kmrtd.cbeff.BiometricDataBlockDecoder
+import kmrtd.cbeff.BiometricDataBlockEncoder
+import kmrtd.cbeff.BiometricEncodingType
+import kmrtd.cbeff.ISO781611
+import kmrtd.cbeff.ISO781611Decoder
+import kmrtd.cbeff.ISO781611Encoder
+import kmrtd.cbeff.StandardBiometricHeader
+import kmrtd.lds.CBEFFDataGroup
+import kmrtd.lds.LDSFile
+import kmrtd.lds.iso19794.IrisInfo
+import kmrtd.lds.iso39794.IrisImageDataBlock
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * File structure for the EF_DG4 file.
  * Based on ISO/IEC 19794-6 and ISO/IEC 39794-6.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1905 $
  */
-public class DG4File extends CBEFFDataGroup {
+class DG4File : CBEFFDataGroup {
+    /**
+     * Creates a new file with the specified records.
+     * 
+     * @param irisInfos records
+     */
+    constructor(irisInfos: MutableList<IrisInfo?>?) : this(irisInfos, true)
 
-  private static final long serialVersionUID = -1290365855823447586L;
+    /**
+     * Creates a new file with the specified records.
+     * 
+     * @param irisInfos records
+     * @param shouldAddRandomDataIfEmpty indicates whether the encoder should add random data when no templates are present
+     * 
+     */
+    @Deprecated("Use the corresponding factory method for ISO19794 instead")
+    constructor(irisInfos: MutableList<IrisInfo?>?, shouldAddRandomDataIfEmpty: Boolean) : super(
+        LDSFile.Companion.EF_DG4_TAG,
+        BiometricEncodingType.ISO_19794,
+        irisInfos,
+        shouldAddRandomDataIfEmpty
+    ) {
+        this.shouldAddRandomDataIfEmpty = shouldAddRandomDataIfEmpty
+    }
 
-  private static final ISO781611Decoder<BiometricDataBlock> DECODER = new ISO781611Decoder<BiometricDataBlock>(getDecoderMap());
+    private constructor(
+        encodingType: BiometricEncodingType?,
+        dataBlocks: MutableList<out BiometricDataBlock?>?,
+        shouldAddRandomDataIfEmpty: Boolean
+    ) : super(LDSFile.Companion.EF_DG4_TAG, encodingType, dataBlocks, shouldAddRandomDataIfEmpty)
 
-  private static Map<Integer, BiometricDataBlockDecoder<BiometricDataBlock>> getDecoderMap() {
-    Map<Integer, BiometricDataBlockDecoder<BiometricDataBlock>> decoders = new HashMap<Integer, BiometricDataBlockDecoder<BiometricDataBlock>>();
+    /**
+     * Constructs a new file based on an input stream.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException on error reading from input stream
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG4_TAG, inputStream, false)
 
-    /* 5F2E */
-    decoders.put(ISO781611.BIOMETRIC_DATA_BLOCK_TAG, new BiometricDataBlockDecoder<BiometricDataBlock>() {
-      public BiometricDataBlock decode(InputStream inputStream, StandardBiometricHeader sbh, int index, int length) throws IOException {
-        return new IrisInfo(sbh, inputStream);
-      }
-    });
+    override fun getDecoder(): ISO781611Decoder<BiometricDataBlock?> {
+        return DECODER
+    }
 
-    /* 7F2E */
-    decoders.put(ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG, new BiometricDataBlockDecoder<BiometricDataBlock>() {
-      public BiometricDataBlock decode(InputStream inputStream, StandardBiometricHeader sbh, int index, int length) throws IOException {
-        if (sbh != null && sbh.hasFormatType(StandardBiometricHeader.ISO_19794_IRIS_IMAGE_FORMAT_TYPE_VALUE)) {
-          return new IrisInfo(sbh, inputStream);
+    override fun getEncoder(): ISO781611Encoder<BiometricDataBlock?> {
+        if (encodingType == null) {
+            return ISO_19794_ENCODER
         }
-        if (sbh != null && !sbh.hasFormatType(StandardBiometricHeader.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE)) {
-          LOGGER.warning("Unexpected format type in standard biometric header " + sbh + ", assuming ISO-39794 encoding");
+        when (encodingType) {
+            BiometricEncodingType.ISO_19794 -> return ISO_19794_ENCODER
+            BiometricEncodingType.ISO_39794 -> return ISO_39794_ENCODER
+            else -> return ISO_19794_ENCODER
         }
-        TLVInputStream tlvInputStream = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-        int tag = tlvInputStream.readTag(); // 0xA1
-        if (tag != ISO781611.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG) {
-          /* ISO/IEC 39794-5 Application Profile for eMRTDs Version – 1.00: Table 2: Data Structure under DO7F2E. */
-          LOGGER.warning("Expected tag A1, found " + Integer.toHexString(tag));
+    }
+
+    /**
+     * Returns a textual representation of this file.
+     * 
+     * @return a textual representation of this file
+     */
+    override fun toString(): String {
+        return "DG4File [" + super.toString() + "]"
+    }
+
+    @get:Deprecated("Use {@link #getSubRecords()} and check with {@code instanceof} instead")
+    val irisInfos: MutableList<IrisInfo?>?
+        /**
+         * Returns the embedded iris infos in this file.
+         * 
+         * @return iris infos
+         * 
+         */
+        get() = toIrisInfos(getSubRecords())
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + (if (shouldAddRandomDataIfEmpty) 1231 else 1237)
+        return result
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
         }
-        tlvInputStream.readLength();
-        return new IrisImageDataBlock(sbh, inputStream);
-      }
-    });
+        if (!super.equals(obj)) {
+            return false
+        }
+        if (javaClass != obj!!.javaClass) {
+            return false
+        }
 
-    return decoders;
-  }
-
-  private static final ISO781611Encoder<BiometricDataBlock> ISO_19794_ENCODER = new ISO781611Encoder<BiometricDataBlock>(new BiometricDataBlockEncoder<BiometricDataBlock>() {
-
-    @Override
-    public void encode(BiometricDataBlock info, OutputStream outputStream) throws IOException {
-      if (info instanceof IrisInfo) {
-        ((IrisInfo)info).writeObject(outputStream);
-      }
+        val other = obj as DG4File
+        return shouldAddRandomDataIfEmpty == other.shouldAddRandomDataIfEmpty
     }
 
-    @Override
-    public BiometricEncodingType getEncodingType() {
-      return BiometricEncodingType.ISO_19794;
+    companion object {
+        private val serialVersionUID = -1290365855823447586L
+
+        private val DECODER: ISO781611Decoder<BiometricDataBlock?> =
+            ISO781611Decoder<BiometricDataBlock?>(
+                decoderMap
+            )
+
+        private val decoderMap: MutableMap<Int?, BiometricDataBlockDecoder<BiometricDataBlock?>?>
+            get() {
+                val decoders: MutableMap<Int?, BiometricDataBlockDecoder<BiometricDataBlock?>?> =
+                    HashMap<Int?, BiometricDataBlockDecoder<BiometricDataBlock?>?>()
+
+                /* 5F2E */
+                decoders.put(
+                    ISO781611.BIOMETRIC_DATA_BLOCK_TAG,
+                    object : BiometricDataBlockDecoder<BiometricDataBlock> {
+                        @Throws(IOException::class)
+                        override fun decode(
+                            inputStream: InputStream?,
+                            sbh: StandardBiometricHeader?,
+                            index: Int,
+                            length: Int
+                        ): BiometricDataBlock {
+                            return IrisInfo(sbh, inputStream)
+                        }
+                    })
+
+                /* 7F2E */
+                decoders.put(
+                    ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG,
+                    object : BiometricDataBlockDecoder<BiometricDataBlock> {
+                        @Throws(IOException::class)
+                        override fun decode(
+                            inputStream: InputStream?,
+                            sbh: StandardBiometricHeader?,
+                            index: Int,
+                            length: Int
+                        ): BiometricDataBlock {
+                            if (sbh != null && sbh.hasFormatType(StandardBiometricHeader.Companion.ISO_19794_IRIS_IMAGE_FORMAT_TYPE_VALUE)) {
+                                return IrisInfo(sbh, inputStream)
+                            }
+                            if (sbh != null && !sbh.hasFormatType(StandardBiometricHeader.Companion.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE)) {
+                                CBEFFDataGroup.Companion.LOGGER.warning("Unexpected format type in standard biometric header " + sbh + ", assuming ISO-39794 encoding")
+                            }
+                            val tlvInputStream =
+                                if (inputStream is TLVInputStream) inputStream else TLVInputStream(
+                                    inputStream
+                                )
+                            val tag = tlvInputStream.readTag() // 0xA1
+                            if (tag != ISO781611.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG) {
+                                /* ISO/IEC 39794-5 Application Profile for eMRTDs Version – 1.00: Table 2: Data Structure under DO7F2E. */
+                                CBEFFDataGroup.Companion.LOGGER.warning(
+                                    "Expected tag A1, found " + Integer.toHexString(
+                                        tag
+                                    )
+                                )
+                            }
+                            tlvInputStream.readLength()
+                            return IrisImageDataBlock(sbh, inputStream)
+                        }
+                    })
+
+                return decoders
+            }
+
+        private val ISO_19794_ENCODER = ISO781611Encoder<BiometricDataBlock?>(object :
+            BiometricDataBlockEncoder<BiometricDataBlock> {
+            @Throws(IOException::class)
+            override fun encode(info: BiometricDataBlock?, outputStream: OutputStream?) {
+                if (info is IrisInfo) {
+                    info.writeObject(outputStream)
+                }
+            }
+
+            val encodingType: BiometricEncodingType
+                get() = BiometricEncodingType.ISO_19794
+        })
+
+        private val ISO_39794_ENCODER = ISO781611Encoder<BiometricDataBlock?>(object :
+            BiometricDataBlockEncoder<BiometricDataBlock> {
+            @Throws(IOException::class)
+            override fun encode(info: BiometricDataBlock?, outputStream: OutputStream?) {
+                if (info is IrisImageDataBlock) {
+                    val tlvOutputStream =
+                        if (outputStream is TLVOutputStream) outputStream else TLVOutputStream(
+                            outputStream
+                        )
+                    tlvOutputStream.writeTag(0xA1)
+                    tlvOutputStream.writeValue(info.encoded)
+                }
+            }
+
+            val encodingType: BiometricEncodingType
+                get() = BiometricEncodingType.ISO_39794
+        })
+
+        fun createISO19794DG4File(irisInfos: MutableList<IrisInfo?>?): DG4File {
+            return DG4File(BiometricEncodingType.ISO_19794, irisInfos, false)
+        }
+
+        fun createISO39794DG4File(irisImageDataBlocks: MutableList<IrisImageDataBlock?>?): DG4File {
+            return DG4File(BiometricEncodingType.ISO_39794, irisImageDataBlocks, false)
+        }
+
+        private fun toIrisInfos(records: MutableList<BiometricDataBlock?>?): MutableList<IrisInfo?>? {
+            if (records == null) {
+                return null
+            }
+
+            val irisInfos: MutableList<IrisInfo?> = ArrayList<IrisInfo?>(records.size)
+            for (record in records) {
+                if (record is IrisInfo) {
+                    irisInfos.add(record)
+                }
+            }
+            return irisInfos
+        }
     }
-  });
-
-  private static final ISO781611Encoder<BiometricDataBlock> ISO_39794_ENCODER = new ISO781611Encoder<BiometricDataBlock>(new BiometricDataBlockEncoder<BiometricDataBlock>() {
-
-    @Override
-    public void encode(BiometricDataBlock info, OutputStream outputStream) throws IOException {
-      if (info instanceof IrisImageDataBlock) {
-        TLVOutputStream tlvOutputStream = outputStream instanceof TLVOutputStream ? (TLVOutputStream)outputStream : new TLVOutputStream(outputStream);
-        tlvOutputStream.writeTag(0xA1);
-        tlvOutputStream.writeValue(((IrisImageDataBlock)info).getEncoded());
-      }
-    }
-
-    @Override
-    public BiometricEncodingType getEncodingType() {
-      return BiometricEncodingType.ISO_39794;
-    }
-  });
-
-  /**
-   * Creates a new file with the specified records.
-   *
-   * @param irisInfos records
-   */
-  public DG4File(List<IrisInfo> irisInfos) {
-    this(irisInfos, true);
-  }
-
-  /**
-   * Creates a new file with the specified records.
-   *
-   * @param irisInfos records
-   * @param shouldAddRandomDataIfEmpty indicates whether the encoder should add random data when no templates are present
-   *
-   * @deprecated Use the corresponding factory method for ISO19794 instead
-   */
-  @Deprecated
-  public DG4File(List<IrisInfo> irisInfos, boolean shouldAddRandomDataIfEmpty) {
-    super(EF_DG4_TAG, BiometricEncodingType.ISO_19794, irisInfos, shouldAddRandomDataIfEmpty);
-    this.shouldAddRandomDataIfEmpty = shouldAddRandomDataIfEmpty;
-  }
-
-  private DG4File(BiometricEncodingType encodingType, List<? extends BiometricDataBlock> dataBlocks, boolean shouldAddRandomDataIfEmpty) {
-    super(EF_DG4_TAG, encodingType, dataBlocks, shouldAddRandomDataIfEmpty);
-  }
-
-  /**
-   * Constructs a new file based on an input stream.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading from input stream
-   */
-  public DG4File(InputStream inputStream) throws IOException {
-    super(EF_DG4_TAG, inputStream, false);
-  }
-
-  public static DG4File createISO19794DG4File(List<IrisInfo> irisInfos) {
-    return new DG4File(BiometricEncodingType.ISO_19794, irisInfos, false);
-  }
-
-  public static DG4File createISO39794DG4File(List<IrisImageDataBlock> irisImageDataBlocks) {
-    return new DG4File(BiometricEncodingType.ISO_39794, irisImageDataBlocks, false);
-  }
-
-  @Override
-  public ISO781611Decoder<BiometricDataBlock> getDecoder() {
-    return DECODER;
-  }
-
-  @Override
-  public ISO781611Encoder<BiometricDataBlock> getEncoder() {
-    if (encodingType == null) {
-      return ISO_19794_ENCODER;
-    }
-    switch (encodingType) {
-    case ISO_19794:
-      return ISO_19794_ENCODER;
-    case ISO_39794:
-      return ISO_39794_ENCODER;
-    default:
-      return ISO_19794_ENCODER;
-    }
-  }
-
-  /**
-   * Returns a textual representation of this file.
-   *
-   * @return a textual representation of this file
-   */
-  @Override
-  public String toString() {
-    return "DG4File [" + super.toString() + "]";
-  }
-
-  /**
-   * Returns the embedded iris infos in this file.
-   *
-   * @return iris infos
-   *
-   * @deprecated Use {@link #getSubRecords()} and check with {@code instanceof} instead
-   */
-  @Deprecated
-  public List<IrisInfo> getIrisInfos() {
-    return toIrisInfos(getSubRecords());
-  }
-
-  @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + (shouldAddRandomDataIfEmpty ? 1231 : 1237);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!super.equals(obj)) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-
-    DG4File other = (DG4File)obj;
-    return shouldAddRandomDataIfEmpty == other.shouldAddRandomDataIfEmpty;
-  }
-
-  private static List<IrisInfo> toIrisInfos(List<BiometricDataBlock> records) {
-    if (records == null) {
-      return null;
-    }
-
-    List<IrisInfo> irisInfos = new ArrayList<IrisInfo>(records.size());
-    for (BiometricDataBlock record: records) {
-      if (record instanceof IrisInfo) {
-        irisInfos.add((IrisInfo)record);
-      }
-    }
-    return irisInfos;
-  }
 }

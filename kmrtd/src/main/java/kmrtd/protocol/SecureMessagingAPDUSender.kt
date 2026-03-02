@@ -19,215 +19,248 @@
  *
  * $Id: SecureMessagingAPDUSender.java 1841 2020-09-18 19:11:27Z martijno $
  */
+package kmrtd.protocol
 
-package kmrtd.protocol;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import kmrtd.Util;
-import kmrtd.WrappedAPDUEvent;
-
-import net.sf.scuba.smartcards.APDUEvent;
-import net.sf.scuba.smartcards.APDUListener;
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CardService;
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.smartcards.CommandAPDU;
-import net.sf.scuba.smartcards.ISO7816;
-import net.sf.scuba.smartcards.ResponseAPDU;
-import net.sf.scuba.util.Hex;
+import kmrtd.Util
+import kmrtd.WrappedAPDUEvent
+import net.sf.scuba.smartcards.APDUEvent
+import net.sf.scuba.smartcards.APDUListener
+import net.sf.scuba.smartcards.APDUWrapper
+import net.sf.scuba.smartcards.CardService
+import net.sf.scuba.smartcards.CardServiceException
+import net.sf.scuba.smartcards.CommandAPDU
+import net.sf.scuba.smartcards.ISO7816
+import net.sf.scuba.smartcards.ResponseAPDU
+import net.sf.scuba.util.Hex
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * An APDU sender for tranceiving wrapped APDUs.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1841 $
- *
+ * 
  * @since 0.7.0
  */
-public class SecureMessagingAPDUSender {
+class SecureMessagingAPDUSender(service: CardService) {
+    private val service: CardService
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd.protocol");
+    private var apduCount: Int
 
-  private CardService service;
-
-  private int apduCount;
-
-  /**
-   * Creates an APDU sender for tranceiving wrapped APDUs.
-   *
-   * @param service the card service for tranceiving the APDUs
-   */
-  public SecureMessagingAPDUSender(CardService service) {
-    this.service = service;
-    this.apduCount = 0;
-  }
-
-  /**
-   * Transmits an APDU.
-   *
-   * @param wrapper the secure messaging wrapper
-   * @param commandAPDU the APDU to send
-   *
-   * @return the APDU received from the PICC
-   *
-   * @throws CardServiceException if tranceiving failed
-   */
-  public ResponseAPDU transmit(APDUWrapper wrapper, CommandAPDU commandAPDU) throws CardServiceException {
-    CommandAPDU plainCapdu = commandAPDU;
-    if (wrapper != null) {
-      commandAPDU = wrapper.wrap(commandAPDU);
+    /**
+     * Creates an APDU sender for tranceiving wrapped APDUs.
+     * 
+     * @param service the card service for tranceiving the APDUs
+     */
+    init {
+        this.service = service
+        this.apduCount = 0
     }
-    ResponseAPDU responseAPDU = service.transmit(commandAPDU);
-    ResponseAPDU rawRapdu = responseAPDU;
-    short sw = (short)responseAPDU.getSW();
-    if (wrapper == null) {
-      notifyExchangedAPDU(new APDUEvent(this, "PLAIN", ++apduCount, commandAPDU, responseAPDU));
-    } else {
-      try {
-        if ((sw & ISO7816.SW_WRONG_LENGTH) == ISO7816.SW_WRONG_LENGTH) {
-          return responseAPDU;
+
+    /**
+     * Transmits an APDU.
+     * 
+     * @param wrapper the secure messaging wrapper
+     * @param commandAPDU the APDU to send
+     * 
+     * @return the APDU received from the PICC
+     * 
+     * @throws CardServiceException if tranceiving failed
+     */
+    @Throws(CardServiceException::class)
+    fun transmit(wrapper: APDUWrapper?, commandAPDU: CommandAPDU): ResponseAPDU {
+        var commandAPDU = commandAPDU
+        val plainCapdu = commandAPDU
+        if (wrapper != null) {
+            commandAPDU = wrapper.wrap(commandAPDU)
         }
-        if (responseAPDU.getBytes().length <= 2) {
-          throw new CardServiceException("Exception during transmission of wrapped APDU"
-              + ", C=" + Hex.bytesToHexString(plainCapdu.getBytes()), sw);
+        var responseAPDU = service.transmit(commandAPDU)
+        val rawRapdu: ResponseAPDU? = responseAPDU
+        val sw = responseAPDU.getSW().toShort()
+        if (wrapper == null) {
+            notifyExchangedAPDU(APDUEvent(this, "PLAIN", ++apduCount, commandAPDU, responseAPDU))
+        } else {
+            try {
+                if ((sw.toInt() and ISO7816.SW_WRONG_LENGTH.toInt()) == ISO7816.SW_WRONG_LENGTH.toInt()) {
+                    return responseAPDU
+                }
+                if (responseAPDU.getBytes().size <= 2) {
+                    throw CardServiceException(
+                        ("Exception during transmission of wrapped APDU"
+                                + ", C=" + Hex.bytesToHexString(plainCapdu.getBytes())), sw.toInt()
+                    )
+                }
+
+                responseAPDU = wrapper.unwrap(responseAPDU)
+            } catch (cse: CardServiceException) {
+                throw cse
+            } catch (e: Exception) {
+                throw CardServiceException(
+                    ("Exception during transmission of wrapped APDU"
+                            + ", C=" + Hex.bytesToHexString(plainCapdu.getBytes())), e, sw.toInt()
+                )
+            } finally {
+                notifyExchangedAPDU(
+                    WrappedAPDUEvent(
+                        this,
+                        wrapper.getType(),
+                        ++apduCount,
+                        plainCapdu,
+                        responseAPDU,
+                        commandAPDU,
+                        rawRapdu
+                    )
+                )
+            }
         }
 
-        responseAPDU = wrapper.unwrap(responseAPDU);
-      } catch (CardServiceException cse) {
-        throw cse;
-      } catch (Exception e) {
-        throw new CardServiceException("Exception during transmission of wrapped APDU"
-            + ", C=" + Hex.bytesToHexString(plainCapdu.getBytes()), e, sw);
-      } finally {
-        notifyExchangedAPDU(new WrappedAPDUEvent(this, wrapper.getType(), ++apduCount, plainCapdu, responseAPDU, commandAPDU, rawRapdu));
-      }
+        return responseAPDU
     }
 
-    return responseAPDU;
-  }
+    val isExtendedAPDULengthSupported: Boolean
+        /**
+         * Returns a boolean indicating whether extended length APDUs are supported.
+         * 
+         * @return a boolean indicating whether extended length APDUs are supported
+         */
+        get() = service.isExtendedAPDULengthSupported()
 
-  /**
-   * Returns a boolean indicating whether extended length APDUs are supported.
-   *
-   * @return a boolean indicating whether extended length APDUs are supported
-   */
-  public boolean isExtendedAPDULengthSupported() {
-    return service.isExtendedAPDULengthSupported();
-  }
-
-  /**
-   * Adds a listener.
-   *
-   * @param l the listener to add
-   */
-  public void addAPDUListener(APDUListener l) {
-    service.addAPDUListener(l);
-  }
-
-  /**
-   * Removes a listener.
-   * If the specified listener is not present, this method has no effect.
-   *
-   * @param l the listener to remove
-   */
-  public void removeAPDUListener(APDUListener l) {
-    service.removeAPDUListener(l);
-  }
-
-  /**
-   * Notifies listeners about APDU event.
-   *
-   * @param event the APDU event
-   */
-  protected void notifyExchangedAPDU(APDUEvent event) {
-    Collection<APDUListener> apduListeners = service.getAPDUListeners();
-    if (apduListeners == null || apduListeners.isEmpty()) {
-      return;
+    /**
+     * Adds a listener.
+     * 
+     * @param l the listener to add
+     */
+    fun addAPDUListener(l: APDUListener?) {
+        service.addAPDUListener(l)
     }
 
-    for (APDUListener listener: apduListeners) {
-      listener.exchangedAPDU(event);
-    }
-  }
-
-  /* EXPERIMENTAL CODE BELOW */
-
-  /**
-   * Sends a (lengthy) command APDU using command chaining as described in ISO 7816-4 5.3.3.
-   *
-   * @param commandAPDU the command APDU to send
-   * @param chunkSize the maximum size of data within each APDU
-   *
-   * @return the resulting response APDUs that were received
-   *
-   * @throws CardServiceException on error while sending
-   */
-  private List<ResponseAPDU> sendUsingCommandChaining(CommandAPDU commandAPDU, int chunkSize) throws CardServiceException {
-    byte[] data = commandAPDU.getData();
-    List<byte[]> segments = Util.partition(chunkSize, data);
-    List<ResponseAPDU> responseAPDUs = new ArrayList<ResponseAPDU>(segments.size());
-    int index = 0;
-    for (byte[] segment: segments) {
-      boolean isLast = ++index >= segments.size();
-      int cla = commandAPDU.getCLA();
-      if (!isLast) {
-        cla |= ISO7816.CLA_COMMAND_CHAINING;
-      }
-      CommandAPDU partialCommandAPDU = new CommandAPDU(cla, commandAPDU.getINS(), commandAPDU.getP1(), commandAPDU.getP2(), segment, commandAPDU.getNe());
-      ResponseAPDU responseAPDU = service.transmit(partialCommandAPDU);
-      responseAPDUs.add(responseAPDU);
+    /**
+     * Removes a listener.
+     * If the specified listener is not present, this method has no effect.
+     * 
+     * @param l the listener to remove
+     */
+    fun removeAPDUListener(l: APDUListener?) {
+        service.removeAPDUListener(l)
     }
 
-    return responseAPDUs;
-  }
-
-  /**
-   * Response chaining as described in ISO 7816-4 Section 5.3.4.
-   * This will send additional {@code GET RESPONSE} APDUs.
-   *
-   * @param wrapper a secure messaging wrapper
-   * @param sw the status word of the first APDU, of which the first byte is {@code 0x61}
-   * @param data the data of the first response APDU
-   *
-   * @return the total amount of data
-   *
-   * @throws CardServiceException on error while sending
-   */
-  private byte[] continueSendingUsingResponseChaining(APDUWrapper wrapper, short sw, byte[] data) throws CardServiceException {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try {
-      while ((sw & 0xFF00) == 0x6100) {
-        /* More bytes remaining. */
-        byteArrayOutputStream.write(data);
-
-        int remainingLength = sw & 0xFF;
-        if (remainingLength <= 0) {
-          break;
+    /**
+     * Notifies listeners about APDU event.
+     * 
+     * @param event the APDU event
+     */
+    protected fun notifyExchangedAPDU(event: APDUEvent?) {
+        val apduListeners = service.getAPDUListeners()
+        if (apduListeners == null || apduListeners.isEmpty()) {
+            return
         }
-        CommandAPDU capdu = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_GET_RESPONSE, 0x00, 0x00, remainingLength);
-        ResponseAPDU rapdu = transmit(wrapper, capdu);
-        data = rapdu.getData();
-        sw = (short)rapdu.getSW();
-      }
 
-      return byteArrayOutputStream.toByteArray();
-    } catch (IOException ioe) {
-      /* NOTE: Unlikely, we can always write to in-memory stream. */
-      throw new CardServiceException("Could not write to stream", ioe, sw);
-    } finally {
-      try {
-        byteArrayOutputStream.close();
-      } catch (IOException ioe) {
-        LOGGER.log(Level.FINE, "Error closing stream", ioe);
-      }
+        for (listener in apduListeners) {
+            listener.exchangedAPDU(event)
+        }
     }
-  }
+
+    /* EXPERIMENTAL CODE BELOW */
+    /**
+     * Sends a (lengthy) command APDU using command chaining as described in ISO 7816-4 5.3.3.
+     * 
+     * @param commandAPDU the command APDU to send
+     * @param chunkSize the maximum size of data within each APDU
+     * 
+     * @return the resulting response APDUs that were received
+     * 
+     * @throws CardServiceException on error while sending
+     */
+    @Throws(CardServiceException::class)
+    private fun sendUsingCommandChaining(
+        commandAPDU: CommandAPDU,
+        chunkSize: Int
+    ): MutableList<ResponseAPDU?> {
+        val data = commandAPDU.getData()
+        val segments = Util.partition(chunkSize, data)
+        val responseAPDUs: MutableList<ResponseAPDU?> = ArrayList<ResponseAPDU?>(segments.size)
+        var index = 0
+        for (segment in segments) {
+            val isLast = ++index >= segments.size
+            var cla = commandAPDU.getCLA()
+            if (!isLast) {
+                cla = cla or ISO7816.CLA_COMMAND_CHAINING.toInt()
+            }
+            val partialCommandAPDU = CommandAPDU(
+                cla,
+                commandAPDU.getINS(),
+                commandAPDU.getP1(),
+                commandAPDU.getP2(),
+                segment,
+                commandAPDU.getNe()
+            )
+            val responseAPDU = service.transmit(partialCommandAPDU)
+            responseAPDUs.add(responseAPDU)
+        }
+
+        return responseAPDUs
+    }
+
+    /**
+     * Response chaining as described in ISO 7816-4 Section 5.3.4.
+     * This will send additional `GET RESPONSE` APDUs.
+     * 
+     * @param wrapper a secure messaging wrapper
+     * @param sw the status word of the first APDU, of which the first byte is `0x61`
+     * @param data the data of the first response APDU
+     * 
+     * @return the total amount of data
+     * 
+     * @throws CardServiceException on error while sending
+     */
+    @Throws(CardServiceException::class)
+    private fun continueSendingUsingResponseChaining(
+        wrapper: APDUWrapper?,
+        sw: Short,
+        data: ByteArray
+    ): ByteArray {
+        var sw = sw
+        var data = data
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        try {
+            while ((sw.toInt() and 0xFF00) == 0x6100) {
+                /* More bytes remaining. */
+                byteArrayOutputStream.write(data)
+
+                val remainingLength = sw.toInt() and 0xFF
+                if (remainingLength <= 0) {
+                    break
+                }
+                val capdu = CommandAPDU(
+                    ISO7816.CLA_ISO7816.toInt(),
+                    ISO7816.INS_GET_RESPONSE.toInt(),
+                    0x00,
+                    0x00,
+                    remainingLength
+                )
+                val rapdu = transmit(wrapper, capdu)
+                data = rapdu.getData()
+                sw = rapdu.getSW().toShort()
+            }
+
+            return byteArrayOutputStream.toByteArray()
+        } catch (ioe: IOException) {
+            /* NOTE: Unlikely, we can always write to in-memory stream. */
+            throw CardServiceException("Could not write to stream", ioe, sw.toInt())
+        } finally {
+            try {
+                byteArrayOutputStream.close()
+            } catch (ioe: IOException) {
+                LOGGER.log(Level.FINE, "Error closing stream", ioe)
+            }
+        }
+    }
+
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd.protocol")
+    }
 }

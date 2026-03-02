@@ -32,510 +32,387 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import kmrtd.cbeff.CBEFFInfo
+import kmrtd.lds.ImageInfo
+import kmrtd.lds.iso39794.FingerImageAnnotationBlock.Companion.decodeFingerImageAnnotationBlocks
+import kmrtd.lds.iso39794.FingerImageSegmentationBlock.Companion.decodeFingerImageSegmentationBlocks
+import kmrtd.lds.iso39794.QualityBlock.Companion.decodeQualityBlocks
+import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode
+import kmrtd.lds.iso39794.fingerimage.ImageDataFormatCode
+import kmrtd.lds.iso39794.fingerimage.ImpressionCode
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1OctetString
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.ASN1VisibleString
+import org.bouncycastle.asn1.DEROctetString
+import org.bouncycastle.asn1.DERSequence
+import org.bouncycastle.asn1.DERVisibleString
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.util.Objects
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1VisibleString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERVisibleString;
+data class FingerImageRepresentationBlock(
+    val position: FingerImagePositionCode?,
+    val impression: ImpressionCode?,
+    val imageDataFormat: ImageDataFormatCode?,
+    val captureDateTimeBlock: DateTimeBlock?,
+    val captureDeviceBlock: FingerImageCaptureDeviceBlock?,
+    val qualityBlocks: List<QualityBlock>?,
+    val spatialSamplingRateBlock: FingerImageSpatialSamplingRateBlock?,
+    val isPositionComputedByCaptureSystem: Boolean?,
+    /** INTEGER (0..359)  */
+    val fingerRotation: Int?,
+    val isImageRotatedToVertical: Boolean?,
+    val isImageHasBeenLossilyCompressed: Boolean?,
+    val segmentationBlocks: List<FingerImageSegmentationBlock>?,
+    val annotationBlocks: List<FingerImageAnnotationBlock>?,
+    val padDataBlock: PADDataBlock?,
+    private val imageData: ByteArray,
+    val commentBlocks: List<String>?,
+    val vendorSpecificDataBlocks: List<ExtendedDataBlock>?,
+) : Block(), ImageInfo {
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
-import kmrtd.ASN1Util;
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.lds.ImageInfo;
-import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode;
-import kmrtd.lds.iso39794.fingerimage.ImageDataFormatCode;
-import kmrtd.lds.iso39794.fingerimage.ImpressionCode;
-
-public class FingerImageRepresentationBlock extends Block implements ImageInfo {
-
-  private static final long serialVersionUID = -9136319709147388829L;
-
-  private final FingerImagePositionCode position;
-
-  private final ImpressionCode impression;
-
-  private final ImageDataFormatCode imageDataFormat;
-
-  private DateTimeBlock captureDateTimeBlock;
-
-  private FingerImageCaptureDeviceBlock captureDeviceBlock;
-
-  private List<QualityBlock> qualityBlocks;
-
-  private FingerImageSpatialSamplingRateBlock spatialSamplingRateBlock;
-
-  private Boolean isPositionComputedByCaptureSystem;
-
-  /** INTEGER (0..359) */
-  private Integer fingerRotation;
-
-  private Boolean isImageRotatedToVertical;
-
-  private Boolean isImageHasBeenLossilyCompressed;
-
-  private List<FingerImageSegmentationBlock> segmentationBlocks;
-
-  private List<FingerImageAnnotationBlock> annotationBlocks;
-
-  private PADDataBlock padDataBlock;
-
-  private final byte[] imageData;
-
-  private List<String> commentBlocks;
-
-  private List<ExtendedDataBlock> vendorSpecificDataBlocks;
-
-  public FingerImageRepresentationBlock(FingerImagePositionCode position, ImpressionCode impression,
-      ImageDataFormatCode imageDataFormat, DateTimeBlock captureDateTimeBlock,
-      FingerImageCaptureDeviceBlock captureDeviceBlock, List<QualityBlock> qualityBlocks,
-      FingerImageSpatialSamplingRateBlock spatialSamplingRateBlock, Boolean isPositionComputedByCaptureSystem,
-      Integer fingerRotation, Boolean isImageRotatedToVertical, Boolean isImageHasBeenLossilyCompressed,
-      List<FingerImageSegmentationBlock> segmentationBlocks, List<FingerImageAnnotationBlock> annotationBlocks,
-      PADDataBlock padDataBlock, byte[] imageData, List<String> commentBlocks,
-      List<ExtendedDataBlock> vendorSpecificDataBlocks) {
-    this.position = position;
-    this.impression = impression;
-    this.imageDataFormat = imageDataFormat;
-    this.captureDateTimeBlock = captureDateTimeBlock;
-    this.captureDeviceBlock = captureDeviceBlock;
-    this.qualityBlocks = qualityBlocks;
-    this.spatialSamplingRateBlock = spatialSamplingRateBlock;
-    this.isPositionComputedByCaptureSystem = isPositionComputedByCaptureSystem;
-    this.fingerRotation = fingerRotation;
-    this.isImageRotatedToVertical = isImageRotatedToVertical;
-    this.isImageHasBeenLossilyCompressed = isImageHasBeenLossilyCompressed;
-    this.segmentationBlocks = segmentationBlocks;
-    this.annotationBlocks = annotationBlocks;
-    this.padDataBlock = padDataBlock;
-    this.imageData = imageData;
-    this.commentBlocks = commentBlocks;
-    this.vendorSpecificDataBlocks = vendorSpecificDataBlocks;
-  }
-
-  //  RepresentationBlock ::= SEQUENCE {
-  //    position [0] Position,
-  //    impression [1] Impression,
-  //    imageDataFormat [2] ImageDataFormat,
-  //    imageData [3] OCTET STRING,
-  //    captureDateTimeBlock [4] CaptureDateTimeBlock OPTIONAL,
-  //    captureDeviceBlock [5] CaptureDeviceBlock OPTIONAL,
-  //    qualityBlocks [6] QualityBlocks OPTIONAL,
-  //    spatialSamplingRateBlock [7] SpatialSamplingRateBlock OPTIONAL,
-  //    positionComputedByCaptureSystem [8] BOOLEAN OPTIONAL,
-  //    originalRotation [9] FingerRotation OPTIONAL,
-  //    imageRotatedToVertical [10] BOOLEAN OPTIONAL,
-  //    imageHasBeenLossilyCompressed [11] BOOLEAN OPTIONAL,
-  //    segmentationBlocks [12] SegmentationBlocks OPTIONAL,
-  //    annotationBlocks [13] AnnotationBlocks OPTIONAL,
-  //    pADDataBlock [14] PADDataBlock OPTIONAL,
-  //    commentBlocks [15] CommentBlocks OPTIONAL,
-  //    vendorSpecificDataBlocks [16] VendorSpecificDataBlocks OPTIONAL,
-  //    ...
-  //  }
-
-  FingerImageRepresentationBlock(ASN1Encodable asn1Encodable) {
-    if (asn1Encodable == null) {
-      throw new IllegalArgumentException("Cannot decode!");
-    }
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    position = FingerImagePositionCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(0)));
-    impression = ImpressionCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(1)));
-    imageDataFormat = ImageDataFormatCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(2)));
-    imageData = (ASN1OctetString.getInstance(taggedObjects.get(3))).getOctets();
-    if (taggedObjects.containsKey(4)) {
-      captureDateTimeBlock = DateTimeBlock.from(taggedObjects.get(4));
-    }
-    if (taggedObjects.containsKey(5)) {
-      captureDeviceBlock = new FingerImageCaptureDeviceBlock(taggedObjects.get(5));
-    }
-    if (taggedObjects.containsKey(6)) {
-      qualityBlocks = QualityBlock.decodeQualityBlocks(taggedObjects.get(6));
-    }
-    if (taggedObjects.containsKey(7)) {
-      spatialSamplingRateBlock = new FingerImageSpatialSamplingRateBlock(taggedObjects.get(7));
-    }
-    if (taggedObjects.containsKey(8)) {
-      isPositionComputedByCaptureSystem = ASN1Util.decodeBoolean(taggedObjects.get(8));
-    }
-    if (taggedObjects.containsKey(9)) {
-      fingerRotation = ASN1Util.decodeInt(taggedObjects.get(9));
-    }
-    if (taggedObjects.containsKey(10)) {
-      isImageRotatedToVertical = ASN1Util.decodeBoolean(taggedObjects.get(10));
-    }
-    if (taggedObjects.containsKey(11)) {
-      isImageHasBeenLossilyCompressed = ASN1Util.decodeBoolean(taggedObjects.get(11));
-    }
-    if (taggedObjects.containsKey(12)) {
-      segmentationBlocks = FingerImageSegmentationBlock.decodeFingerImageSegmentationBlocks(taggedObjects.get(12));
-    }
-    if (taggedObjects.containsKey(13)) {
-      annotationBlocks = FingerImageAnnotationBlock.decodeFingerImageAnnotationBlocks(taggedObjects.get(13));
-    }
-    if (taggedObjects.containsKey(14)) {
-      padDataBlock = PADDataBlock.from(taggedObjects.get(14));
-    }
-    if (taggedObjects.containsKey(15)) {
-      commentBlocks = decodeCommentBlocks(taggedObjects.get(15));
-    }
-    if (taggedObjects.containsKey(16)) {
-      vendorSpecificDataBlocks = ExtendedDataBlock.decodeExtendedDataBlocks(taggedObjects.get(16));
-    }
-  }
-
-  public FingerImagePositionCode getPosition() {
-    return position;
-  }
-
-  public ImpressionCode getImpression() {
-    return impression;
-  }
-
-  public FingerImageCaptureDeviceBlock getCaptureDeviceBlock() {
-    return captureDeviceBlock;
-  }
-
-  public DateTimeBlock getCaptureDateTimeBlock() {
-    return captureDateTimeBlock;
-  }
-
-  public ImageDataFormatCode getImageDataFormat() {
-    return imageDataFormat;
-  }
-
-  public List<QualityBlock> getQualityBlocks() {
-    return qualityBlocks;
-  }
-
-  public FingerImageSpatialSamplingRateBlock getSpatialSamplingRateBlock() {
-    return spatialSamplingRateBlock;
-  }
-
-  public Boolean isPositionComputedByCaptureSystem() {
-    return isPositionComputedByCaptureSystem;
-  }
-
-  public Integer getFingerRotation() {
-    return fingerRotation;
-  }
-
-  public Boolean getIsImageRotatedToVertical() {
-    return isImageRotatedToVertical;
-  }
-
-  public Boolean getIsImageHasBeenLossilyCompressed() {
-    return isImageHasBeenLossilyCompressed;
-  }
-
-  public List<FingerImageSegmentationBlock> getSegmentationBlocks() {
-    return segmentationBlocks;
-  }
-
-  public PADDataBlock getPadDataBlock() {
-    return padDataBlock;
-  }
-
-  public List<FingerImageAnnotationBlock> getAnnotationBlocks() {
-    return annotationBlocks;
-  }
-
-  public List<String> getCommentBlocks() {
-    return commentBlocks;
-  }
-
-  public List<ExtendedDataBlock> getVendorSpecificDataBlocks() {
-    return vendorSpecificDataBlocks;
-  }
-
-  public byte[] geImageData() {
-    return imageData;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(imageData);
-    result = prime * result + Objects.hash(annotationBlocks, captureDateTimeBlock, captureDeviceBlock, commentBlocks,
-        fingerRotation, imageDataFormat, impression, isImageHasBeenLossilyCompressed, isImageRotatedToVertical,
-        isPositionComputedByCaptureSystem, padDataBlock, position, qualityBlocks, segmentationBlocks,
-        spatialSamplingRateBlock, vendorSpecificDataBlocks);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    //  RepresentationBlock ::= SEQUENCE {
+    //    position [0] Position,
+    //    impression [1] Impression,
+    //    imageDataFormat [2] ImageDataFormat,
+    //    imageData [3] OCTET STRING,
+    //    captureDateTimeBlock [4] CaptureDateTimeBlock OPTIONAL,
+    //    captureDeviceBlock [5] CaptureDeviceBlock OPTIONAL,
+    //    qualityBlocks [6] QualityBlocks OPTIONAL,
+    //    spatialSamplingRateBlock [7] SpatialSamplingRateBlock OPTIONAL,
+    //    positionComputedByCaptureSystem [8] BOOLEAN OPTIONAL,
+    //    originalRotation [9] FingerRotation OPTIONAL,
+    //    imageRotatedToVertical [10] BOOLEAN OPTIONAL,
+    //    imageHasBeenLossilyCompressed [11] BOOLEAN OPTIONAL,
+    //    segmentationBlocks [12] SegmentationBlocks OPTIONAL,
+    //    annotationBlocks [13] AnnotationBlocks OPTIONAL,
+    //    pADDataBlock [14] PADDataBlock OPTIONAL,
+    //    commentBlocks [15] CommentBlocks OPTIONAL,
+    //    vendorSpecificDataBlocks [16] VendorSpecificDataBlocks OPTIONAL,
+    //    ...
+    //  }
+    internal constructor(asn1Encodable: ASN1Encodable) {
+        requireNotNull(asn1Encodable) { "Cannot decode!" }
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        position = FingerImagePositionCode.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[0])
+        )
+        impression = ImpressionCode.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[1])
+        )
+        imageDataFormat = ImageDataFormatCode.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[2])
+        )
+        imageData = (ASN1OctetString.getInstance(taggedObjects[3])).octets
+        if (taggedObjects.containsKey(4)) {
+            captureDateTimeBlock = DateTimeBlock.from(taggedObjects[4])
+        }
+        if (taggedObjects.containsKey(5)) {
+            captureDeviceBlock = FingerImageCaptureDeviceBlock.from(taggedObjects[5])
+        }
+        if (taggedObjects.containsKey(6)) {
+            qualityBlocks = decodeQualityBlocks(taggedObjects[6])
+        }
+        if (taggedObjects.containsKey(7)) {
+            spatialSamplingRateBlock = FingerImageSpatialSamplingRateBlock(taggedObjects[7])
+        }
+        if (taggedObjects.containsKey(8)) {
+            isPositionComputedByCaptureSystem = ASN1Util.decodeBoolean(taggedObjects[8])
+        }
+        if (taggedObjects.containsKey(9)) {
+            fingerRotation = ASN1Util.decodeInt(taggedObjects[9])
+        }
+        if (taggedObjects.containsKey(10)) {
+            isImageRotatedToVertical = ASN1Util.decodeBoolean(taggedObjects[10])
+        }
+        if (taggedObjects.containsKey(11)) {
+            isImageHasBeenLossilyCompressed = ASN1Util.decodeBoolean(taggedObjects[11])
+        }
+        if (taggedObjects.containsKey(12)) {
+            segmentationBlocks = decodeFingerImageSegmentationBlocks(taggedObjects.get(12))
+        }
+        if (taggedObjects.containsKey(13)) {
+            annotationBlocks = decodeFingerImageAnnotationBlocks(taggedObjects[13])
+        }
+        if (taggedObjects.containsKey(14)) {
+            padDataBlock = PADDataBlock.from(taggedObjects[14])
+        }
+        if (taggedObjects.containsKey(15)) {
+            commentBlocks = decodeCommentBlocks(taggedObjects[15])
+        }
+        if (taggedObjects.containsKey(16)) {
+            vendorSpecificDataBlocks =
+                ExtendedDataBlock.decodeExtendedDataBlocks(taggedObjects[16]!!)
+        }
     }
 
-    FingerImageRepresentationBlock other = (FingerImageRepresentationBlock) obj;
-    return Objects.equals(annotationBlocks, other.annotationBlocks)
-        && Objects.equals(captureDateTimeBlock, other.captureDateTimeBlock)
-        && Objects.equals(captureDeviceBlock, other.captureDeviceBlock)
-        && Objects.equals(commentBlocks, other.commentBlocks) && Objects.equals(fingerRotation, other.fingerRotation)
-        && Arrays.equals(imageData, other.imageData) && imageDataFormat == other.imageDataFormat
-        && impression == other.impression
-        && Objects.equals(isImageHasBeenLossilyCompressed, other.isImageHasBeenLossilyCompressed)
-        && Objects.equals(isImageRotatedToVertical, other.isImageRotatedToVertical)
-        && Objects.equals(isPositionComputedByCaptureSystem, other.isPositionComputedByCaptureSystem)
-        && Objects.equals(padDataBlock, other.padDataBlock) && position == other.position
-        && Objects.equals(qualityBlocks, other.qualityBlocks)
-        && Objects.equals(segmentationBlocks, other.segmentationBlocks)
-        && Objects.equals(spatialSamplingRateBlock, other.spatialSamplingRateBlock)
-        && Objects.equals(vendorSpecificDataBlocks, other.vendorSpecificDataBlocks);
-  }
+    /*fun geImageData(): ByteArray {
+        return imageData
+    }*/
 
-  @Override
-  public String toString() {
-    return "FingerImageRepresentationBlock ["
-        + "position: " + position
-        + ", impression: " + impression
-        + ", imageDataFormat: " + imageDataFormat
-        + ", captureDateTimeBlock: " + captureDateTimeBlock
-        + ", captureDeviceBlock: " + captureDeviceBlock
-        + ", qualityBlocks: " + qualityBlocks
-        + ", spatialSamplingRateBlock: " + spatialSamplingRateBlock
-        + ", isPositionComputedByCaptureSystem: " + isPositionComputedByCaptureSystem
-        + ", fingerRotation: " + fingerRotation
-        + ", isImageRotatedToVertical: " + isImageRotatedToVertical
-        + ", isImageHasBeenLossilyCompressed: " + isImageHasBeenLossilyCompressed
-        + ", segmentationBlocks: " + segmentationBlocks
-        + ", annotationBlocks: " + annotationBlocks
-        + ", padDataBlock: " + padDataBlock
-        + ", imageData: " + imageData.length
-        + ", commentBlocks: " + commentBlocks
-        + ", vendorSpecificDataBlocks: " + vendorSpecificDataBlocks
-        + "]";
-  }
-
-  @Override
-  public int getType() {
-    return TYPE_FINGER;
-  }
-
-  @Override
-  public String getMimeType() {
-    if (imageDataFormat == null) {
-      return "image/raw";
-    }
-    return imageDataFormat.getMimeType();
-  }
-
-  @Override
-  public int getWidth() {
-    return 0;
-  }
-
-  @Override
-  public int getHeight() {
-    return 0;
-  }
-
-  @Override
-  public long getRecordLength() {
-    return 0;
-  }
-
-  @Override
-  public int getImageLength() {
-    return imageData.length;
-  }
-
-  @Override
-  public InputStream getImageInputStream() {
-    return new ByteArrayInputStream(imageData);
-  }
-
-  /* PACKAGE */
-
-  /**
-   * Returns the biometric sub-type.
-   *
-   * @return the ICAO/CBEFF (BHT) biometric sub-type
-   */
-  int getBiometricSubtype() {
-    return toBiometricSubtype(position);
-  }
-
-  private static List<String> decodeCommentBlocks(ASN1Encodable asn1Encodable) {
-    if (asn1Encodable instanceof ASN1Sequence) {
-      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
-      List<String> blocks = new ArrayList<String>(blockASN1Objects.size());
-      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
-        blocks.add(ASN1VisibleString.getInstance(blockASN1Object).getString());
-      }
-      return blocks;
-    } else if (asn1Encodable instanceof ASN1VisibleString) {
-      return Collections.singletonList(ASN1VisibleString.getInstance(asn1Encodable).getString());
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = 1
+        result = prime * result + imageData.contentHashCode()
+        result = prime * result + Objects.hash(
+            annotationBlocks,
+            captureDateTimeBlock,
+            captureDeviceBlock,
+            commentBlocks,
+            fingerRotation,
+            imageDataFormat,
+            impression,
+            isImageHasBeenLossilyCompressed,
+            isImageRotatedToVertical,
+            isPositionComputedByCaptureSystem,
+            padDataBlock,
+            position,
+            qualityBlocks,
+            segmentationBlocks,
+            spatialSamplingRateBlock,
+            vendorSpecificDataBlocks
+        )
+        return result
     }
 
-    //LOGGER.warning("Cannot decode comment blocks!");
-    return null;
-  }
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
 
-  static List<FingerImageRepresentationBlock> decodeRepresentationBlocks(ASN1Encodable asn1Encodable) {
-    List<FingerImageRepresentationBlock> blocks = new ArrayList<FingerImageRepresentationBlock>();
-    if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
-      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
-        blocks.add(new FingerImageRepresentationBlock(blockASN1Object));
-      }
-    } else {
-      blocks.add(new FingerImageRepresentationBlock(asn1Encodable));
+        val other = obj as FingerImageRepresentationBlock
+        return annotationBlocks == other.annotationBlocks
+                && captureDateTimeBlock == other.captureDateTimeBlock
+                && captureDeviceBlock == other.captureDeviceBlock
+                && commentBlocks == other.commentBlocks && fingerRotation == other.fingerRotation
+                && imageData.contentEquals(other.imageData) && imageDataFormat == other.imageDataFormat && impression == other.impression && isImageHasBeenLossilyCompressed == other.isImageHasBeenLossilyCompressed
+                && isImageRotatedToVertical == other.isImageRotatedToVertical
+                && isPositionComputedByCaptureSystem == other.isPositionComputedByCaptureSystem
+                && padDataBlock == other.padDataBlock && position == other.position && qualityBlocks == other.qualityBlocks
+                && segmentationBlocks == other.segmentationBlocks
+                && spatialSamplingRateBlock == other.spatialSamplingRateBlock
+                && vendorSpecificDataBlocks == other.vendorSpecificDataBlocks
     }
 
-    return blocks;
-  }
+    /*override fun toString(): String {
+        return ("FingerImageRepresentationBlock ["
+                + "position: " + position
+                + ", impression: " + impression
+                + ", imageDataFormat: " + imageDataFormat
+                + ", captureDateTimeBlock: " + captureDateTimeBlock
+                + ", captureDeviceBlock: " + captureDeviceBlock
+                + ", qualityBlocks: " + qualityBlocks
+                + ", spatialSamplingRateBlock: " + spatialSamplingRateBlock
+                + ", isPositionComputedByCaptureSystem: " + isPositionComputedByCaptureSystem
+                + ", fingerRotation: " + fingerRotation
+                + ", isImageRotatedToVertical: " + isImageRotatedToVertical
+                + ", isImageHasBeenLossilyCompressed: " + isImageHasBeenLossilyCompressed
+                + ", segmentationBlocks: " + segmentationBlocks
+                + ", annotationBlocks: " + annotationBlocks
+                + ", padDataBlock: " + padDataBlock
+                + ", imageData: " + imageData.size
+                + ", commentBlocks: " + commentBlocks
+                + ", vendorSpecificDataBlocks: " + vendorSpecificDataBlocks
+                + "]")
+    }*/
 
-  /* PRIVATE */
+    override fun getType(): Int {
+        return ImageInfo.TYPE_FINGER
+    }
 
-  /**
-   * Converts from 37984-4 position coding to 7816-11 (BHT) coding.
-   *
-   * @param position an ISO 39794-4 finger position code
-   *
-   * @return a ISO7816-11 biometric subtype mask combination
-   */
-  private static int toBiometricSubtype(FingerImagePositionCode position) {
-    if (position ==  null) {
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+    override fun getMimeType(): String? {
+        if (imageDataFormat == null) {
+            return "image/raw"
+        }
+        return imageDataFormat.mimeType
     }
-    return switch (position) {
-      case UNKNOWN_POSITION -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-      case RIGHT_THUMB_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
-      case RIGHT_INDEX_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
-      case RIGHT_MIDDLE_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
-      case RIGHT_RING_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
-      case RIGHT_LITTLE_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
-      case LEFT_THUMB_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
-      case LEFT_INDEX_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
-      case LEFT_MIDDLE_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
-      case LEFT_RING_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
-      case LEFT_LITTLE_FINGER ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
-      case RIGHT_FOUR_FINGERS ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-      case LEFT_FOUR_FINGERS ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      case BOTH_THUMB_FINGERS ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
-      case UNKNOWN_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-      case RIGHT_FULL_PALM ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-      case RIGHT_WRITERS_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-      case LEFT_FULL_PALM ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      case LEFT_WRITERS_PALM ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      case RIGHT_LOWER_PALM ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-      case RIGHT_UPPER_PALM ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-      case LEFT_LOWER_PALM ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      case LEFT_UPPER_PALM ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      case RIGHT_INTERDIGITAL ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-      case RIGHT_THENAR ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-      case RIGHT_HYPOTHENAR ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-      case LEFT_INTERDIGITAL ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      case LEFT_THENAR -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      case LEFT_HYPOTHENAR ->
-              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-      // Fall through...
-      default -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    };
-  }
 
-  private static ASN1Encodable encodeCommentBlocks(List<String> comments) {
-    ASN1Encodable[] asn1Objects = new ASN1Encodable[comments.size()];
-    int i = 0;
-    for (String comment: comments) {
-      asn1Objects[i++] = new DERVisibleString(comment);
+    override fun getWidth(): Int {
+        return 0
     }
-    return new DERSequence(asn1Objects);
-  }
 
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    taggedObjects.put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(position.getCode()));
-    taggedObjects.put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(impression.getCode()));
-    taggedObjects.put(2, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(imageDataFormat.getCode()));
-    taggedObjects.put(3, new DEROctetString(imageData));
-    if (captureDateTimeBlock != null) {
-      taggedObjects.put(4, captureDateTimeBlock.getASN1Object());
+    override fun getHeight(): Int {
+        return 0
     }
-    if (captureDeviceBlock != null) {
-      taggedObjects.put(5, captureDeviceBlock.getASN1Object());
+
+    override fun getRecordLength(): Long {
+        return 0
     }
-    if (qualityBlocks != null) {
-      taggedObjects.put(6, ISO39794Util.encodeBlocks(qualityBlocks));
+
+    override fun getImageLength(): Int {
+        return imageData.size
     }
-    if (spatialSamplingRateBlock != null) {
-      taggedObjects.put(7, spatialSamplingRateBlock.getASN1Object());
+
+    override fun getImageInputStream(): InputStream {
+        return ByteArrayInputStream(imageData)
     }
-    if (isPositionComputedByCaptureSystem != null) {
-      taggedObjects.put(8, ASN1Util.encodeBoolean(isPositionComputedByCaptureSystem));
+
+    /* PACKAGE */
+    val biometricSubtype: Int
+        /**
+         * Returns the biometric sub-type.
+         * 
+         * @return the ICAO/CBEFF (BHT) biometric sub-type
+         */
+        get() = toBiometricSubtype(position)
+
+    override val aSN1Object: ASN1Encodable
+        get() {
+            val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+                HashMap<Int?, ASN1Encodable?>()
+            taggedObjects[0] =
+                ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(position!!.code)
+            taggedObjects[1] =
+                ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(impression!!.code)
+            taggedObjects[2] =
+                ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(imageDataFormat!!.code)
+            taggedObjects[3] = DEROctetString(imageData)
+            if (captureDateTimeBlock != null) {
+                taggedObjects[4] = captureDateTimeBlock.aSN1Object
+            }
+            if (captureDeviceBlock != null) {
+                taggedObjects[5] = captureDeviceBlock.aSN1Object
+            }
+            if (qualityBlocks != null) {
+                taggedObjects[6] = ISO39794Util.encodeBlocks(qualityBlocks)
+            }
+            if (spatialSamplingRateBlock != null) {
+                taggedObjects[7] = spatialSamplingRateBlock.aSN1Object
+            }
+            if (isPositionComputedByCaptureSystem != null) {
+                taggedObjects[8] = ASN1Util.encodeBoolean(isPositionComputedByCaptureSystem)
+            }
+            if (fingerRotation != null) {
+                taggedObjects[9] = ASN1Util.encodeInt(fingerRotation)
+            }
+            if (isImageRotatedToVertical != null) {
+                taggedObjects[10] = ASN1Util.encodeBoolean(isImageRotatedToVertical)
+            }
+            if (isImageHasBeenLossilyCompressed != null) {
+                taggedObjects[11] = ASN1Util.encodeBoolean(isImageHasBeenLossilyCompressed)
+            }
+            if (segmentationBlocks != null) {
+                taggedObjects[12] = ISO39794Util.encodeBlocks(segmentationBlocks)
+            }
+            if (annotationBlocks != null) {
+                taggedObjects[13] = ISO39794Util.encodeBlocks(annotationBlocks)
+            }
+            if (padDataBlock != null) {
+                taggedObjects[14] = padDataBlock.aSN1Object
+            }
+            if (commentBlocks != null) {
+                taggedObjects[15] = Companion.encodeCommentBlocks(commentBlocks!!)
+            }
+            if (vendorSpecificDataBlocks != null) {
+                taggedObjects[16] = ISO39794Util.encodeBlocks(vendorSpecificDataBlocks)
+            }
+            return ASN1Util.encodeTaggedObjects(taggedObjects)
+        }
+
+    companion object {
+        private const val serialVersionUID = -9136319709147388829L
+
+        private fun decodeCommentBlocks(asn1Encodable: ASN1Encodable?): List<String>? {
+            if (asn1Encodable is ASN1Sequence) {
+                val blockASN1Objects = ASN1Util.list(asn1Encodable)
+                val blocks: MutableList<String> = ArrayList<String>(blockASN1Objects.size)
+                for (blockASN1Object in blockASN1Objects) {
+                    blocks.add(ASN1VisibleString.getInstance(blockASN1Object).getString())
+                }
+                return blocks
+            } else if (asn1Encodable is ASN1VisibleString) {
+                return mutableListOf<String?>(
+                    ASN1VisibleString.getInstance(asn1Encodable).getString()
+                )
+            }
+
+            //LOGGER.warning("Cannot decode comment blocks!");
+            return null
+        }
+
+        fun decodeRepresentationBlocks(asn1Encodable: ASN1Encodable): List<FingerImageRepresentationBlock?> {
+            val blocks: MutableList<FingerImageRepresentationBlock?> =
+                ArrayList<FingerImageRepresentationBlock?>()
+            if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+                val blockASN1Objects = ASN1Util.list(asn1Encodable)
+                for (blockASN1Object in blockASN1Objects) {
+                    blocks.add(FingerImageRepresentationBlock(blockASN1Object))
+                }
+            } else {
+                blocks.add(FingerImageRepresentationBlock(asn1Encodable))
+            }
+
+            return blocks
+        }
+
+        /* PRIVATE */
+        /**
+         * Converts from 37984-4 position coding to 7816-11 (BHT) coding.
+         * 
+         * @param position an ISO 39794-4 finger position code
+         * 
+         * @return a ISO7816-11 biometric subtype mask combination
+         */
+        private fun toBiometricSubtype(position: FingerImagePositionCode?): Int =
+            if (position == null) {
+                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE
+            } else when (position) {
+                FingerImagePositionCode.UNKNOWN_POSITION -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE
+                FingerImagePositionCode.RIGHT_THUMB_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB
+                FingerImagePositionCode.RIGHT_INDEX_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER
+                FingerImagePositionCode.RIGHT_MIDDLE_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER
+                FingerImagePositionCode.RIGHT_RING_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER
+                FingerImagePositionCode.RIGHT_LITTLE_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER
+                FingerImagePositionCode.LEFT_THUMB_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB
+                FingerImagePositionCode.LEFT_INDEX_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER
+                FingerImagePositionCode.LEFT_MIDDLE_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER
+                FingerImagePositionCode.LEFT_RING_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER
+                FingerImagePositionCode.LEFT_LITTLE_FINGER -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER
+                FingerImagePositionCode.RIGHT_FOUR_FINGERS -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT
+                FingerImagePositionCode.LEFT_FOUR_FINGERS -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                FingerImagePositionCode.BOTH_THUMB_FINGERS -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB
+                FingerImagePositionCode.UNKNOWN_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE
+                FingerImagePositionCode.RIGHT_FULL_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT
+                FingerImagePositionCode.RIGHT_WRITERS_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE
+                FingerImagePositionCode.LEFT_FULL_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                FingerImagePositionCode.LEFT_WRITERS_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                FingerImagePositionCode.RIGHT_LOWER_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT
+                FingerImagePositionCode.RIGHT_UPPER_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT
+                FingerImagePositionCode.LEFT_LOWER_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                FingerImagePositionCode.LEFT_UPPER_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                FingerImagePositionCode.RIGHT_INTERDIGITAL -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT
+                FingerImagePositionCode.RIGHT_THENAR -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT
+                FingerImagePositionCode.RIGHT_HYPOTHENAR -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT
+                FingerImagePositionCode.LEFT_INTERDIGITAL -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                FingerImagePositionCode.LEFT_THENAR -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                FingerImagePositionCode.LEFT_HYPOTHENAR -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE or CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT
+                else -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE
+            }
+
+        private fun encodeCommentBlocks(comments: List<String>): ASN1Encodable {
+            val asn1Objects = arrayOfNulls<ASN1Encodable>(comments.size)
+            var i = 0
+            for (comment in comments) {
+                asn1Objects[i++] = DERVisibleString(comment)
+            }
+            return DERSequence(asn1Objects)
+        }
     }
-    if (fingerRotation != null) {
-      taggedObjects.put(9, ASN1Util.encodeInt(fingerRotation));
-    }
-    if (isImageRotatedToVertical != null) {
-      taggedObjects.put(10, ASN1Util.encodeBoolean(isImageRotatedToVertical));
-    }
-    if (isImageHasBeenLossilyCompressed != null) {
-      taggedObjects.put(11, ASN1Util.encodeBoolean(isImageHasBeenLossilyCompressed));
-    }
-    if (segmentationBlocks != null) {
-      taggedObjects.put(12, ISO39794Util.encodeBlocks(segmentationBlocks));
-    }
-    if (annotationBlocks != null) {
-      taggedObjects.put(13, ISO39794Util.encodeBlocks(annotationBlocks));
-    }
-    if (padDataBlock != null) {
-      taggedObjects.put(14, padDataBlock.getASN1Object());
-    }
-    if (commentBlocks != null) {
-      taggedObjects.put(15, encodeCommentBlocks(commentBlocks));
-    }
-    if (vendorSpecificDataBlocks != null) {
-      taggedObjects.put(16, ISO39794Util.encodeBlocks(vendorSpecificDataBlocks));
-    }
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
 }

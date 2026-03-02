@@ -19,193 +19,195 @@
  *
  * $Id: CardAccessFile.java 1850 2021-05-21 06:25:03Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DLSet;
+import org.bouncycastle.asn1.ASN1EncodableVector
+import org.bouncycastle.asn1.ASN1Encoding
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.ASN1Set
+import org.bouncycastle.asn1.DLSet
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.Serializable
+import java.util.Collections
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Card access file stores a set of SecurityInfos for PACE.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1850 $
- *
+ * 
  * @since 0.5.1
  */
-public class CardAccessFile implements Serializable {
+class CardAccessFile : Serializable {
+    /** The security infos that make up this file.  */
+    private var securityInfos: MutableSet<SecurityInfo>? = null
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd.lds");
-
-  private static final long serialVersionUID = -3536507558193769951L;
-
-  /** The security infos that make up this file. */
-  private Set<SecurityInfo> securityInfos;
-
-  /**
-   * Constructs a new file from the provided data.
-   *
-   * @param securityInfos a non-empty list of security infos
-   */
-  public CardAccessFile(Collection<SecurityInfo> securityInfos) {
-    if (securityInfos == null) {
-      throw new IllegalArgumentException("Null securityInfos");
+    /**
+     * Constructs a new file from the provided data.
+     * 
+     * @param securityInfos a non-empty list of security infos
+     */
+    constructor(securityInfos: MutableCollection<SecurityInfo?>) {
+        requireNotNull(securityInfos) { "Null securityInfos" }
+        this.securityInfos = HashSet<SecurityInfo>(securityInfos)
     }
-    this.securityInfos = new HashSet<SecurityInfo>(securityInfos);
-  }
 
-  /**
-   * Constructs a new file from the data in an input stream.
-   *
-   * @param inputStream the input stream to parse the data from
-   *
-   * @throws IOException on error reading input stream
-   */
-  public CardAccessFile(InputStream inputStream) throws IOException {
-    readContent(inputStream);
-  }
+    /**
+     * Constructs a new file from the data in an input stream.
+     * 
+     * @param inputStream the input stream to parse the data from
+     * 
+     * @throws IOException on error reading input stream
+     */
+    constructor(inputStream: InputStream?) {
+        readContent(inputStream)
+    }
 
-  /**
-   * Reads the contents as a card access file from a stream.
-   *
-   * @param inputStream the stream to read from
-   *
-   * @throws IOException on error reading from the stream
-   */
-  protected void readContent(InputStream inputStream) throws IOException {
-    securityInfos = new HashSet<SecurityInfo>();
-    ASN1InputStream asn1In = new ASN1InputStream(inputStream);
-    ASN1Set set = (ASN1Set)asn1In.readObject();
-    for (int i = 0; i < set.size(); i++) {
-      ASN1Primitive object = set.getObjectAt(i).toASN1Primitive();
-      try {
-        SecurityInfo securityInfo = SecurityInfo.getInstance(object);
-        if (securityInfo == null) {
-          /* NOTE: skipping this unsupported SecurityInfo */
-          continue;
+    /**
+     * Reads the contents as a card access file from a stream.
+     * 
+     * @param inputStream the stream to read from
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    @Throws(IOException::class)
+    protected fun readContent(inputStream: InputStream?) {
+        securityInfos = HashSet<SecurityInfo>()
+        val asn1In = ASN1InputStream(inputStream)
+        val set = asn1In.readObject() as ASN1Set
+        for (i in 0..<set.size()) {
+            val `object` = set.getObjectAt(i).toASN1Primitive()
+            try {
+                val securityInfo: SecurityInfo? = SecurityInfo.Companion.getInstance(`object`)
+                if (securityInfo == null) {
+                    /* NOTE: skipping this unsupported SecurityInfo */
+                    continue
+                }
+                securityInfos!!.add(securityInfo)
+            } catch (e: Exception) {
+                /* NOTE: skipping this unsupported SecurityInfo. */
+                continue
+            }
         }
-        securityInfos.add(securityInfo);
-      } catch (Exception e) {
-        /* NOTE: skipping this unsupported SecurityInfo. */
-        continue;
-      }
-    }
-  }
-
-  /* FIXME: rewrite (using writeObject instead of getDERObject) to remove interface dependency on BC. */
-  /**
-   * Writes the contents of this file to a stream.
-   *
-   * @param outputStream the stream to write to
-   *
-   * @throws IOException on error writing to the stream
-   */
-  protected void writeContent(OutputStream outputStream) throws IOException {
-    ASN1EncodableVector vector = new ASN1EncodableVector();
-    for (SecurityInfo securityInfo: securityInfos) {
-      vector.add(securityInfo.getDERObject());
-    }
-    ASN1Set derSet = new DLSet(vector);
-    outputStream.write(derSet.getEncoded(ASN1Encoding.DER));
-  }
-
-  /**
-   * Returns a DER encoded of this file.
-   *
-   * @return the encoded file
-   */
-  public byte[] getEncoded() {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    try {
-      writeContent(byteArrayOutputStream);
-      byteArrayOutputStream.flush();
-      return byteArrayOutputStream.toByteArray();
-    } catch (IOException ioe) {
-      LOGGER.log(Level.WARNING, "Exception while encoding", ioe);
-      return null;
-    } finally {
-      try {
-        byteArrayOutputStream.close();
-      } catch (IOException ioe) {
-        LOGGER.log(Level.FINE, "Error closing stream", ioe);
-      }
-    }
-  }
-
-  /**
-   * Returns the security infos as an unordered collection.
-   *
-   * @return security infos
-   */
-  public Collection<SecurityInfo> getSecurityInfos() {
-    return Collections.unmodifiableCollection(securityInfos);
-  }
-
-  /**
-   * Returns the signature algorithm object identifier.
-   *
-   * @return signature algorithm OID
-   */
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append("CardAccessFile [")
-        .append(securityInfos.toString())
-        .append("]").toString();
-  }
-
-  /**
-   * Tests equality with respect to another object.
-   *
-   * @param otherObj another object
-   *
-   * @return whether this object equals the other object
-   */
-  @Override
-  public boolean equals(Object otherObj) {
-    if (otherObj == null) {
-      return false;
     }
 
-    if (!(otherObj.getClass().equals(this.getClass()))) {
-      return false;
+    /* FIXME: rewrite (using writeObject instead of getDERObject) to remove interface dependency on BC. */
+    /**
+     * Writes the contents of this file to a stream.
+     * 
+     * @param outputStream the stream to write to
+     * 
+     * @throws IOException on error writing to the stream
+     */
+    @Throws(IOException::class)
+    protected fun writeContent(outputStream: OutputStream) {
+        val vector = ASN1EncodableVector()
+        for (securityInfo in securityInfos!!) {
+            vector.add(securityInfo.getDERObject())
+        }
+        val derSet: ASN1Set = DLSet(vector)
+        outputStream.write(derSet.getEncoded(ASN1Encoding.DER))
     }
 
-    CardAccessFile other = (CardAccessFile)otherObj;
-    if (securityInfos == null) {
-      return  other.securityInfos == null;
-    }
-    if (other.securityInfos == null) {
-      return securityInfos == null;
+    val encoded: ByteArray?
+        /**
+         * Returns a DER encoded of this file.
+         * 
+         * @return the encoded file
+         */
+        get() {
+            val byteArrayOutputStream =
+                ByteArrayOutputStream()
+            try {
+                writeContent(byteArrayOutputStream)
+                byteArrayOutputStream.flush()
+                return byteArrayOutputStream.toByteArray()
+            } catch (ioe: IOException) {
+                LOGGER.log(
+                    Level.WARNING,
+                    "Exception while encoding",
+                    ioe
+                )
+                return null
+            } finally {
+                try {
+                    byteArrayOutputStream.close()
+                } catch (ioe: IOException) {
+                    LOGGER.log(
+                        Level.FINE,
+                        "Error closing stream",
+                        ioe
+                    )
+                }
+            }
+        }
+
+    /**
+     * Returns the security infos as an unordered collection.
+     * 
+     * @return security infos
+     */
+    fun getSecurityInfos(): MutableCollection<SecurityInfo?> {
+        return Collections.unmodifiableCollection<SecurityInfo?>(securityInfos)
     }
 
-    return securityInfos.equals(other.securityInfos);
-  }
+    /**
+     * Returns the signature algorithm object identifier.
+     * 
+     * @return signature algorithm OID
+     */
+    override fun toString(): String {
+        return StringBuilder()
+            .append("CardAccessFile [")
+            .append(securityInfos.toString())
+            .append("]").toString()
+    }
 
-  /**
-   * Returns a hash code of this object.
-   *
-   * @return the hash code
-   */
-  @Override
-  public int hashCode() {
-    return 7 * securityInfos.hashCode() + 61;
-  }
+    /**
+     * Tests equality with respect to another object.
+     * 
+     * @param otherObj another object
+     * 
+     * @return whether this object equals the other object
+     */
+    override fun equals(otherObj: Any?): Boolean {
+        if (otherObj == null) {
+            return false
+        }
+
+        if (!(otherObj.javaClass == this.javaClass)) {
+            return false
+        }
+
+        val other = otherObj as CardAccessFile
+        if (securityInfos == null) {
+            return other.securityInfos == null
+        }
+        if (other.securityInfos == null) {
+            return securityInfos == null
+        }
+
+        return securityInfos == other.securityInfos
+    }
+
+    /**
+     * Returns a hash code of this object.
+     * 
+     * @return the hash code
+     */
+    override fun hashCode(): Int {
+        return 7 * securityInfos.hashCode() + 61
+    }
+
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd.lds")
+
+        private val serialVersionUID = -3536507558193769951L
+    }
 }

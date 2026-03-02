@@ -19,51 +19,57 @@
  *
  * $Id: AbstractLDSInfo.java 1751 2018-01-15 15:35:45Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Base class for data structures that are contained in files in the LDS.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1751 $
  */
-public abstract class AbstractLDSInfo implements LDSElement {
+abstract class AbstractLDSInfo : LDSElement {
+    val encoded: ByteArray?
+        /**
+         * Returns an encoding of this LDS info.
+         * 
+         * @return the LDS info encoded as byte array
+         */
+        get() {
+            try {
+                val outputStream = ByteArrayOutputStream()
+                writeObject(outputStream)
+                outputStream.flush()
+                return outputStream.toByteArray()
+            } catch (ioe: IOException) {
+                LOGGER.log(
+                    Level.WARNING,
+                    "Exception: ",
+                    ioe
+                )
+                return null
+            }
+        }
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
+    /**
+     * Writes this LDS info to a stream.
+     * 
+     * @param outputStream the stream to write to
+     * 
+     * @throws IOException on error writing to the stream
+     */
+    @Throws(IOException::class)
+    abstract fun writeObject(outputStream: OutputStream?)
 
-  private static final long serialVersionUID = -2340098256249194537L;
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
 
-  /**
-   * Returns an encoding of this LDS info.
-   *
-   * @return the LDS info encoded as byte array
-   */
-  public byte[] getEncoded() {
-    try {
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-      writeObject(outputStream);
-      outputStream.flush();
-      return outputStream.toByteArray();
-    } catch (IOException ioe) {
-      LOGGER.log(Level.WARNING, "Exception: ", ioe);
-      return null;
+        private val serialVersionUID = -2340098256249194537L
     }
-  }
-
-  /**
-   * Writes this LDS info to a stream.
-   *
-   * @param outputStream the stream to write to
-   *
-   * @throws IOException on error writing to the stream
-   */
-  public abstract void writeObject(OutputStream outputStream) throws IOException;
 }

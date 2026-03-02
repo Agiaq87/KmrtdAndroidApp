@@ -19,44 +19,42 @@
  *
  * $Id: DG7File.java 1751 2018-01-15 15:35:45Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import kmrtd.lds.DisplayedImageDataGroup;
-import kmrtd.lds.DisplayedImageInfo;
+import kmrtd.lds.DisplayedImageDataGroup
+import kmrtd.lds.DisplayedImageInfo
+import kmrtd.lds.LDSFile
+import java.io.InputStream
 
 /**
  * File structure for the EF_DG7 file.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1751 $
  */
-public class DG7File extends DisplayedImageDataGroup {
+class DG7File : DisplayedImageDataGroup {
+    /**
+     * Constructs a new file from a list of displayed images.
+     * 
+     * @param images the displayed images, all of which should be of type *Signature or mark*
+     */
+    constructor(images: MutableList<DisplayedImageInfo?>?) : super(
+        LDSFile.Companion.EF_DG7_TAG,
+        images,
+        DisplayedImageInfo.Companion.DISPLAYED_SIGNATURE_OR_MARK_TAG
+    )
 
-  private static final long serialVersionUID = 7189545112850471359L;
+    /**
+     * Constructs a new file from binary representation.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException on error reading input stream
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG7_TAG, inputStream)
 
-  /**
-   * Constructs a new file from a list of displayed images.
-   *
-   * @param images the displayed images, all of which should be of type <i>Signature or mark</i>
-   */
-  public DG7File(List<DisplayedImageInfo> images) {
-    super(EF_DG7_TAG, images, DisplayedImageInfo.DISPLAYED_SIGNATURE_OR_MARK_TAG);
-  }
-
-  /**
-   * Constructs a new file from binary representation.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading input stream
-   */
-  public DG7File(InputStream inputStream) throws IOException {
-    super(EF_DG7_TAG, inputStream);
-  }
+    companion object {
+        private const val serialVersionUID = 7189545112850471359L
+    }
 }

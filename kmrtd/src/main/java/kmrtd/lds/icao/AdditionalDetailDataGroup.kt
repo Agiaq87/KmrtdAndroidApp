@@ -19,239 +19,253 @@
  *
  * $Id: AdditionalDetailDataGroup.java 1907 2026-02-06 09:24:02Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import kmrtd.lds.DataGroup;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
-import net.sf.scuba.tlv.TLVUtil;
-import net.sf.scuba.util.Hex;
+import kmrtd.lds.DataGroup
+import kmrtd.lds.LDSFile
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import net.sf.scuba.tlv.TLVUtil
+import net.sf.scuba.util.Hex
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.UnsupportedEncodingException
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Abstract superclass for DG11 and DG12.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1907 $
  */
-abstract class AdditionalDetailDataGroup extends DataGroup {
+internal abstract class AdditionalDetailDataGroup : DataGroup {
+    constructor(tag: Int) : super(LDSFile.Companion.EF_DG11_TAG)
 
-  private static final long serialVersionUID = 8566312538928662931L;
+    /**
+     * Constructs a file from binary representation.
+     * 
+     * @param tag the datagroup tag
+     * @param inputStream an input stream
+     * 
+     * @throws IOException if reading fails
+     */
+    constructor(tag: Int, inputStream: InputStream?) : super(tag, inputStream)
 
-  public static final int TAG_LIST_TAG = 0x5C;
+    /**
+     * Returns the list of tags of fields actually present.
+     * 
+     * @return list of tags
+     */
+    abstract val tagPresenceList: MutableList<Int?>
 
-  public static final int CONTENT_SPECIFIC_CONSTRUCTED_TAG = 0xA0; // 5F0F is always used inside A0 constructed object
-  public static final int COUNT_TAG = 0x02; // Used in A0 constructed object to indicate single byte count of simple objects
+    @Throws(IOException::class)
+    protected abstract fun readField(expectedTag: Int, tlvInputStream: TLVInputStream?)
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
+    @Throws(IOException::class)
+    protected abstract fun writeField(tag: Int, tlvOut: TLVOutputStream?)
 
-  public AdditionalDetailDataGroup(int tag) {
-    super(EF_DG11_TAG);
-  }
-
-  /**
-   * Constructs a file from binary representation.
-   *
-   * @param tag the datagroup tag
-   * @param inputStream an input stream
-   *
-   * @throws IOException if reading fails
-   */
-  public AdditionalDetailDataGroup(int tag, InputStream inputStream) throws IOException {
-    super(tag, inputStream);
-  }
-
-  /**
-   * Returns the list of tags of fields actually present.
-   *
-   * @return list of tags
-   */
-  public abstract List<Integer> getTagPresenceList();
-
-  protected abstract void readField(int expectedTag, TLVInputStream tlvInputStream) throws IOException;
-
-  protected abstract void writeField(int tag, TLVOutputStream tlvOut) throws IOException;
-
-  @Override
-  protected void readContent(InputStream inputStream) throws IOException {
-    TLVInputStream tlvInputStream = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    List<Integer> tagList = readTagList(tlvInputStream);
-    /* Now read the fields in order. */
-    for (int t: tagList) {
-      readField(t, tlvInputStream);
-    }
-  }
-
-
-  @Override
-  protected void writeContent(OutputStream out) throws IOException {
-    TLVOutputStream tlvOut = out instanceof TLVOutputStream ? (TLVOutputStream)out : new TLVOutputStream(out);
-    List<Integer> tagList = getTagPresenceList();
-    writeTagList(tagList, tlvOut);
-    for (int tag: tagList) {
-      writeField(tag, tlvOut);
-    }
-  }
-
-  protected static List<Integer> readTagList(TLVInputStream tlvInputStream) throws IOException {
-    int tagListTag = tlvInputStream.readTag();
-    if (tagListTag != TAG_LIST_TAG) {
-      throw new IllegalArgumentException("Expected tag list in DG11");
-    }
-
-    int tagListLength = tlvInputStream.readLength();
-    int tagListBytesRead = 0;
-
-    byte[] tagListBytes = tlvInputStream.readValue();
-    ByteArrayInputStream tagListBytesInputStream = new ByteArrayInputStream(tagListBytes);
-    try {
-      /* Find out which tags are present. */
-      List<Integer> tagList = new ArrayList<Integer>();
-      while (tagListBytesRead < tagListLength) {
-        /* We're using another TLV inputstream every time to read each tag. */
-        TLVInputStream anotherTLVInputStream = new TLVInputStream(tagListBytesInputStream);
-        int tag = anotherTLVInputStream.readTag();
-        tagListBytesRead += TLVUtil.getTagLength(tag);
-        tagList.add(tag);
-      }
-      return tagList;
-    } finally {
-      tagListBytesInputStream.close();
-    }
-  }
-
-  protected static void writeTagList(List<Integer> tags, TLVOutputStream tlvOut) throws IOException {
-    tlvOut.writeTag(TAG_LIST_TAG);
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    for (int tag: tags) {
-      TLVOutputStream anotherTLVOutputStream = new TLVOutputStream(byteArrayOutputStream);
-      anotherTLVOutputStream.writeTag(tag);
-    }
-    tlvOut.writeValue(byteArrayOutputStream.toByteArray());
-    tlvOut.writeValueEnd(); /* TAG_LIST_TAG */
-  }
-
-  protected static byte[] readBytes(TLVInputStream tlvInputStream) throws IOException {
-    return tlvInputStream.readValue();
-  }
-
-  protected static void writeBytes(int tag, byte[] value, TLVOutputStream tlvOut) throws IOException {
-    tlvOut.writeTag(tag);;
-    if (value == null) {
-      tlvOut.writeValue(new byte[] { });
-    } else {
-      tlvOut.writeValue(value);
-    }
-  }
-
-  protected static String readString(TLVInputStream tlvIn) throws IOException {
-    byte[] value = tlvIn.readValue();
-    try {
-      String field = new String(value, "UTF-8");
-      return field.trim();
-    } catch (UnsupportedEncodingException uee) {
-      LOGGER.log(Level.WARNING, "Exception", uee);
-      return new String(value).trim();
-    }
-  }
-
-  protected static void writeString(int tag, String value, TLVOutputStream tlvOut) throws IOException {
-    writeBytes(tag, value == null ? null : value.trim().getBytes("UTF-8"), tlvOut);
-  }
-
-  protected static String readFullDate(TLVInputStream tlvInputStream) throws IOException {
-    byte[] value = tlvInputStream.readValue();
-    String field = null;
-    if (value.length == 4) {
-      /* Either France or Belgium uses this encoding for dates. */
-      field = Hex.bytesToHexString(value);
-    } else {
-      /* Assume length 8 yyyMMdd as per spec, or whatever was put in. */
-      field = new String(value);
-      try {
-        field = new String(value, "UTF-8");
-      } catch (UnsupportedEncodingException usee) {
-        LOGGER.log(Level.WARNING, "Exception", usee);
-      }
-    }
-    return field;
-  }
-
-  protected static List<String> readContentSpecificFieldsList(TLVInputStream tlvInputStream) throws IOException {
-    int countTag = tlvInputStream.readTag();
-    if (countTag != COUNT_TAG) {
-      throw new IllegalArgumentException("Expected " + Integer.toHexString(COUNT_TAG) + ", found " + Integer.toHexString(countTag));
-    }
-    int countLength = tlvInputStream.readLength();
-    if (countLength != 1) {
-      throw new IllegalArgumentException("Expected length 1 count length, found " + countLength);
-    }
-    byte[] countValue = tlvInputStream.readValue();
-    if (countValue == null || countValue.length != 1) {
-      throw new IllegalArgumentException("Number of content specific fields should be encoded in single byte, found " + Arrays.toString(countValue));
-    }
-    int count = countValue[0] & 0xFF;
-    List<String> list = new ArrayList<String>(count);
-    for (int i = 0; i < count; i++) {
-      int tag = tlvInputStream.readTag();
-      /* int length = */ tlvInputStream.readLength();
-      list.add(readString(tlvInputStream));
-    }
-    return list;
-  }
-
-  protected static void writeContentSpecificFieldsList(int tag, List<String> list, TLVOutputStream tlvOut) throws IOException {
-    tlvOut.writeTag(CONTENT_SPECIFIC_CONSTRUCTED_TAG);
-    tlvOut.writeTag(COUNT_TAG);
-    tlvOut.write(list.size());
-    tlvOut.writeValueEnd(); /* COUNT_TAG */
-    for (String otherName: list) {
-      tlvOut.writeTag(tag);
-      tlvOut.writeValue(otherName.trim().getBytes("UTF-8"));
-    }
-    tlvOut.writeValueEnd(); /* CONTENT_SPECIFIC_CONSTRUCTED_TAG */
-  }
-
-  protected static List<String> readList(TLVInputStream tlvInputStream) throws IOException {
-    String field = readString(tlvInputStream);
-    List<String> list = new ArrayList<String>();
-    String[] tokens = field.split("<", -1);
-    for (String token: tokens) {
-      list.add(token.trim());
-    }
-    return list;
-  }
-
-  protected static void writeList(int tag, List<String> list, TLVOutputStream tlvOut) throws IOException {
-    tlvOut.writeTag(tag);
-    boolean isFirstOne = true;
-    if (list.isEmpty()) {
-      tlvOut.writeValue(new byte[] { });
-    } else {
-      StringBuilder encodedString = new StringBuilder();
-      for (String detail: list) {
-        if (isFirstOne) {
-          isFirstOne = false;
-        } else {
-          encodedString.append('<');
+    @Throws(IOException::class)
+    override fun readContent(inputStream: InputStream?) {
+        val tlvInputStream =
+            if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val tagList: MutableList<Int?> = readTagList(tlvInputStream)
+        /* Now read the fields in order. */
+        for (t in tagList) {
+            readField(t!!, tlvInputStream)
         }
-        encodedString.append(detail.trim());
-      }
-      tlvOut.writeValue(encodedString.toString().getBytes("UTF-8"));
     }
-  }
+
+
+    @Throws(IOException::class)
+    override fun writeContent(out: OutputStream?) {
+        val tlvOut = if (out is TLVOutputStream) out else TLVOutputStream(out)
+        val tagList = this.tagPresenceList
+        writeTagList(tagList, tlvOut)
+        for (tag in tagList) {
+            writeField(tag!!, tlvOut)
+        }
+    }
+
+    companion object {
+        private const val serialVersionUID = 8566312538928662931L
+
+        const val TAG_LIST_TAG: Int = 0x5C
+
+        const val CONTENT_SPECIFIC_CONSTRUCTED_TAG: Int =
+            0xA0 // 5F0F is always used inside A0 constructed object
+        const val COUNT_TAG: Int =
+            0x02 // Used in A0 constructed object to indicate single byte count of simple objects
+
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+
+        @Throws(IOException::class)
+        protected fun readTagList(tlvInputStream: TLVInputStream): MutableList<Int?> {
+            val tagListTag = tlvInputStream.readTag()
+            require(tagListTag == TAG_LIST_TAG) { "Expected tag list in DG11" }
+
+            val tagListLength = tlvInputStream.readLength()
+            var tagListBytesRead = 0
+
+            val tagListBytes = tlvInputStream.readValue()
+            val tagListBytesInputStream = ByteArrayInputStream(tagListBytes)
+            try {
+                /* Find out which tags are present. */
+                val tagList: MutableList<Int?> = ArrayList<Int?>()
+                while (tagListBytesRead < tagListLength) {
+                    /* We're using another TLV inputstream every time to read each tag. */
+                    val anotherTLVInputStream = TLVInputStream(tagListBytesInputStream)
+                    val tag = anotherTLVInputStream.readTag()
+                    tagListBytesRead += TLVUtil.getTagLength(tag)
+                    tagList.add(tag)
+                }
+                return tagList
+            } finally {
+                tagListBytesInputStream.close()
+            }
+        }
+
+        @Throws(IOException::class)
+        protected fun writeTagList(tags: MutableList<Int?>, tlvOut: TLVOutputStream) {
+            tlvOut.writeTag(TAG_LIST_TAG)
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            for (tag in tags) {
+                val anotherTLVOutputStream = TLVOutputStream(byteArrayOutputStream)
+                anotherTLVOutputStream.writeTag(tag!!)
+            }
+            tlvOut.writeValue(byteArrayOutputStream.toByteArray())
+            tlvOut.writeValueEnd() /* TAG_LIST_TAG */
+        }
+
+        @Throws(IOException::class)
+        protected fun readBytes(tlvInputStream: TLVInputStream): ByteArray {
+            return tlvInputStream.readValue()
+        }
+
+        @Throws(IOException::class)
+        protected fun writeBytes(tag: Int, value: ByteArray?, tlvOut: TLVOutputStream) {
+            tlvOut.writeTag(tag)
+
+            if (value == null) {
+                tlvOut.writeValue(byteArrayOf())
+            } else {
+                tlvOut.writeValue(value)
+            }
+        }
+
+        @Throws(IOException::class)
+        protected fun readString(tlvIn: TLVInputStream): String {
+            val value = tlvIn.readValue()
+            try {
+                val field = String(value, charset("UTF-8"))
+                return field.trim { it <= ' ' }
+            } catch (uee: UnsupportedEncodingException) {
+                LOGGER.log(Level.WARNING, "Exception", uee)
+                return String(value).trim { it <= ' ' }
+            }
+        }
+
+        @Throws(IOException::class)
+        protected fun writeString(tag: Int, value: String?, tlvOut: TLVOutputStream) {
+            writeBytes(
+                tag,
+                if (value == null) null else value.trim { it <= ' ' }.toByteArray(charset("UTF-8")),
+                tlvOut
+            )
+        }
+
+        @Throws(IOException::class)
+        protected fun readFullDate(tlvInputStream: TLVInputStream): String {
+            val value = tlvInputStream.readValue()
+            var field: String? = null
+            if (value.size == 4) {
+                /* Either France or Belgium uses this encoding for dates. */
+                field = Hex.bytesToHexString(value)
+            } else {
+                /* Assume length 8 yyyMMdd as per spec, or whatever was put in. */
+                field = String(value)
+                try {
+                    field = String(value, charset("UTF-8"))
+                } catch (usee: UnsupportedEncodingException) {
+                    LOGGER.log(Level.WARNING, "Exception", usee)
+                }
+            }
+            return field
+        }
+
+        @Throws(IOException::class)
+        protected fun readContentSpecificFieldsList(tlvInputStream: TLVInputStream): MutableList<String?> {
+            val countTag = tlvInputStream.readTag()
+            require(countTag == COUNT_TAG) {
+                "Expected " + Integer.toHexString(COUNT_TAG) + ", found " + Integer.toHexString(
+                    countTag
+                )
+            }
+            val countLength = tlvInputStream.readLength()
+            require(countLength == 1) { "Expected length 1 count length, found " + countLength }
+            val countValue = tlvInputStream.readValue()
+            require(!(countValue == null || countValue.size != 1)) { "Number of content specific fields should be encoded in single byte, found " + countValue.contentToString() }
+            val count = countValue[0].toInt() and 0xFF
+            val list: MutableList<String?> = ArrayList<String?>(count)
+            for (i in 0..<count) {
+                val tag = tlvInputStream.readTag()
+                /* int length = */
+                tlvInputStream.readLength()
+                list.add(readString(tlvInputStream))
+            }
+            return list
+        }
+
+        @Throws(IOException::class)
+        protected fun writeContentSpecificFieldsList(
+            tag: Int,
+            list: MutableList<String>,
+            tlvOut: TLVOutputStream
+        ) {
+            tlvOut.writeTag(CONTENT_SPECIFIC_CONSTRUCTED_TAG)
+            tlvOut.writeTag(COUNT_TAG)
+            tlvOut.write(list.size)
+            tlvOut.writeValueEnd() /* COUNT_TAG */
+            for (otherName in list) {
+                tlvOut.writeTag(tag)
+                tlvOut.writeValue(otherName.trim { it <= ' ' }.toByteArray(charset("UTF-8")))
+            }
+            tlvOut.writeValueEnd() /* CONTENT_SPECIFIC_CONSTRUCTED_TAG */
+        }
+
+        @Throws(IOException::class)
+        protected fun readList(tlvInputStream: TLVInputStream): MutableList<String?> {
+            val field: String = readString(tlvInputStream)
+            val list: MutableList<String?> = ArrayList<String?>()
+            val tokens = field.split("<".toRegex()).toTypedArray()
+            for (token in tokens) {
+                list.add(token.trim { it <= ' ' })
+            }
+            return list
+        }
+
+        @Throws(IOException::class)
+        protected fun writeList(tag: Int, list: MutableList<String>, tlvOut: TLVOutputStream) {
+            tlvOut.writeTag(tag)
+            var isFirstOne = true
+            if (list.isEmpty()) {
+                tlvOut.writeValue(byteArrayOf())
+            } else {
+                val encodedString = StringBuilder()
+                for (detail in list) {
+                    if (isFirstOne) {
+                        isFirstOne = false
+                    } else {
+                        encodedString.append('<')
+                    }
+                    encodedString.append(detail.trim { it <= ' ' })
+                }
+                tlvOut.writeValue(encodedString.toString().toByteArray(charset("UTF-8")))
+            }
+        }
+    }
 }

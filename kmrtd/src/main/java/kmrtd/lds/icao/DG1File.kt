@@ -19,106 +19,98 @@
  *
  * $Id: DG1File.java 1808 2019-03-07 21:32:19Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import kmrtd.lds.DataGroup;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
+import kmrtd.lds.DataGroup
+import kmrtd.lds.LDSFile
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * File structure for the EF_DG1 file.
  * Datagroup 1 contains the Machine
  * Readable Zone information.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1808 $
  */
-public class DG1File extends DataGroup {
+class DG1File : DataGroup {
+    private var mrzInfo: MRZInfo? = null
 
-  private static final long serialVersionUID = 5091606125728809058L;
-
-  private static final short MRZ_INFO_TAG = 0x5F1F;
-
-  private MRZInfo mrzInfo;
-
-  /**
-   * Creates a new file based on MRZ information.
-   *
-   * @param mrzInfo the MRZ information to store in this file
-   */
-  public DG1File(MRZInfo mrzInfo) {
-    super(EF_DG1_TAG);
-    this.mrzInfo = mrzInfo;
-  }
-
-  /**
-   * Creates a new file based on an input stream.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException if something goes wrong
-   */
-  public DG1File(InputStream inputStream) throws IOException {
-    super(EF_DG1_TAG, inputStream);
-  }
-
-  @Override
-  protected void readContent(InputStream inputStream) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    tlvIn.skipToTag(MRZ_INFO_TAG);
-    int length = tlvIn.readLength();
-    this.mrzInfo = new MRZInfo(tlvIn, length);
-  }
-
-  /**
-   * Returns the MRZ information stored in this file.
-   *
-   * @return the MRZ information
-   */
-  public MRZInfo getMRZInfo() {
-    return mrzInfo;
-  }
-
-  /**
-   * Returns a textual representation of this file.
-   *
-   * @return a textual representation of this file
-   */
-  @Override
-  public String toString() {
-    return "DG1File " + mrzInfo.toString().replaceAll("\n", "").trim();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) {
-      return false;
-    }
-    if (!(obj.getClass().equals(this.getClass()))) {
-      return false;
+    /**
+     * Creates a new file based on MRZ information.
+     * 
+     * @param mrzInfo the MRZ information to store in this file
+     */
+    constructor(mrzInfo: MRZInfo) : super(LDSFile.Companion.EF_DG1_TAG) {
+        this.mrzInfo = mrzInfo
     }
 
-    DG1File other = (DG1File)obj;
-    return mrzInfo.equals(other.mrzInfo);
-  }
+    /**
+     * Creates a new file based on an input stream.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException if something goes wrong
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG1_TAG, inputStream)
 
-  @Override
-  public int hashCode() {
-    return 3 * mrzInfo.hashCode() + 57;
-  }
+    @Throws(IOException::class)
+    override fun readContent(inputStream: InputStream?) {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        tlvIn.skipToTag(MRZ_INFO_TAG.toInt())
+        val length = tlvIn.readLength()
+        this.mrzInfo = MRZInfo(tlvIn, length)
+    }
 
-  @Override
-  protected void writeContent(OutputStream out) throws IOException {
-    TLVOutputStream tlvOut = out instanceof TLVOutputStream ? (TLVOutputStream)out : new TLVOutputStream(out);
-    tlvOut.writeTag(MRZ_INFO_TAG);
-    byte[] value = mrzInfo.getEncoded();
-    tlvOut.writeValue(value);
-  }
+    val mRZInfo: MRZInfo
+        /**
+         * Returns the MRZ information stored in this file.
+         * 
+         * @return the MRZ information
+         */
+        get() = mrzInfo!!
+
+    /**
+     * Returns a textual representation of this file.
+     * 
+     * @return a textual representation of this file
+     */
+    override fun toString(): String {
+        return "DG1File " + mrzInfo.toString().replace("\n".toRegex(), "").trim { it <= ' ' }
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        if (obj == null) {
+            return false
+        }
+        if (!(obj.javaClass == this.javaClass)) {
+            return false
+        }
+
+        val other = obj as DG1File
+        return mrzInfo == other.mrzInfo
+    }
+
+    override fun hashCode(): Int {
+        return 3 * mrzInfo.hashCode() + 57
+    }
+
+    @Throws(IOException::class)
+    override fun writeContent(out: OutputStream?) {
+        val tlvOut = if (out is TLVOutputStream) out else TLVOutputStream(out)
+        tlvOut.writeTag(MRZ_INFO_TAG.toInt())
+        val value = mrzInfo!!.encoded
+        tlvOut.writeValue(value)
+    }
+
+    companion object {
+        private const val serialVersionUID = 5091606125728809058L
+
+        private const val MRZ_INFO_TAG: Short = 0x5F1F
+    }
 }

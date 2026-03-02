@@ -19,44 +19,42 @@
  *
  * $Id: DG5File.java 1751 2018-01-15 15:35:45Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import kmrtd.lds.DisplayedImageDataGroup;
-import kmrtd.lds.DisplayedImageInfo;
+import kmrtd.lds.DisplayedImageDataGroup
+import kmrtd.lds.DisplayedImageInfo
+import kmrtd.lds.LDSFile
+import java.io.InputStream
 
 /**
  * File structure for the EF_DG5 file.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1751 $
  */
-public class DG5File extends DisplayedImageDataGroup {
+class DG5File : DisplayedImageDataGroup {
+    /**
+     * Constructs a new file from a list of displayed images.
+     * 
+     * @param images the displayed images, all of which should be of type *Portrait*
+     */
+    constructor(images: MutableList<DisplayedImageInfo?>?) : super(
+        LDSFile.Companion.EF_DG5_TAG,
+        images,
+        DisplayedImageInfo.Companion.DISPLAYED_PORTRAIT_TAG
+    )
 
-  private static final long serialVersionUID = 923840683207218244L;
+    /**
+     * Constructs a new file from binary representation.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException on error reading input stream
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG5_TAG, inputStream)
 
-  /**
-   * Constructs a new file from a list of displayed images.
-   *
-   * @param images the displayed images, all of which should be of type <i>Portrait</i>
-   */
-  public DG5File(List<DisplayedImageInfo> images) {
-    super(EF_DG5_TAG, images, DisplayedImageInfo.DISPLAYED_PORTRAIT_TAG);
-  }
-
-  /**
-   * Constructs a new file from binary representation.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading input stream
-   */
-  public DG5File(InputStream inputStream) throws IOException {
-    super(EF_DG5_TAG, inputStream);
-  }
+    companion object {
+        private const val serialVersionUID = 923840683207218244L
+    }
 }

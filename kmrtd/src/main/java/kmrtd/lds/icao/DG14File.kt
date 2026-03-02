@@ -19,33 +19,26 @@
  *
  * $Id: DG14File.java 1885 2024-11-07 09:17:29Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Encoding;
-import org.bouncycastle.asn1.ASN1InputStream;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Set;
-import org.bouncycastle.asn1.DLSet;
-
-import kmrtd.lds.ActiveAuthenticationInfo;
-import kmrtd.lds.ChipAuthenticationInfo;
-import kmrtd.lds.ChipAuthenticationPublicKeyInfo;
-import kmrtd.lds.DataGroup;
-import kmrtd.lds.SecurityInfo;
-import kmrtd.lds.TerminalAuthenticationInfo;
+import kmrtd.lds.ActiveAuthenticationInfo
+import kmrtd.lds.ChipAuthenticationInfo
+import kmrtd.lds.ChipAuthenticationPublicKeyInfo
+import kmrtd.lds.DataGroup
+import kmrtd.lds.LDSFile
+import kmrtd.lds.SecurityInfo
+import kmrtd.lds.TerminalAuthenticationInfo
+import kmrtd.protocol.PACEResult.equals
+import org.bouncycastle.asn1.ASN1EncodableVector
+import org.bouncycastle.asn1.ASN1Encoding
+import org.bouncycastle.asn1.ASN1InputStream
+import org.bouncycastle.asn1.ASN1Set
+import org.bouncycastle.asn1.DLSet
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Data Group 14 stores a set of SecurityInfos for EAC and PACE, see
@@ -53,195 +46,194 @@ import kmrtd.lds.TerminalAuthenticationInfo;
  * To us the interesting bits are: the map of public keys (EC or DH),
  * the map of protocol identifiers which should match the key's map (not
  * checked here!), and the file identifier of the efCVCA file.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1885 $
  */
-public class DG14File extends DataGroup {
+class DG14File : DataGroup {
+    /** The security infos that make up this file.  */
+    private var securityInfos: MutableSet<SecurityInfo?>? = null
 
-  private static final long serialVersionUID = -3536507558193769953L;
-
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-
-  /** The security infos that make up this file. */
-  private Set<SecurityInfo> securityInfos;
-
-  /**
-   * Constructs a new DG14 file from the provided data.
-   *
-   * @param securityInfos a list of security infos
-   */
-  public DG14File(Collection<SecurityInfo> securityInfos) {
-    super(EF_DG14_TAG);
-    if (securityInfos == null) {
-      throw new IllegalArgumentException("Null securityInfos");
+    /**
+     * Constructs a new DG14 file from the provided data.
+     * 
+     * @param securityInfos a list of security infos
+     */
+    constructor(securityInfos: MutableCollection<SecurityInfo?>) : super(LDSFile.Companion.EF_DG14_TAG) {
+        requireNotNull(securityInfos) { "Null securityInfos" }
+        this.securityInfos = HashSet<SecurityInfo?>(securityInfos)
     }
-    this.securityInfos = new HashSet<SecurityInfo>(securityInfos);
-  }
 
-  /**
-   * Constructs a new DG14 file from the data in an input stream.
-   *
-   * @param inputStream the input stream to parse the data from
-   *
-   * @throws IOException on error reading from input stream
-   */
-  public DG14File(InputStream inputStream) throws IOException {
-    super(EF_DG14_TAG, inputStream);
-  }
+    /**
+     * Constructs a new DG14 file from the data in an input stream.
+     * 
+     * @param inputStream the input stream to parse the data from
+     * 
+     * @throws IOException on error reading from input stream
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG14_TAG, inputStream)
 
-  @Override
-  protected void readContent(InputStream inputStream) throws IOException {
-    ASN1InputStream asn1In = new ASN1InputStream(inputStream, true);
-    ASN1Primitive asn1Primitive = asn1In.readObject();
-    ASN1Set set = ASN1Set.getInstance(asn1Primitive);
-    securityInfos = new HashSet<SecurityInfo>(set.size());
-    for (int i = 0; i < set.size(); i++) {
-      ASN1Primitive object = set.getObjectAt(i).toASN1Primitive();
-      try {
-        SecurityInfo securityInfo = SecurityInfo.getInstance(object);
-        if (securityInfo == null) {
-          LOGGER.warning("Skipping this unsupported SecurityInfo");
-          continue;
+    @Throws(IOException::class)
+    override fun readContent(inputStream: InputStream?) {
+        val asn1In = ASN1InputStream(inputStream, true)
+        val asn1Primitive = asn1In.readObject()
+        val set = ASN1Set.getInstance(asn1Primitive)
+        securityInfos = HashSet<SecurityInfo?>(set.size())
+        for (i in 0..<set.size()) {
+            val `object` = set.getObjectAt(i).toASN1Primitive()
+            try {
+                val securityInfo: SecurityInfo? = SecurityInfo.Companion.getInstance(`object`)
+                if (securityInfo == null) {
+                    LOGGER.warning("Skipping this unsupported SecurityInfo")
+                    continue
+                }
+                securityInfos!!.add(securityInfo)
+            } catch (e: Exception) {
+                LOGGER.log(Level.WARNING, "Skipping Security Info", e)
+            }
         }
-        securityInfos.add(securityInfo);
-      } catch (Exception e) {
-        LOGGER.log(Level.WARNING, "Skipping Security Info", e);
-      }
     }
-  }
 
-  /* FIXME: rewrite (using writeObject instead of getDERObject) to remove interface dependency on BC. */
-  @Override
-  protected void writeContent(OutputStream outputStream) throws IOException {
-    ASN1EncodableVector vector = new ASN1EncodableVector();
-    for (SecurityInfo securityInfo: securityInfos) {
-      if (securityInfo == null) {
-        continue;
-      }
+    /* FIXME: rewrite (using writeObject instead of getDERObject) to remove interface dependency on BC. */
+    @Throws(IOException::class)
+    override fun writeContent(outputStream: OutputStream) {
+        val vector = ASN1EncodableVector()
+        for (securityInfo in securityInfos!!) {
+            if (securityInfo == null) {
+                continue
+            }
 
-      ASN1Primitive derObject = securityInfo.getDERObject();
-      vector.add(derObject);
-    }
-    ASN1Set derSet = new DLSet(vector);
-    outputStream.write(derSet.getEncoded(ASN1Encoding.DER));
-  }
-
-  /**
-   * Returns the  Terminal Authentication infos.
-   *
-   * @return the Terminal Authentication infos.
-   *
-   * @deprecated Clients should use {@link #getSecurityInfos()} and filter that collection
-   */
-  @Deprecated
-  public List<TerminalAuthenticationInfo> getTerminalAuthenticationInfos() {
-    List<TerminalAuthenticationInfo> terminalAuthenticationInfos = new ArrayList<TerminalAuthenticationInfo>();
-    for (SecurityInfo securityInfo: securityInfos) {
-      if (securityInfo instanceof TerminalAuthenticationInfo) {
-        terminalAuthenticationInfos.add((TerminalAuthenticationInfo)securityInfo);
-      }
-    }
-    return terminalAuthenticationInfos;
-  }
-
-  /**
-   * Returns the Chip Authentication infos.
-   *
-   * @return the Chip Authentication infos
-   *
-   * @deprecated Clients should use {@link #getSecurityInfos()} and filter that collection
-   */
-  @Deprecated
-  public List<ChipAuthenticationInfo> getChipAuthenticationInfos() {
-    List<ChipAuthenticationInfo> map = new ArrayList<ChipAuthenticationInfo>();
-    for (SecurityInfo securityInfo: securityInfos) {
-      if (securityInfo instanceof ChipAuthenticationInfo) {
-        ChipAuthenticationInfo chipAuthNInfo = (ChipAuthenticationInfo)securityInfo;
-        map.add(chipAuthNInfo);
-        if (chipAuthNInfo.getKeyId() == null) {
-          return map;
+            val derObject = securityInfo.getDERObject()
+            vector.add(derObject)
         }
-      }
-    }
-    return map;
-  }
-
-  /**
-   * Returns the mapping of key identifiers to public keys.
-   * The key identifier may be -1 if there is only one key.
-   *
-   * @return the mapping of key identifiers to public keys
-   *
-   * @deprecated Clients should use {@link #getSecurityInfos()} and filter that collection
-   */
-  @Deprecated
-  public List<ChipAuthenticationPublicKeyInfo> getChipAuthenticationPublicKeyInfos() {
-    List<ChipAuthenticationPublicKeyInfo> publicKeys = new ArrayList<ChipAuthenticationPublicKeyInfo>();
-    for (SecurityInfo securityInfo: securityInfos) {
-      if (securityInfo instanceof ChipAuthenticationPublicKeyInfo) {
-        publicKeys.add((ChipAuthenticationPublicKeyInfo)securityInfo);
-      }
-    }
-    return publicKeys;
-  }
-
-  /**
-   * Returns the Active Authentication security infos.
-   *
-   * @return the Active Authentication security infos
-   *
-   * @deprecated Clients should use {@link #getSecurityInfos()} and filter that collection
-   */
-  @Deprecated
-  public List<ActiveAuthenticationInfo> getActiveAuthenticationInfos() {
-    List<ActiveAuthenticationInfo> resultList = new ArrayList<ActiveAuthenticationInfo>();
-    for (SecurityInfo securityInfo: securityInfos) {
-      if (securityInfo instanceof ActiveAuthenticationInfo) {
-        ActiveAuthenticationInfo activeAuthenticationInfo = (ActiveAuthenticationInfo)securityInfo;
-        resultList.add(activeAuthenticationInfo);
-      }
-    }
-    return resultList;
-  }
-
-  /**
-   * Returns the security infos as an unordered collection.
-   *
-   * @return security infos
-   */
-  public Collection<SecurityInfo> getSecurityInfos() {
-    return securityInfos;
-  }
-
-  @Override
-  public String toString() {
-    return "DG14File [" + securityInfos.toString() + "]";
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) {
-      return false;
-    }
-    if (!(obj.getClass().equals(this.getClass()))) {
-      return false;
+        val derSet: ASN1Set = DLSet(vector)
+        outputStream.write(derSet.getEncoded(ASN1Encoding.DER))
     }
 
-    DG14File other = (DG14File)obj;
-    if (securityInfos == null) {
-      return  other.securityInfos == null;
-    }
-    if (other.securityInfos == null) {
-      return securityInfos == null;
+    @get:Deprecated("Clients should use {@link #getSecurityInfos()} and filter that collection")
+    val terminalAuthenticationInfos: MutableList<TerminalAuthenticationInfo?>
+        /**
+         * Returns the  Terminal Authentication infos.
+         * 
+         * @return the Terminal Authentication infos.
+         * 
+         */
+        get() {
+            val terminalAuthenticationInfos: MutableList<TerminalAuthenticationInfo?> =
+                ArrayList<TerminalAuthenticationInfo?>()
+            for (securityInfo in securityInfos!!) {
+                if (securityInfo is TerminalAuthenticationInfo) {
+                    terminalAuthenticationInfos.add(securityInfo)
+                }
+            }
+            return terminalAuthenticationInfos
+        }
+
+    @get:Deprecated("Clients should use {@link #getSecurityInfos()} and filter that collection")
+    val chipAuthenticationInfos: MutableList<ChipAuthenticationInfo?>
+        /**
+         * Returns the Chip Authentication infos.
+         * 
+         * @return the Chip Authentication infos
+         * 
+         */
+        get() {
+            val map: MutableList<ChipAuthenticationInfo?> =
+                ArrayList<ChipAuthenticationInfo?>()
+            for (securityInfo in securityInfos!!) {
+                if (securityInfo is ChipAuthenticationInfo) {
+                    val chipAuthNInfo =
+                        securityInfo
+                    map.add(chipAuthNInfo)
+                    if (chipAuthNInfo.getKeyId() == null) {
+                        return map
+                    }
+                }
+            }
+            return map
+        }
+
+    @get:Deprecated("Clients should use {@link #getSecurityInfos()} and filter that collection")
+    val chipAuthenticationPublicKeyInfos: MutableList<ChipAuthenticationPublicKeyInfo?>
+        /**
+         * Returns the mapping of key identifiers to public keys.
+         * The key identifier may be -1 if there is only one key.
+         * 
+         * @return the mapping of key identifiers to public keys
+         * 
+         */
+        get() {
+            val publicKeys: MutableList<ChipAuthenticationPublicKeyInfo?> =
+                ArrayList<ChipAuthenticationPublicKeyInfo?>()
+            for (securityInfo in securityInfos!!) {
+                if (securityInfo is ChipAuthenticationPublicKeyInfo) {
+                    publicKeys.add(securityInfo)
+                }
+            }
+            return publicKeys
+        }
+
+    @get:Deprecated("Clients should use {@link #getSecurityInfos()} and filter that collection")
+    val activeAuthenticationInfos: MutableList<ActiveAuthenticationInfo?>
+        /**
+         * Returns the Active Authentication security infos.
+         * 
+         * @return the Active Authentication security infos
+         * 
+         */
+        get() {
+            val resultList: MutableList<ActiveAuthenticationInfo?> =
+                ArrayList<ActiveAuthenticationInfo?>()
+            for (securityInfo in securityInfos!!) {
+                if (securityInfo is ActiveAuthenticationInfo) {
+                    val activeAuthenticationInfo =
+                        securityInfo
+                    resultList.add(activeAuthenticationInfo)
+                }
+            }
+            return resultList
+        }
+
+    /**
+     * Returns the security infos as an unordered collection.
+     * 
+     * @return security infos
+     */
+    fun getSecurityInfos(): MutableCollection<SecurityInfo?>? {
+        return securityInfos
     }
 
-    return securityInfos.equals(other.securityInfos);
-  }
+    override fun toString(): String {
+        return "DG14File [" + securityInfos.toString() + "]"
+    }
 
-  @Override
-  public int hashCode() {
-    return 5 * securityInfos.hashCode() + 41;
-  }
+    override fun equals(obj: Any?): Boolean {
+        if (obj == null) {
+            return false
+        }
+        if (!(obj.javaClass == this.javaClass)) {
+            return false
+        }
+
+        val other = obj as DG14File
+        if (securityInfos == null) {
+            return other.securityInfos == null
+        }
+        if (other.securityInfos == null) {
+            return securityInfos == null
+        }
+
+        return securityInfos == other.securityInfos
+    }
+
+    override fun hashCode(): Int {
+        return 5 * securityInfos.hashCode() + 41
+    }
+
+    companion object {
+        private val serialVersionUID = -3536507558193769953L
+
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+    }
 }

@@ -19,161 +19,128 @@
  *
  * $Id: AAResult.java 1763 2018-02-18 07:41:30Z martijno $
  */
+package kmrtd.protocol
 
-package kmrtd.protocol;
-
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.Arrays;
-
-import kmrtd.Util;
-
-import net.sf.scuba.util.Hex;
+import kmrtd.Util
+import net.sf.scuba.util.Hex
+import java.io.Serializable
+import java.security.PublicKey
 
 /**
  * Result from Active Authentication protocol.
- *
+ * 
  * @author The JMRTD team
- *
+ * 
  * @version $Revision: 1763 $
  */
-public class AAResult implements Serializable {
-
-  private static final long serialVersionUID = 8800803919646625713L;
-
-  private PublicKey publicKey;
-  private String digestAlgorithm;
-  private String signatureAlgorithm;
-  private byte[] challenge;
-  private byte[] response;
-
-  /**
-   * The result of an Active Authentication protocol run.
-   *
-   * @param publicKey the AA public key that was used
-   * @param digestAlgorithm the digest algorithm that was used
-   * @param signatureAlgorithm the signature algorithm that was used
-   * @param challenge the challenge that was used
-   * @param response the response that resulted
-   */
-  public AAResult(PublicKey publicKey, String digestAlgorithm, String signatureAlgorithm, byte[] challenge, byte[] response) {
-    this.publicKey = publicKey;
-    this.digestAlgorithm = digestAlgorithm;
-    this.signatureAlgorithm = signatureAlgorithm;
-    this.challenge = challenge;
-    this.response = response;
-  }
-
-  /**
-   * Returns the challenge that was initially used.
-   *
-   * @return the challenge
-   */
-  public byte[] getChallenge() {
-    return challenge;
-  }
-
-  /**
-   * Returns the response that was sent back by the ICC.
-   *
-   * @return the response that was sent back by the ICC
-   */
-  public byte[] getResponse() {
-    return response;
-  }
-
-  /**
-   * Returns the public key for verifying the result.
-   *
-   * @return the public key for verofying the result
-   */
-  public PublicKey getPublicKey() {
-    return publicKey;
-  }
-
-  /**
-   * Returns the digest algorithm used by the ICC.
-   *
-   * @return the digest algorithm used by the ICC
-   */
-  public String getDigestAlgorithm() {
-    return digestAlgorithm;
-  }
-
-  /**
-   * Returns the signature algorithm used by the ICC.
-   *
-   * @return the signature algorithm used by the ICC
-   */
-  public String getSignatureAlgorithm() {
-    return signatureAlgorithm;
-  }
-
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append("AAResult [")
-        .append("publicKey: ").append(Util.getDetailedPublicKeyAlgorithm(publicKey))
-        .append(", digestAlgorithm: ").append(digestAlgorithm)
-        .append(", signatureAlgorithm: ").append(signatureAlgorithm)
-        .append(", challenge: ").append(Hex.bytesToHexString(challenge))
-        .append(", response: ").append(Hex.bytesToHexString(response))
-        .toString();
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 1991;
-    int result = 1234567891;
-    result = prime * result + Arrays.hashCode(challenge);
-    result = prime * result + ((digestAlgorithm == null) ? 0 : digestAlgorithm.hashCode());
-    result = prime * result + ((publicKey == null) ? 0 : publicKey.hashCode());
-    result = prime * result + Arrays.hashCode(response);
-    result = prime * result + ((signatureAlgorithm == null) ? 0 : signatureAlgorithm.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+class AAResult
+/**
+ * The result of an Active Authentication protocol run.
+ * 
+ * @param publicKey the AA public key that was used
+ * @param digestAlgorithm the digest algorithm that was used
+ * @param signatureAlgorithm the signature algorithm that was used
+ * @param challenge the challenge that was used
+ * @param response the response that resulted
+ */(
+    /**
+     * Returns the public key for verifying the result.
+     * 
+     * @return the public key for verofying the result
+     */
+    val publicKey: PublicKey?,
+    /**
+     * Returns the digest algorithm used by the ICC.
+     * 
+     * @return the digest algorithm used by the ICC
+     */
+    val digestAlgorithm: String?,
+    /**
+     * Returns the signature algorithm used by the ICC.
+     * 
+     * @return the signature algorithm used by the ICC
+     */
+    val signatureAlgorithm: String?,
+    /**
+     * Returns the challenge that was initially used.
+     * 
+     * @return the challenge
+     */
+    val challenge: ByteArray?,
+    /**
+     * Returns the response that was sent back by the ICC.
+     * 
+     * @return the response that was sent back by the ICC
+     */
+    val response: ByteArray?
+) : Serializable {
+    override fun toString(): String {
+        return StringBuilder()
+            .append("AAResult [")
+            .append("publicKey: ").append(Util.getDetailedPublicKeyAlgorithm(publicKey))
+            .append(", digestAlgorithm: ").append(digestAlgorithm)
+            .append(", signatureAlgorithm: ").append(signatureAlgorithm)
+            .append(", challenge: ").append(Hex.bytesToHexString(challenge))
+            .append(", response: ").append(Hex.bytesToHexString(response))
+            .toString()
     }
 
-    AAResult other = (AAResult) obj;
-    if (!Arrays.equals(challenge, other.challenge)) {
-      return false;
-    }
-    if (digestAlgorithm == null) {
-      if (other.digestAlgorithm != null) {
-        return false;
-      }
-    } else if (!digestAlgorithm.equals(other.digestAlgorithm)) {
-      return false;
-    }
-    if (publicKey == null) {
-      if (other.publicKey != null) {
-        return false;
-      }
-    } else if (!publicKey.equals(other.publicKey)) {
-      return false;
-    }
-    if (!Arrays.equals(response, other.response)) {
-      return false;
-    }
-    if (signatureAlgorithm == null) {
-      if (other.signatureAlgorithm != null) {
-        return false;
-      }
-    } else if (!signatureAlgorithm.equals(other.signatureAlgorithm)) {
-      return false;
+    override fun hashCode(): Int {
+        val prime = 1991
+        var result = 1234567891
+        result = prime * result + challenge.contentHashCode()
+        result = prime * result + (if (digestAlgorithm == null) 0 else digestAlgorithm.hashCode())
+        result = prime * result + (if (publicKey == null) 0 else publicKey.hashCode())
+        result = prime * result + response.contentHashCode()
+        result =
+            prime * result + (if (signatureAlgorithm == null) 0 else signatureAlgorithm.hashCode())
+        return result
     }
 
-    return true;
-  }
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
+
+        val other = obj as AAResult
+        if (!challenge.contentEquals(other.challenge)) {
+            return false
+        }
+        if (digestAlgorithm == null) {
+            if (other.digestAlgorithm != null) {
+                return false
+            }
+        } else if (digestAlgorithm != other.digestAlgorithm) {
+            return false
+        }
+        if (publicKey == null) {
+            if (other.publicKey != null) {
+                return false
+            }
+        } else if (publicKey != other.publicKey) {
+            return false
+        }
+        if (!response.contentEquals(other.response)) {
+            return false
+        }
+        if (signatureAlgorithm == null) {
+            if (other.signatureAlgorithm != null) {
+                return false
+            }
+        } else if (signatureAlgorithm != other.signatureAlgorithm) {
+            return false
+        }
+
+        return true
+    }
+
+    companion object {
+        private const val serialVersionUID = 8800803919646625713L
+    }
 }

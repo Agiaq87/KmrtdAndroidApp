@@ -19,54 +19,51 @@
  *
  * $Id: DataGroup.java 1808 2019-03-07 21:32:19Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStream
 
 /**
  * Base class for data group files.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1808 $
  */
-public abstract class DataGroup extends AbstractTaggedLDSFile {
+abstract class DataGroup : AbstractTaggedLDSFile {
+    /**
+     * Constructs a data group. This constructor
+     * is only visible to the other classes in this package.
+     * 
+     * @param dataGroupTag data group tag
+     */
+    protected constructor(dataGroupTag: Int) : super(dataGroupTag)
 
-  private static final long serialVersionUID = -4761360877353069639L;
+    /**
+     * Constructs a data group from the DER encoded data in the
+     * given input stream. Tag and length are read, so the input stream
+     * is positioned just before the value.
+     * 
+     * @param dataGroupTag data group tag
+     * @param inputStream an input stream
+     * 
+     * @throws IOException on error reading input stream
+     */
+    protected constructor(dataGroupTag: Int, inputStream: InputStream?) : super(
+        dataGroupTag,
+        inputStream
+    )
 
-  /**
-   * Constructs a data group. This constructor
-   * is only visible to the other classes in this package.
-   *
-   * @param dataGroupTag data group tag
-   */
-  protected DataGroup(int dataGroupTag) {
-    super(dataGroupTag);
-  }
+    /**
+     * Returns a textual representation of this file.
+     * 
+     * @return a textual representation of this file
+     */
+    override fun toString(): String {
+        return "DataGroup [" + Integer.toHexString(getTag()) + " (" + getLength() + ")]"
+    }
 
-  /**
-   * Constructs a data group from the DER encoded data in the
-   * given input stream. Tag and length are read, so the input stream
-   * is positioned just before the value.
-   *
-   * @param dataGroupTag data group tag
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading input stream
-   */
-  protected DataGroup(int dataGroupTag, InputStream inputStream) throws IOException {
-    super(dataGroupTag, inputStream);
-  }
-
-  /**
-   * Returns a textual representation of this file.
-   *
-   * @return a textual representation of this file
-   */
-  @Override
-  public String toString() {
-    return "DataGroup [" + Integer.toHexString(getTag()) + " (" + getLength() + ")]";
-  }
+    companion object {
+        private val serialVersionUID = -4761360877353069639L
+    }
 }

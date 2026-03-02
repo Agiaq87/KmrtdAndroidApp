@@ -19,186 +19,149 @@
  *
  * $Id: EACCAResult.java 1852 2021-06-10 10:56:17Z martijno $
  */
+package kmrtd.protocol
 
-package kmrtd.protocol;
-
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.util.Arrays;
-
-import kmrtd.Util;
-
-import net.sf.scuba.util.Hex;
+import kmrtd.Util
+import net.sf.scuba.util.Hex
+import java.io.Serializable
+import java.math.BigInteger
+import java.security.PrivateKey
+import java.security.PublicKey
 
 /**
  * Result of EAC Chip Authentication protocol.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1852 $
  */
-public class EACCAResult implements Serializable {
-
-  private static final long serialVersionUID = 4431711176589761513L;
-
-  private BigInteger keyId;
-  private PublicKey piccPublicKey;
-  private SecureMessagingWrapper wrapper;
-  private byte[] keyHash;
-  private PublicKey pcdPublicKey;
-  private PrivateKey pcdPrivateKey;
-
-  /**
-   * Creates a result.
-   *
-   * @param keyId the key identifier of the ICC's public key or {@code null}
-   * @param piccPublicKey the ICC's public key
-   * @param keyHash the hash of the PCD's public key
-   * @param pcdPublicKey the public key of the terminal
-   * @param pcdPrivateKey the private key of the terminal
-   * @param wrapper secure messaging wrapper
-   */
-  public EACCAResult(BigInteger keyId, PublicKey piccPublicKey, byte[] keyHash, PublicKey pcdPublicKey, PrivateKey pcdPrivateKey, SecureMessagingWrapper wrapper) {
-    this.keyId = keyId;
-    this.piccPublicKey = piccPublicKey;
-    this.keyHash = keyHash;
-    this.pcdPublicKey = pcdPublicKey;
-    this.pcdPrivateKey = pcdPrivateKey;
-    this.wrapper = wrapper;
-  }
-
-  /**
-   * Returns the ICC's public key identifier.
-   *
-   * @return the key id or {@code null}
-   */
-  public BigInteger getKeyId() {
-    return keyId;
-  }
-
-  /**
-   * Returns the PICC's public key that was used as input to chip authentication protocol.
-   *
-   * @return the public key
-   */
-  public PublicKey getPublicKey() {
-    return piccPublicKey;
-  }
-
-  /**
-   * Returns the resulting secure messaging wrapper.
-   *
-   * @return the secure messaging wrapper
-   */
-  public SecureMessagingWrapper getWrapper() {
-    return wrapper;
-  }
-
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append("EACCAResult [keyId: ").append(keyId)
-        .append(", PICC public key: ").append(piccPublicKey)
-        .append(", wrapper: ").append(wrapper)
-        .append(", key hash: ").append(Hex.bytesToHexString(keyHash))
-        .append(", PCD public key: ").append(Util.getDetailedPublicKeyAlgorithm(pcdPublicKey))
-        .append(", PCD private key: ").append(Util.getDetailedPrivateKeyAlgorithm(pcdPrivateKey))
-        .append("]").toString();
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(keyHash);
-    result = prime * result + ((keyId == null) ? 0 : keyId.hashCode());
-    result = prime * result + ((piccPublicKey == null) ? 0 : piccPublicKey.hashCode());
-    result = prime * result + ((pcdPublicKey == null) ? 0 : pcdPublicKey.hashCode());
-    result = prime * result + ((pcdPrivateKey == null) ? 0 : pcdPrivateKey.hashCode());
-    result = prime * result + ((wrapper == null) ? 0 : wrapper.hashCode());
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    EACCAResult other = (EACCAResult) obj;
-    if (!Arrays.equals(keyHash, other.keyHash)) {
-      return false;
-    }
-    if (keyId == null) {
-      if (other.keyId != null) {
-        return false;
-      }
-    } else if (!keyId.equals(other.keyId)) {
-      return false;
-    }
-    if (pcdPrivateKey == null) {
-      if (other.pcdPrivateKey != null) {
-        return false;
-      }
-    } else if (!pcdPrivateKey.equals(other.pcdPrivateKey)) {
-      return false;
-    }
-    if (pcdPublicKey == null) {
-      if (other.pcdPublicKey != null) {
-        return false;
-      }
-    } else if (!pcdPublicKey.equals(other.pcdPublicKey)) {
-      return false;
-    }
-    if (piccPublicKey == null) {
-      if (other.piccPublicKey != null) {
-        return false;
-      }
-    } else if (!piccPublicKey.equals(other.piccPublicKey)) {
-      return false;
-    }
-    if (wrapper == null) {
-      if (other.wrapper != null) {
-        return false;
-      }
-    } else if (!wrapper.equals(other.wrapper)) {
-      return false;
+class EACCAResult
+/**
+ * Creates a result.
+ * 
+ * @param keyId the key identifier of the ICC's public key or `null`
+ * @param publicKey the ICC's public key
+ * @param keyHash the hash of the PCD's public key
+ * @param pCDPublicKey the public key of the terminal
+ * @param pCDPrivateKey the private key of the terminal
+ * @param wrapper secure messaging wrapper
+ */(
+    /**
+     * Returns the ICC's public key identifier.
+     * 
+     * @return the key id or `null`
+     */
+    val keyId: BigInteger?,
+    /**
+     * Returns the PICC's public key that was used as input to chip authentication protocol.
+     * 
+     * @return the public key
+     */
+    val publicKey: PublicKey?,
+    /**
+     * Returns the hash of the ephemeral public key of the terminal.
+     * 
+     * @return the hash of the ephemeral public key of the terminal
+     */
+    val keyHash: ByteArray?,
+    /**
+     * Returns the ephemeral public key of the terminal that was used in the key exchange.
+     * 
+     * @return the public key
+     */
+    val pCDPublicKey: PublicKey?,
+    /**
+     * The ephemeral private key of the terminal that was used in the key exchange.
+     * 
+     * @return the private key
+     */
+    val pCDPrivateKey: PrivateKey?,
+    /**
+     * Returns the resulting secure messaging wrapper.
+     * 
+     * @return the secure messaging wrapper
+     */
+    val wrapper: SecureMessagingWrapper?
+) : Serializable {
+    override fun toString(): String {
+        return StringBuilder()
+            .append("EACCAResult [keyId: ").append(keyId)
+            .append(", PICC public key: ").append(this.publicKey)
+            .append(", wrapper: ").append(wrapper)
+            .append(", key hash: ").append(Hex.bytesToHexString(keyHash))
+            .append(", PCD public key: ")
+            .append(Util.getDetailedPublicKeyAlgorithm(this.pCDPublicKey))
+            .append(", PCD private key: ")
+            .append(Util.getDetailedPrivateKeyAlgorithm(this.pCDPrivateKey))
+            .append("]").toString()
     }
 
-    return true;
-  }
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = 1
+        result = prime * result + keyHash.contentHashCode()
+        result = prime * result + (if (keyId == null) 0 else keyId.hashCode())
+        result = prime * result + (if (this.publicKey == null) 0 else publicKey.hashCode())
+        result = prime * result + (if (this.pCDPublicKey == null) 0 else pCDPublicKey.hashCode())
+        result = prime * result + (if (this.pCDPrivateKey == null) 0 else pCDPrivateKey.hashCode())
+        result = prime * result + (if (wrapper == null) 0 else wrapper.hashCode())
+        return result
+    }
 
-  /**
-   * Returns the hash of the ephemeral public key of the terminal.
-   *
-   * @return the hash of the ephemeral public key of the terminal
-   */
-  public byte[] getKeyHash() {
-    return keyHash;
-  }
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
+        val other = obj as EACCAResult
+        if (!keyHash.contentEquals(other.keyHash)) {
+            return false
+        }
+        if (keyId == null) {
+            if (other.keyId != null) {
+                return false
+            }
+        } else if (keyId != other.keyId) {
+            return false
+        }
+        if (this.pCDPrivateKey == null) {
+            if (other.pCDPrivateKey != null) {
+                return false
+            }
+        } else if (this.pCDPrivateKey != other.pCDPrivateKey) {
+            return false
+        }
+        if (this.pCDPublicKey == null) {
+            if (other.pCDPublicKey != null) {
+                return false
+            }
+        } else if (this.pCDPublicKey != other.pCDPublicKey) {
+            return false
+        }
+        if (this.publicKey == null) {
+            if (other.publicKey != null) {
+                return false
+            }
+        } else if (this.publicKey != other.publicKey) {
+            return false
+        }
+        if (wrapper == null) {
+            if (other.wrapper != null) {
+                return false
+            }
+        } else if (wrapper != other.wrapper) {
+            return false
+        }
 
-  /**
-   * Returns the ephemeral public key of the terminal that was used in the key exchange.
-   *
-   * @return the public key
-   */
-  public PublicKey getPCDPublicKey() {
-    return pcdPublicKey;
-  }
+        return true
+    }
 
-  /**
-   * The ephemeral private key of the terminal that was used in the key exchange.
-   *
-   * @return the private key
-   */
-  public PrivateKey getPCDPrivateKey() {
-    return pcdPrivateKey;
-  }
+    companion object {
+        private const val serialVersionUID = 4431711176589761513L
+    }
 }

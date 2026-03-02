@@ -19,166 +19,172 @@
  *
  * $Id: AbstractTaggedLDSFile.java 1811 2019-05-27 14:08:20Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
+import kmrtd.io.Fragment.length
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Base class for TLV based LDS files.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1811 $
  */
-public abstract class AbstractTaggedLDSFile extends AbstractLDSFile {
+abstract class AbstractTaggedLDSFile : AbstractLDSFile {
+    /**
+     * Returns the tag that identifies this LDS file.
+     * 
+     * @return the tag of this LDS file
+     */
+    open var tag: Int
+        private set
+    private var length = 0
 
-  private static final long serialVersionUID = -4761360877353069639L;
-
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-
-  private int tag;
-  private int length;
-
-  /**
-   * Constructs a data group. This constructor
-   * is only visible to the other classes in this package.
-   *
-   * @param dataGroupTag data group tag
-   */
-  protected AbstractTaggedLDSFile(int dataGroupTag) {
-    this.tag = dataGroupTag;
-  }
-
-  /**
-   * Constructs a data group from the DER encoded data in the
-   * given input stream.
-   *
-   * @param tag the tag
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading input stream
-   */
-  protected AbstractTaggedLDSFile(int tag, InputStream inputStream) throws IOException {
-    this.tag = tag;
-    readObject(inputStream);
-  }
-
-  /**
-   * Reads the contents of this LDS file, including tag and length from an input stream.
-   *
-   * @param inputStream the stream to read from
-   *
-   * @throws IOException if reading from the stream fails
-   */
-  @Override
-  protected void readObject(InputStream inputStream) throws IOException {
-    TLVInputStream tlvIn = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-    int inputTag = tlvIn.readTag();
-    if (inputTag != tag) {
-      throw new IllegalArgumentException("Was expecting tag " + Integer.toHexString(tag) + ", found " + Integer.toHexString(inputTag));
+    /**
+     * Constructs a data group. This constructor
+     * is only visible to the other classes in this package.
+     * 
+     * @param dataGroupTag data group tag
+     */
+    protected constructor(dataGroupTag: Int) {
+        this.tag = dataGroupTag
     }
-    length = tlvIn.readLength();
-    readContent(tlvIn);
-//    readContent(new SplittableInputStream(inputStream, length)); // was using this in <= 0.7.9 -- MO
-  }
 
-  @Override
-  protected void writeObject(OutputStream outputStream) throws IOException {
-    TLVOutputStream tlvOut = outputStream instanceof TLVOutputStream ? (TLVOutputStream)outputStream : new TLVOutputStream(outputStream);
-    int ourTag = getTag();
-    if (tag != ourTag) {
-      tag = ourTag;
+    /**
+     * Constructs a data group from the DER encoded data in the
+     * given input stream.
+     * 
+     * @param tag the tag
+     * @param inputStream an input stream
+     * 
+     * @throws IOException on error reading input stream
+     */
+    protected constructor(tag: Int, inputStream: InputStream?) {
+        this.tag = tag
+        readObject(inputStream)
     }
-    tlvOut.writeTag(ourTag);
-    byte[] value = getContent();
-    int ourLength = value == null ? 0 : value.length;
-    if (length != ourLength) {
-      length = ourLength;
+
+    /**
+     * Reads the contents of this LDS file, including tag and length from an input stream.
+     * 
+     * @param inputStream the stream to read from
+     * 
+     * @throws IOException if reading from the stream fails
+     */
+    @Throws(IOException::class)
+    override fun readObject(inputStream: InputStream?) {
+        val tlvIn = if (inputStream is TLVInputStream) inputStream else TLVInputStream(inputStream)
+        val inputTag = tlvIn.readTag()
+        require(inputTag == tag) {
+            "Was expecting tag " + Integer.toHexString(tag) + ", found " + Integer.toHexString(
+                inputTag
+            )
+        }
+        length = tlvIn.readLength()
+        readContent(tlvIn)
+        //    readContent(new SplittableInputStream(inputStream, length)); // was using this in <= 0.7.9 -- MO
     }
-    tlvOut.writeValue(value);
-  }
 
-  /**
-   * Reads the contents of the data group from an input stream.
-   * Client code implementing this method should only read the contents
-   * from the input stream, not the tag or length of the data group.
-   *
-   * @param inputStream the input stream to read from
-   *
-   * @throws IOException on error reading from input stream
-   */
-  protected abstract void readContent(InputStream inputStream) throws IOException;
-
-  /**
-   * Writes the contents of the data group to an output stream.
-   * Client code implementing this method should only write the contents
-   * to the output stream, not the tag or length of the data group.
-   *
-   * @param outputStream the output stream to write to
-   *
-   * @throws IOException on error writing to output stream
-   */
-  protected abstract void writeContent(OutputStream outputStream) throws IOException;
-
-  /**
-   * Returns a textual representation of this file.
-   *
-   * @return a textual representation of this file
-   */
-  @Override
-  public String toString() {
-    return "TaggedLDSFile [" + Integer.toHexString(getTag()) + " (" + getLength() + ")]";
-  }
-
-  /**
-   * Returns the tag that identifies this LDS file.
-   *
-   * @return the tag of this LDS file
-   */
-  public int getTag() {
-    return tag;
-  }
-
-  /**
-   * The length of the value of the data group.
-   *
-   * @return the length of the value of the data group
-   */
-  public int getLength() {
-    if (length <= 0) {
-      length = getContent().length;
+    @Throws(IOException::class)
+    override fun writeObject(outputStream: OutputStream?) {
+        val tlvOut =
+            if (outputStream is TLVOutputStream) outputStream else TLVOutputStream(outputStream)
+        val ourTag = this.tag
+        if (tag != ourTag) {
+            tag = ourTag
+        }
+        tlvOut.writeTag(ourTag)
+        val value = this.content
+        val ourLength = if (value == null) 0 else value.size
+        if (length != ourLength) {
+            length = ourLength
+        }
+        tlvOut.writeValue(value)
     }
-    return length;
-  }
 
-  /**
-   * Returns the value part of this LDS file.
-   *
-   * @return the value as byte array
-   */
-  private byte[] getContent() {
-    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    try {
-      writeContent(outputStream);
-      outputStream.flush();
-      return outputStream.toByteArray();
-    } catch (IOException ioe) {
-      throw new IllegalStateException("Could not get DG content", ioe);
-    } finally {
-      try {
-        outputStream.close();
-      } catch (IOException ioe) {
-        LOGGER.log(Level.FINE, "Error closing stream", ioe);
-      }
+    /**
+     * Reads the contents of the data group from an input stream.
+     * Client code implementing this method should only read the contents
+     * from the input stream, not the tag or length of the data group.
+     * 
+     * @param inputStream the input stream to read from
+     * 
+     * @throws IOException on error reading from input stream
+     */
+    @Throws(IOException::class)
+    protected abstract fun readContent(inputStream: InputStream?)
+
+    /**
+     * Writes the contents of the data group to an output stream.
+     * Client code implementing this method should only write the contents
+     * to the output stream, not the tag or length of the data group.
+     * 
+     * @param outputStream the output stream to write to
+     * 
+     * @throws IOException on error writing to output stream
+     */
+    @Throws(IOException::class)
+    protected abstract fun writeContent(outputStream: OutputStream?)
+
+    /**
+     * Returns a textual representation of this file.
+     * 
+     * @return a textual representation of this file
+     */
+    override fun toString(): String {
+        return "TaggedLDSFile [" + Integer.toHexString(this.tag) + " (" + getLength() + ")]"
     }
-  }
+
+    /**
+     * The length of the value of the data group.
+     * 
+     * @return the length of the value of the data group
+     */
+    override fun getLength(): Int {
+        if (length <= 0) {
+            length = this.content.length
+        }
+        return length
+    }
+
+    private val content: ByteArray
+        /**
+         * Returns the value part of this LDS file.
+         * 
+         * @return the value as byte array
+         */
+        get() {
+            val outputStream = ByteArrayOutputStream()
+            try {
+                writeContent(outputStream)
+                outputStream.flush()
+                return outputStream.toByteArray()
+            } catch (ioe: IOException) {
+                throw IllegalStateException("Could not get DG content", ioe)
+            } finally {
+                try {
+                    outputStream.close()
+                } catch (ioe: IOException) {
+                    LOGGER.log(
+                        Level.FINE,
+                        "Error closing stream",
+                        ioe
+                    )
+                }
+            }
+        }
+
+    companion object {
+        private val serialVersionUID = -4761360877353069639L
+
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+    }
 }

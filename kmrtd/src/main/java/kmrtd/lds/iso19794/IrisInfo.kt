@@ -19,301 +19,309 @@
  *
  * $Id: IrisInfo.java 1896 2025-04-18 21:39:56Z martijno $
  */
+package kmrtd.lds.iso19794
 
-package kmrtd.lds.iso19794;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.StandardBiometricHeader;
-import kmrtd.lds.AbstractListInfo;
+import kmrtd.cbeff.BiometricDataBlock
+import kmrtd.cbeff.CBEFFInfo
+import kmrtd.cbeff.ISO781611
+import kmrtd.cbeff.StandardBiometricHeader
+import kmrtd.lds.AbstractListInfo
+import java.io.DataInputStream
+import java.io.DataOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.SortedMap
+import java.util.TreeMap
+import java.util.logging.Logger
 
 /**
  * Iris record header and biometric subtype blocks
  * based on Section 6.5.3 and Table 2 of
  * ISO/IEC 19794-6 2005.
- *
+ * 
  * TODO: proper enums for fields.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1896 $
  */
-public class IrisInfo extends AbstractListInfo<IrisBiometricSubtypeInfo> implements BiometricDataBlock {
+class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock {
+    private var recordLength: Long = 0
 
-  private static final long serialVersionUID = -3415309711643815511L;
+    /**
+     * Returns the capture device identifier.
+     * 
+     * @return the capture device identifier
+     */
+    /* 16 bit */
+    var captureDeviceId: Int = 0
+        private set
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
+    /**
+     * Returns the horizontal orientation.
+     * 
+     * @return the horizontalOrientation, one of [.ORIENTATION_UNDEF], [.ORIENTATION_BASE], or [.ORIENTATION_FLIPPED]
+     */
+    var horizontalOrientation: Int = 0
+        private set
 
-  /** Format identifier 'I', 'I', 'R', 0x00. */
-  private static final int FORMAT_IDENTIFIER = 0x49495200;
+    /**
+     * Returns the vertical orientation.
+     * 
+     * @return the verticalOrientation, one of [.ORIENTATION_UNDEF], [.ORIENTATION_BASE], or [.ORIENTATION_FLIPPED]
+     */
+    var verticalOrientation: Int = 0
+        private set
 
-  /** Version number. */
-  private static final int VERSION_NUMBER = 0x30313000;
+    /**
+     * Returns the scan type.
+     * One of [.SCAN_TYPE_UNDEF], [.SCAN_TYPE_PROGRESSIVE],
+     * [.SCAN_TYPE_INTERLACE_FRAME], [.SCAN_TYPE_INTERLACE_FIELD],
+     * or [.SCAN_TYPE_CORRECTED].
+     * 
+     * @return the scanType
+     */
+    var scanType: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_MONO_RAW = 2; /* (0x0002) */
+    /**
+     * Returns the iris occlusion.
+     * 
+     * @return the irisOcclusion
+     */
+    var irisOcclusion: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_RGB_RAW = 4; /* (0x0004) */
+    /**
+     * Returns the iris occlusing filling.
+     * 
+     * @return the occlusionFilling
+     */
+    var occlusionFilling: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_MONO_JPEG = 6; /* (0x0006) */
+    /**
+     * Returns the boundary extraction.
+     * 
+     * @return the boundaryExtraction
+     */
+    var boundaryExtraction: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_RGB_JPEG = 8; /* (0x0008) */
+    /**
+     * Returns the iris diameter.
+     * 
+     * @return the irisDiameter
+     */
+    var irisDiameter: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_MONO_JPEG_LS = 10; /* (0x000A) */
+    /**
+     * Returns the image format.
+     * 
+     * @return the imageFormat
+     */
+    var imageFormat: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_RGB_JPEG_LS = 12; /* (0x000C) */
+    /**
+     * Returns the raw image width.
+     * 
+     * @return the rawImageWidth
+     */
+    var rawImageWidth: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_MONO_JPEG2000 = 14; /* (0x000E) */
+    /**
+     * Returns the raw image height.
+     * 
+     * @return the rawImageHeight
+     */
+    var rawImageHeight: Int = 0
+        private set
 
-  /** Image format. */
-  public static final int IMAGEFORMAT_RGB_JPEG2000 = 16; /* (0x0010) */
+    /**
+     * Returns the intensity depth.
+     * 
+     * @return the intensityDepth
+     */
+    var intensityDepth: Int = 0
+        private set
 
-  /** Constant for capture device Id, based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int CAPTURE_DEVICE_UNDEF = 0;
+    /**
+     * Returns the image transformation.
+     * 
+     * @return the imageTransformation
+     */
+    var imageTransformation: Int = 0
+        private set
 
-  /** Constant for horizontal and veritical orientation, based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int ORIENTATION_UNDEF = 0;
+    /**
+     * Returns the device unique id.
+     * 
+     * @return the deviceUniqueId
+     */
+    /*
+        * Length 16, starts with 'D' (serial), 'M' (MAC address) or 'P' (processor Id),
+        * or all zeroes (indicating no serial number).
+        */
+    var deviceUniqueId: ByteArray
+        private set
 
-  /** Constant for horizontal and veritical orientation, based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int ORIENTATION_BASE = 1;
+    private var sbh: StandardBiometricHeader?
 
-  /** Constant for horizontal and veritical orientation, based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int ORIENTATION_FLIPPED = 2;
-
-  /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int SCAN_TYPE_UNDEF = 0;
-
-  /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int SCAN_TYPE_PROGRESSIVE = 1;
-
-  /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int SCAN_TYPE_INTERLACE_FRAME = 2;
-
-  /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int SCAN_TYPE_INTERLACE_FIELD = 3;
-
-  /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int SCAN_TYPE_CORRECTED = 4;
-
-  /** Iris occlusion (polar only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int IROCC_UNDEF = 0;
-
-  /** Iris occlusion (polar only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int IROCC_PROCESSED = 1;
-
-  /** Iris occlusion filling (polar only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int IROCC_ZEROFILL = 0;
-
-  /** Iris occlusion filling (polar only), based on Table 2 in Section 5.5 in ISO 19794-6. */
-  public static final int IROC_UNITFILL = 1;
-
-  /* TODO: reference to specification. */
-  public static final int INTENSITY_DEPTH_UNDEF = 0;
-
-  /* TODO: reference to specification. */
-  public static final int TRANS_UNDEF = 0;
-  public static final int TRANS_STD = 1;
-
-  /* TODO: reference to specification. */
-  public static final int IRBNDY_UNDEF = 0;
-  public static final int IRBNDY_PROCESSED = 1;
-
-  private long recordLength;
-
-  /* 16 bit */
-  private int captureDeviceId;
-
-  private int horizontalOrientation;
-  private int verticalOrientation;
-  private int scanType;
-  private int irisOcclusion;
-  private int occlusionFilling;
-  private int boundaryExtraction;
-
-  private int irisDiameter;
-  private int imageFormat;
-  private int rawImageWidth;
-  private int rawImageHeight;
-  private int intensityDepth;
-  private int imageTransformation;
-
-  /*
-   * Length 16, starts with 'D' (serial), 'M' (MAC address) or 'P' (processor Id),
-   * or all zeroes (indicating no serial number).
-   */
-  private byte[] deviceUniqueId;
-
-  private StandardBiometricHeader sbh;
-
-  /**
-   * Constructs a new iris info object.
-   *
-   * @param captureDeviceId capture device identifier assigned by vendor
-   * @param horizontalOrientation horizontal orientation: {@link #ORIENTATION_UNDEF}, {@link #ORIENTATION_BASE}, or {@link #ORIENTATION_FLIPPED}
-   * @param verticalOrientation vertical orientation: {@link #ORIENTATION_UNDEF}, {@link #ORIENTATION_BASE}, or {@link #ORIENTATION_FLIPPED}
-   * @param scanType scan type
-   * @param irisOcclusion iris occlusion (polar only)
-   * @param occlusionFilling occlusion filling (polar only)
-   * @param boundaryExtraction boundary extraction (polar only)
-   * @param irisDiameter expected iris diameter in pixels (rectilinear only)
-   * @param imageFormat image format of data blob (JPEG, raw, etc.)
-   * @param rawImageWidth raw image width, pixels
-   * @param rawImageHeight raw image height, pixels
-   * @param intensityDepth intensity depth, bits, per color
-   * @param imageTransformation transformation to polar image (polar only)
-   * @param deviceUniqueId a 16 character string uniquely identifying the device or source of that data
-   * @param irisBiometricSubtypeInfos the iris biometric subtype records
-   */
-  public IrisInfo(int captureDeviceId, int horizontalOrientation, int verticalOrientation,
-      int scanType, int irisOcclusion, int occlusionFilling,
-      int boundaryExtraction, int irisDiameter, int imageFormat,
-      int rawImageWidth, int rawImageHeight, int intensityDepth, int imageTransformation,
-      byte[] deviceUniqueId,
-      List<IrisBiometricSubtypeInfo> irisBiometricSubtypeInfos) {
-    this(null, captureDeviceId, horizontalOrientation, verticalOrientation,
+    /**
+     * Constructs a new iris info object.
+     * 
+     * @param captureDeviceId capture device identifier assigned by vendor
+     * @param horizontalOrientation horizontal orientation: [.ORIENTATION_UNDEF], [.ORIENTATION_BASE], or [.ORIENTATION_FLIPPED]
+     * @param verticalOrientation vertical orientation: [.ORIENTATION_UNDEF], [.ORIENTATION_BASE], or [.ORIENTATION_FLIPPED]
+     * @param scanType scan type
+     * @param irisOcclusion iris occlusion (polar only)
+     * @param occlusionFilling occlusion filling (polar only)
+     * @param boundaryExtraction boundary extraction (polar only)
+     * @param irisDiameter expected iris diameter in pixels (rectilinear only)
+     * @param imageFormat image format of data blob (JPEG, raw, etc.)
+     * @param rawImageWidth raw image width, pixels
+     * @param rawImageHeight raw image height, pixels
+     * @param intensityDepth intensity depth, bits, per color
+     * @param imageTransformation transformation to polar image (polar only)
+     * @param deviceUniqueId a 16 character string uniquely identifying the device or source of that data
+     * @param irisBiometricSubtypeInfos the iris biometric subtype records
+     */
+    constructor(
+        captureDeviceId: Int, horizontalOrientation: Int, verticalOrientation: Int,
+        scanType: Int, irisOcclusion: Int, occlusionFilling: Int,
+        boundaryExtraction: Int, irisDiameter: Int, imageFormat: Int,
+        rawImageWidth: Int, rawImageHeight: Int, intensityDepth: Int, imageTransformation: Int,
+        deviceUniqueId: ByteArray,
+        irisBiometricSubtypeInfos: MutableList<IrisBiometricSubtypeInfo>
+    ) : this(
+        null, captureDeviceId, horizontalOrientation, verticalOrientation,
         scanType, irisOcclusion, occlusionFilling,
         boundaryExtraction, irisDiameter, imageFormat,
         rawImageWidth, rawImageHeight, intensityDepth, imageTransformation,
-        deviceUniqueId, irisBiometricSubtypeInfos);
-  }
+        deviceUniqueId, irisBiometricSubtypeInfos
+    )
 
-  /**
-   * Constructs a new iris info object.
-   *
-   * @param sbh standard biometric header to use
-   * @param captureDeviceId capture device identifier assigned by vendor
-   * @param horizontalOrientation horizontal orientation: {@link #ORIENTATION_UNDEF}, {@link #ORIENTATION_BASE}, or {@link #ORIENTATION_FLIPPED}
-   * @param verticalOrientation vertical orientation: {@link #ORIENTATION_UNDEF}, {@link #ORIENTATION_BASE}, or {@link #ORIENTATION_FLIPPED}
-   * @param scanType scan type
-   * @param irisOcclusion iris occlusion (polar only)
-   * @param occlusionFilling occlusion filling (polar only)
-   * @param boundaryExtraction boundary extraction (polar only)
-   * @param irisDiameter expected iris diameter in pixels (rectilinear only)
-   * @param imageFormat image format of data blob (JPEG, raw, etc.)
-   * @param rawImageWidth raw image width, pixels
-   * @param rawImageHeight raw image height, pixels
-   * @param intensityDepth intensity depth, bits, per color
-   * @param imageTransformation transformation to polar image (polar only)
-   * @param deviceUniqueId a 16 character string uniquely identifying the device or source of that data
-   * @param irisBiometricSubtypeInfos the iris biometric subtype records
-   */
-  public IrisInfo(StandardBiometricHeader sbh,
-      int captureDeviceId, int horizontalOrientation, int verticalOrientation,
-      int scanType, int irisOcclusion, int occlusionFilling,
-      int boundaryExtraction, int irisDiameter, int imageFormat,
-      int rawImageWidth, int rawImageHeight, int intensityDepth, int imageTransformation,
-      byte[] deviceUniqueId,
-      List<IrisBiometricSubtypeInfo> irisBiometricSubtypeInfos) {
-    this.sbh = sbh;
-    if (irisBiometricSubtypeInfos == null) {
-      throw new IllegalArgumentException("Null irisBiometricSubtypeInfos");
-    }
-    this.captureDeviceId = captureDeviceId;
-    this.horizontalOrientation = horizontalOrientation;
-    this.verticalOrientation = verticalOrientation;
-    this.scanType = scanType;
-    this.irisOcclusion = irisOcclusion;
-    this.occlusionFilling = occlusionFilling;
-    this.boundaryExtraction = boundaryExtraction;
-    this.irisDiameter = irisDiameter;
-    this.imageFormat = imageFormat;
-    this.rawImageWidth = rawImageWidth;
-    this.rawImageHeight = rawImageHeight;
-    this.intensityDepth = intensityDepth;
-    this.imageTransformation = imageTransformation;
-    long headerLength = 45;
-    long dataLength = 0;
-    for (IrisBiometricSubtypeInfo irisBiometricSubtypeInfo: irisBiometricSubtypeInfos) {
-      dataLength += irisBiometricSubtypeInfo.getRecordLength();
-      add(irisBiometricSubtypeInfo);
-    }
-    if (deviceUniqueId == null || deviceUniqueId.length != 16) {
-      throw new IllegalArgumentException("deviceUniqueId invalid");
-    }
-    this.deviceUniqueId = new byte[16];
-    System.arraycopy(deviceUniqueId, 0, this.deviceUniqueId, 0, deviceUniqueId.length);
-    this.recordLength = headerLength + dataLength;
-  }
-
-  /**
-   * Constructs an iris info from binary encoding.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException if reading fails
-   */
-  public IrisInfo(InputStream inputStream) throws IOException {
-    this(null, inputStream);
-  }
-
-  /**
-   * Constructs an iris info from binary encoding.
-   *
-   * @param sbh standard biometric header to use
-   * @param inputStream an input stream
-   *
-   * @throws IOException if reading fails
-   */
-  public IrisInfo(StandardBiometricHeader sbh, InputStream inputStream) throws IOException {
-    this.sbh = sbh;
-    readObject(inputStream);
-  }
-
-  /**
-   * Reads this iris info from input stream.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException if reading fails
-   */
-  @Override
-  public void readObject(InputStream inputStream) throws IOException {
-
-    /* Iris Record Header (45) */
-
-    DataInputStream dataIn = inputStream instanceof DataInputStream ? (DataInputStream)inputStream : new DataInputStream(inputStream);
-
-    int iir0 = dataIn.readInt(); /* format id (e.g. "IIR" 0x00) */				/* 4 */
-    if (iir0 != FORMAT_IDENTIFIER) {
-      throw new IllegalArgumentException("'IIR' marker expected! Found " + Integer.toHexString(iir0));
+    /**
+     * Constructs a new iris info object.
+     * 
+     * @param sbh standard biometric header to use
+     * @param captureDeviceId capture device identifier assigned by vendor
+     * @param horizontalOrientation horizontal orientation: [.ORIENTATION_UNDEF], [.ORIENTATION_BASE], or [.ORIENTATION_FLIPPED]
+     * @param verticalOrientation vertical orientation: [.ORIENTATION_UNDEF], [.ORIENTATION_BASE], or [.ORIENTATION_FLIPPED]
+     * @param scanType scan type
+     * @param irisOcclusion iris occlusion (polar only)
+     * @param occlusionFilling occlusion filling (polar only)
+     * @param boundaryExtraction boundary extraction (polar only)
+     * @param irisDiameter expected iris diameter in pixels (rectilinear only)
+     * @param imageFormat image format of data blob (JPEG, raw, etc.)
+     * @param rawImageWidth raw image width, pixels
+     * @param rawImageHeight raw image height, pixels
+     * @param intensityDepth intensity depth, bits, per color
+     * @param imageTransformation transformation to polar image (polar only)
+     * @param deviceUniqueId a 16 character string uniquely identifying the device or source of that data
+     * @param irisBiometricSubtypeInfos the iris biometric subtype records
+     */
+    constructor(
+        sbh: StandardBiometricHeader?,
+        captureDeviceId: Int, horizontalOrientation: Int, verticalOrientation: Int,
+        scanType: Int, irisOcclusion: Int, occlusionFilling: Int,
+        boundaryExtraction: Int, irisDiameter: Int, imageFormat: Int,
+        rawImageWidth: Int, rawImageHeight: Int, intensityDepth: Int, imageTransformation: Int,
+        deviceUniqueId: ByteArray,
+        irisBiometricSubtypeInfos: MutableList<IrisBiometricSubtypeInfo>
+    ) {
+        this.sbh = sbh
+        requireNotNull(irisBiometricSubtypeInfos) { "Null irisBiometricSubtypeInfos" }
+        this.captureDeviceId = captureDeviceId
+        this.horizontalOrientation = horizontalOrientation
+        this.verticalOrientation = verticalOrientation
+        this.scanType = scanType
+        this.irisOcclusion = irisOcclusion
+        this.occlusionFilling = occlusionFilling
+        this.boundaryExtraction = boundaryExtraction
+        this.irisDiameter = irisDiameter
+        this.imageFormat = imageFormat
+        this.rawImageWidth = rawImageWidth
+        this.rawImageHeight = rawImageHeight
+        this.intensityDepth = intensityDepth
+        this.imageTransformation = imageTransformation
+        val headerLength: Long = 45
+        var dataLength: Long = 0
+        for (irisBiometricSubtypeInfo in irisBiometricSubtypeInfos) {
+            dataLength += irisBiometricSubtypeInfo.getRecordLength()
+            add(irisBiometricSubtypeInfo)
+        }
+        require(!(deviceUniqueId == null || deviceUniqueId.size != 16)) { "deviceUniqueId invalid" }
+        this.deviceUniqueId = ByteArray(16)
+        System.arraycopy(deviceUniqueId, 0, this.deviceUniqueId, 0, deviceUniqueId.size)
+        this.recordLength = headerLength + dataLength
     }
 
-    int version = dataIn.readInt(); /* version (e.g. "010" 0x00) */				/* + 4 = 8 */
-    if (version != VERSION_NUMBER) {
-      throw new IllegalArgumentException("'010' version number expected! Found " + Integer.toHexString(version));
+    /**
+     * Constructs an iris info from binary encoding.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException if reading fails
+     */
+    constructor(inputStream: InputStream) : this(null, inputStream)
+
+    /**
+     * Constructs an iris info from binary encoding.
+     * 
+     * @param sbh standard biometric header to use
+     * @param inputStream an input stream
+     * 
+     * @throws IOException if reading fails
+     */
+    constructor(sbh: StandardBiometricHeader?, inputStream: InputStream) {
+        this.sbh = sbh
+        readObject(inputStream)
     }
 
-    this.recordLength = dataIn.readInt(); /* & 0x00000000FFFFFFFFL */			/* + 4 = 12 */
-    long headerLength = 45;
-    long dataLength = this.recordLength - headerLength;
+    /**
+     * Reads this iris info from input stream.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException if reading fails
+     */
+    @Throws(IOException::class)
+    override fun readObject(inputStream: InputStream) {
+        /* Iris Record Header (45) */
 
-    captureDeviceId = dataIn.readUnsignedShort();								/* + 2 = 14 */
-    int count = dataIn.readUnsignedByte();							/* + 1 = 15 */
+        val dataIn =
+            if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
 
-    int recordHeaderLength = dataIn.readUnsignedShort(); /* Should be 45. */	/* + 2 = 17 */
-    if (recordHeaderLength != headerLength) {
-      throw new IllegalArgumentException("Expected header length " + headerLength + ", found " + recordHeaderLength);
-    }
+        val iir0 = dataIn.readInt() /* format id (e.g. "IIR" 0x00) */ /* 4 */
+        require(iir0 == FORMAT_IDENTIFIER) {
+            "'IIR' marker expected! Found " + Integer.toHexString(
+                iir0
+            )
+        }
 
-    /*
+        val version = dataIn.readInt() /* version (e.g. "010" 0x00) */ /* + 4 = 8 */
+        require(version == VERSION_NUMBER) {
+            "'010' version number expected! Found " + Integer.toHexString(
+                version
+            )
+        }
+
+        this.recordLength = dataIn.readInt().toLong() /* & 0x00000000FFFFFFFFL */ /* + 4 = 12 */
+        val headerLength: Long = 45
+        val dataLength = this.recordLength - headerLength
+
+        captureDeviceId = dataIn.readUnsignedShort() /* + 2 = 14 */
+        val count = dataIn.readUnsignedByte() /* + 1 = 15 */
+
+        val recordHeaderLength = dataIn.readUnsignedShort() /* Should be 45. */ /* + 2 = 17 */
+        require(recordHeaderLength.toLong() == headerLength) { "Expected header length " + headerLength + ", found " + recordHeaderLength }
+
+        /*
      *  16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1
      * [  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  ]
      *                                             1  1  = 0x0003 horizontalOrientation (>> 0)
@@ -323,22 +331,22 @@ public class IrisInfo extends AbstractListInfo<IrisBiometricSubtypeInfo> impleme
      *                        1  0  0  0  0  0  0  0  0  = 0x0100 occlusionFilling (>> 8)
      *                     1  0  0  0  0  0  0  0  0  0  = 0x0200 boundaryExtraction (>> 9)
      */
-    int imagePropertiesBits = dataIn.readUnsignedShort(); 						/* + 2 = 19 */
-    horizontalOrientation = imagePropertiesBits & 0x0003;
-    verticalOrientation = (imagePropertiesBits & 0x00C) >> 2;
-    scanType = (imagePropertiesBits & 0x0070) >> 4;
-    irisOcclusion = (imagePropertiesBits & 0x0080) >> 7;
-    occlusionFilling = (imagePropertiesBits & 0x0100) >> 8;
-    boundaryExtraction = (imagePropertiesBits & 0x0200) >> 9;
+        val imagePropertiesBits = dataIn.readUnsignedShort() /* + 2 = 19 */
+        horizontalOrientation = imagePropertiesBits and 0x0003
+        verticalOrientation = (imagePropertiesBits and 0x00C) shr 2
+        scanType = (imagePropertiesBits and 0x0070) shr 4
+        irisOcclusion = (imagePropertiesBits and 0x0080) shr 7
+        occlusionFilling = (imagePropertiesBits and 0x0100) shr 8
+        boundaryExtraction = (imagePropertiesBits and 0x0200) shr 9
 
-    irisDiameter = dataIn.readUnsignedShort();									/* + 2 = 21 */
-    imageFormat = dataIn.readUnsignedShort();									/* + 2 = 23 */
-    rawImageWidth = dataIn.readUnsignedShort();									/* + 2 = 25 */
-    rawImageHeight = dataIn.readUnsignedShort();								/* + 2 = 27 */
-    intensityDepth = dataIn.readUnsignedByte();									/* + 1 = 28*/
-    imageTransformation =  dataIn.readUnsignedByte();							/* + 1 = 29 */
+        irisDiameter = dataIn.readUnsignedShort() /* + 2 = 21 */
+        imageFormat = dataIn.readUnsignedShort() /* + 2 = 23 */
+        rawImageWidth = dataIn.readUnsignedShort() /* + 2 = 25 */
+        rawImageHeight = dataIn.readUnsignedShort() /* + 2 = 27 */
+        intensityDepth = dataIn.readUnsignedByte() /* + 1 = 28*/
+        imageTransformation = dataIn.readUnsignedByte() /* + 1 = 29 */
 
-    /*
+        /*
      * A 16 character string uniquely identifying the
      * device or source of the data. This data can be
      * one of:
@@ -347,379 +355,344 @@ public class IrisInfo extends AbstractListInfo<IrisBiometricSubtypeInfo> impleme
      * Host PC processor ID, identified by the first character "P"
      * No serial number, identified by all zeros
      */
-    deviceUniqueId = new byte[16];												/* + 16 = 45 */
-    dataIn.readFully(deviceUniqueId);
+        deviceUniqueId = ByteArray(16) /* + 16 = 45 */
+        dataIn.readFully(deviceUniqueId)
 
-    long constructedDataLength = 0L;
+        var constructedDataLength = 0L
 
-    /* A record contains biometric subtype (or: 'feature') blocks (which contain image data blocks)... */
-    for (int i = 0; i < count; i++) {
-      IrisBiometricSubtypeInfo biometricSubtypeInfo = new IrisBiometricSubtypeInfo(inputStream, imageFormat);
-      constructedDataLength += biometricSubtypeInfo.getRecordLength();
-      add(biometricSubtypeInfo);
-    }
-    if (dataLength != constructedDataLength) {
-      LOGGER.warning("ConstructedDataLength and dataLength differ: "
-          + "dataLength = " + dataLength
-          + ", constructedDataLength = " + constructedDataLength);
-    }
-  }
-
-  /**
-   * Writes this iris info to an output stream.
-   *
-   * @param outputStream an output stream
-   *
-   * @throws IOException if writing fails
-   */
-  @Override
-  public void writeObject(OutputStream outputStream) throws IOException {
-
-    int headerLength = 45;
-
-    int dataLength = 0;
-    List<IrisBiometricSubtypeInfo> biometricSubtypeInfos = getSubRecords();
-    for (IrisBiometricSubtypeInfo biometricSubtypeInfo: biometricSubtypeInfos) {
-      dataLength += biometricSubtypeInfo.getRecordLength();
+        /* A record contains biometric subtype (or: 'feature') blocks (which contain image data blocks)... */
+        for (i in 0..<count) {
+            val biometricSubtypeInfo = IrisBiometricSubtypeInfo(inputStream, imageFormat)
+            constructedDataLength += biometricSubtypeInfo.getRecordLength()
+            add(biometricSubtypeInfo)
+        }
+        if (dataLength != constructedDataLength) {
+            LOGGER.warning(
+                ("ConstructedDataLength and dataLength differ: "
+                        + "dataLength = " + dataLength
+                        + ", constructedDataLength = " + constructedDataLength)
+            )
+        }
     }
 
-    int recordLength = headerLength + dataLength;
+    /**
+     * Writes this iris info to an output stream.
+     * 
+     * @param outputStream an output stream
+     * 
+     * @throws IOException if writing fails
+     */
+    @Throws(IOException::class)
+    override fun writeObject(outputStream: OutputStream?) {
+        val headerLength = 45
 
-    /* Iris Record Header (45) */
+        var dataLength = 0
+        val biometricSubtypeInfos = getSubRecords()
+        for (biometricSubtypeInfo in biometricSubtypeInfos) {
+            dataLength += biometricSubtypeInfo.getRecordLength().toInt()
+        }
 
-    DataOutputStream dataOut = outputStream instanceof DataOutputStream ? (DataOutputStream)outputStream : new DataOutputStream(outputStream);
+        val recordLength = headerLength + dataLength
 
-    dataOut.writeInt(FORMAT_IDENTIFIER); /* header (e.g. "IIR", 0x00) */		/* 4 */
-    dataOut.writeInt(VERSION_NUMBER); /* version in ASCII (e.g. "010" 0x00) */	/* +4 = 8 */
+        /* Iris Record Header (45) */
+        val dataOut =
+            if (outputStream is DataOutputStream) outputStream else DataOutputStream(outputStream)
 
-    dataOut.writeInt(recordLength); /* NOTE: bytes 9-12, i.e. 4 bytes, despite "unsigned long" in ISO/IEC FCD 19749-6. */ /* +4 = 12 */
+        dataOut.writeInt(FORMAT_IDENTIFIER) /* header (e.g. "IIR", 0x00) */ /* 4 */
+        dataOut.writeInt(VERSION_NUMBER) /* version in ASCII (e.g. "010" 0x00) */ /* +4 = 8 */
 
-    dataOut.writeShort(captureDeviceId);										/* +2 = 14 */
+        dataOut.writeInt(recordLength) /* NOTE: bytes 9-12, i.e. 4 bytes, despite "unsigned long" in ISO/IEC FCD 19749-6. */ /* +4 = 12 */
 
-    dataOut.writeByte(biometricSubtypeInfos.size());									/* +1 = 15 */
-    dataOut.writeShort(headerLength);											/* +2 = 17 */
+        dataOut.writeShort(captureDeviceId) /* +2 = 14 */
 
-    int imagePropertiesBits = 0;
-    imagePropertiesBits |= (horizontalOrientation & 0x0003);
-    imagePropertiesBits |= ((verticalOrientation << 2) & 0x00C);
-    imagePropertiesBits |= ((scanType << 4)& 0x0070);
-    imagePropertiesBits |= ((irisOcclusion << 7) & 0x0080);
-    imagePropertiesBits |= ((occlusionFilling << 8) & 0x0100);
-    imagePropertiesBits |= ((boundaryExtraction << 9) & 0x0200);
-    dataOut.writeShort(imagePropertiesBits);									/* +2 = 19 */
+        dataOut.writeByte(biometricSubtypeInfos.size) /* +1 = 15 */
+        dataOut.writeShort(headerLength) /* +2 = 17 */
 
-    dataOut.writeShort(irisDiameter);											/* +2 = 21 */
-    dataOut.writeShort(imageFormat);											/* +2 = 23 */
-    dataOut.writeShort(rawImageWidth);											/* +2 = 25 */
-    dataOut.writeShort(rawImageHeight);											/* +2 = 27 */
-    dataOut.writeByte(intensityDepth);											/* +1 = 28 */
-    dataOut.writeByte(imageTransformation);										/* +1 = 29 */
-    dataOut.write(deviceUniqueId); /* array of length 16 */						/* + 16 = 45 */
+        var imagePropertiesBits = 0
+        imagePropertiesBits = imagePropertiesBits or (horizontalOrientation and 0x0003)
+        imagePropertiesBits = imagePropertiesBits or ((verticalOrientation shl 2) and 0x00C)
+        imagePropertiesBits = imagePropertiesBits or ((scanType shl 4) and 0x0070)
+        imagePropertiesBits = imagePropertiesBits or ((irisOcclusion shl 7) and 0x0080)
+        imagePropertiesBits = imagePropertiesBits or ((occlusionFilling shl 8) and 0x0100)
+        imagePropertiesBits = imagePropertiesBits or ((boundaryExtraction shl 9) and 0x0200)
+        dataOut.writeShort(imagePropertiesBits) /* +2 = 19 */
 
-    for (IrisBiometricSubtypeInfo biometricSubtypeInfo: biometricSubtypeInfos) {
-      biometricSubtypeInfo.writeObject(outputStream);
-    }
-  }
+        dataOut.writeShort(irisDiameter) /* +2 = 21 */
+        dataOut.writeShort(imageFormat) /* +2 = 23 */
+        dataOut.writeShort(rawImageWidth) /* +2 = 25 */
+        dataOut.writeShort(rawImageHeight) /* +2 = 27 */
+        dataOut.writeByte(intensityDepth) /* +1 = 28 */
+        dataOut.writeByte(imageTransformation) /* +1 = 29 */
+        dataOut.write(deviceUniqueId) /* array of length 16 */ /* + 16 = 45 */
 
-  /**
-   * Returns the capture device identifier.
-   *
-   * @return the capture device identifier
-   */
-  public int getCaptureDeviceId() {
-    return captureDeviceId;
-  }
-
-  /**
-   * Returns the horizontal orientation.
-   *
-   * @return the horizontalOrientation, one of {@link #ORIENTATION_UNDEF}, {@link #ORIENTATION_BASE}, or {@link #ORIENTATION_FLIPPED}
-   */
-  public int getHorizontalOrientation() {
-    return horizontalOrientation;
-  }
-
-  /**
-   * Returns the vertical orientation.
-   *
-   * @return the verticalOrientation, one of {@link #ORIENTATION_UNDEF}, {@link #ORIENTATION_BASE}, or {@link #ORIENTATION_FLIPPED}
-   */
-  public int getVerticalOrientation() {
-    return verticalOrientation;
-  }
-
-  /**
-   * Returns the scan type.
-   * One of {@link #SCAN_TYPE_UNDEF}, {@link #SCAN_TYPE_PROGRESSIVE},
-   * {@link #SCAN_TYPE_INTERLACE_FRAME}, {@link #SCAN_TYPE_INTERLACE_FIELD},
-   * or {@link #SCAN_TYPE_CORRECTED}.
-   *
-   * @return the scanType
-   */
-  public int getScanType() {
-    return scanType;
-  }
-
-  /**
-   * Returns the iris occlusion.
-   *
-   * @return the irisOcclusion
-   */
-  public int getIrisOcclusion() {
-    return irisOcclusion;
-  }
-
-  /**
-   * Returns the iris occlusing filling.
-   *
-   * @return the occlusionFilling
-   */
-  public int getOcclusionFilling() {
-    return occlusionFilling;
-  }
-
-  /**
-   * Returns the boundary extraction.
-   *
-   * @return the boundaryExtraction
-   */
-  public int getBoundaryExtraction() {
-    return boundaryExtraction;
-  }
-
-  /**
-   * Returns the iris diameter.
-   *
-   * @return the irisDiameter
-   */
-  public int getIrisDiameter() {
-    return irisDiameter;
-  }
-
-  /**
-   * Returns the image format.
-   *
-   * @return the imageFormat
-   */
-  public int getImageFormat() {
-    return imageFormat;
-  }
-
-  /**
-   * Returns the raw image width.
-   *
-   * @return the rawImageWidth
-   */
-  public int getRawImageWidth() {
-    return rawImageWidth;
-  }
-
-  /**
-   * Returns the raw image height.
-   *
-   * @return the rawImageHeight
-   */
-  public int getRawImageHeight() {
-    return rawImageHeight;
-  }
-
-  /**
-   * Returns the intensity depth.
-   *
-   * @return the intensityDepth
-   */
-  public int getIntensityDepth() {
-    return intensityDepth;
-  }
-
-  /**
-   * Returns the image transformation.
-   *
-   * @return the imageTransformation
-   */
-  public int getImageTransformation() {
-    return imageTransformation;
-  }
-
-  /**
-   * Returns the device unique id.
-   *
-   * @return the deviceUniqueId
-   */
-  public byte[] getDeviceUniqueId() {
-    return deviceUniqueId;
-  }
-
-  /**
-   * Returns the standard biometric header of this iris info.
-   *
-   * @return the standard biometric header
-   */
-  public StandardBiometricHeader getStandardBiometricHeader() {
-    if (sbh == null) {
-      byte[] biometricType = { (byte)CBEFFInfo.BIOMETRIC_TYPE_FINGERPRINT };
-      byte[] biometricSubtype = { (byte)getBiometricSubtype() };
-      byte[] formatOwner = { (byte)((StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF00) >> 8), (byte)(StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF) };
-      byte[] formatType = { (byte)((StandardBiometricHeader.ISO_19794_IRIS_IMAGE_FORMAT_TYPE_VALUE & 0xFF00) >> 8), (byte)(StandardBiometricHeader.ISO_19794_IRIS_IMAGE_FORMAT_TYPE_VALUE & 0xFF) };
-
-      SortedMap<Integer, byte[]> elements = new TreeMap<Integer, byte[]>();
-      elements.put(ISO781611.BIOMETRIC_TYPE_TAG, biometricType);
-      elements.put(ISO781611.BIOMETRIC_SUBTYPE_TAG, biometricSubtype);
-      elements.put(ISO781611.FORMAT_OWNER_TAG, formatOwner);
-      elements.put(ISO781611.FORMAT_TYPE_TAG, formatType);
-
-      sbh = new StandardBiometricHeader(elements);
-    }
-    return sbh;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + boundaryExtraction;
-    result = prime * result + captureDeviceId;
-    result = prime * result + Arrays.hashCode(deviceUniqueId);
-    result = prime * result + horizontalOrientation;
-    result = prime * result + imageFormat;
-    result = prime * result + imageTransformation;
-    result = prime * result + intensityDepth;
-    result = prime * result + irisDiameter;
-    result = prime * result + irisOcclusion;
-    result = prime * result + occlusionFilling;
-    result = prime * result + rawImageHeight;
-    result = prime * result + rawImageWidth;
-    result = prime * result + (int) (recordLength ^ (recordLength >>> 32));
-    result = prime * result + ((sbh == null) ? 0 : sbh.hashCode());
-    result = prime * result + scanType;
-    result = prime * result + verticalOrientation;
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!super.equals(obj)) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+        for (biometricSubtypeInfo in biometricSubtypeInfos) {
+            biometricSubtypeInfo.writeObject(outputStream)
+        }
     }
 
-    IrisInfo other = (IrisInfo)obj;
-    if (sbh == null) {
-      if (other.sbh != null) {
-        return false;
-      }
-    } else if (!sbh.equals(other.sbh)) {
-      return false;
-    }
-    if (boundaryExtraction != other.boundaryExtraction) {
-      return false;
-    }
-    if (captureDeviceId != other.captureDeviceId) {
-      return false;
-    }
-    if (!Arrays.equals(deviceUniqueId, other.deviceUniqueId)) {
-      return false;
-    }
-    if (horizontalOrientation != other.horizontalOrientation) {
-      return false;
-    }
-    if (imageFormat != other.imageFormat) {
-      return false;
-    }
-    if (imageTransformation != other.imageTransformation) {
-      return false;
-    }
-    if (intensityDepth != other.intensityDepth) {
-      return false;
-    }
-    if (irisDiameter != other.irisDiameter) {
-      return false;
-    }
-    if (irisOcclusion != other.irisOcclusion) {
-      return false;
-    }
-    if (occlusionFilling != other.occlusionFilling) {
-      return false;
-    }
-    if (rawImageHeight != other.rawImageHeight) {
-      return false;
-    }
-    if (rawImageWidth != other.rawImageWidth) {
-      return false;
-    }
-    if (recordLength != other.recordLength) {
-      return false;
-    }
-    if (scanType != other.scanType) {
-      return false;
-    }
-    if (verticalOrientation != other.verticalOrientation) {
-      return false;
-    }
-    return true;
-  }
+    val standardBiometricHeader: StandardBiometricHeader
+        /**
+         * Returns the standard biometric header of this iris info.
+         * 
+         * @return the standard biometric header
+         */
+        get() {
+            if (sbh == null) {
+                val biometricType =
+                    byteArrayOf(CBEFFInfo.BIOMETRIC_TYPE_FINGERPRINT.toByte())
+                val biometricSubtype =
+                    byteArrayOf(this.biometricSubtype.toByte())
+                val formatOwner = byteArrayOf(
+                    ((StandardBiometricHeader.Companion.JTC1_SC37_FORMAT_OWNER_VALUE and 0xFF00) shr 8).toByte(),
+                    (StandardBiometricHeader.Companion.JTC1_SC37_FORMAT_OWNER_VALUE and 0xFF).toByte()
+                )
+                val formatType = byteArrayOf(
+                    ((StandardBiometricHeader.Companion.ISO_19794_IRIS_IMAGE_FORMAT_TYPE_VALUE and 0xFF00) shr 8).toByte(),
+                    (StandardBiometricHeader.Companion.ISO_19794_IRIS_IMAGE_FORMAT_TYPE_VALUE and 0xFF).toByte()
+                )
 
-  /**
-   * Generates a textual representation of this object.
-   *
-   * @return a textual representation of this object
-   *
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    StringBuilder result = new StringBuilder();
-    result.append("IrisInfo [");
-    // TODO: contents
-    result.append("]");
-    return result.toString();
-  }
+                val elements: SortedMap<Int?, ByteArray?> =
+                    TreeMap<Int?, ByteArray?>()
+                elements.put(ISO781611.BIOMETRIC_TYPE_TAG, biometricType)
+                elements.put(ISO781611.BIOMETRIC_SUBTYPE_TAG, biometricSubtype)
+                elements.put(ISO781611.FORMAT_OWNER_TAG, formatOwner)
+                elements.put(ISO781611.FORMAT_TYPE_TAG, formatType)
 
-  /**
-   * Returns the iris biometric subtype infos embedded in this iris info.
-   *
-   * @return iris biometric subtype infos
-   */
-  public List<IrisBiometricSubtypeInfo> getIrisBiometricSubtypeInfos() {
-    return getSubRecords();
-  }
+                sbh = StandardBiometricHeader(elements)
+            }
+            return sbh!!
+        }
 
-  /**
-   * Adds an iris biometric subtype info to this iris info.
-   *
-   * @param irisBiometricSubtypeInfo an iris biometric subtype info
-   */
-  public void addIrisBiometricSubtypeInfo(IrisBiometricSubtypeInfo irisBiometricSubtypeInfo) {
-    add(irisBiometricSubtypeInfo);
-  }
-
-  /**
-   * Removes an iris biometric subtype info from this iris info.
-   *
-   * @param index the index of the biometric subtype info to remove
-   */
-  public void removeIrisBiometricSubtypeInfo(int index) {
-    remove(index);
-  }
-
-  /* ONLY PRIVATE METHODS BELOW */
-
-  /**
-   * Returns a bit-mask for the biometric sub-types found in this iris info.
-   *
-   * @return a bit-mask for the biometric sub-types found in this iris info
-   */
-  private int getBiometricSubtype() {
-    int result = CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    List<IrisBiometricSubtypeInfo> irisBiometricSubtypeInfos = getSubRecords();
-    for (IrisBiometricSubtypeInfo irisBiometricSubtypeInfo: irisBiometricSubtypeInfos) {
-      result &= irisBiometricSubtypeInfo.getBiometricSubtype();
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = super.hashCode()
+        result = prime * result + boundaryExtraction
+        result = prime * result + captureDeviceId
+        result = prime * result + deviceUniqueId.contentHashCode()
+        result = prime * result + horizontalOrientation
+        result = prime * result + imageFormat
+        result = prime * result + imageTransformation
+        result = prime * result + intensityDepth
+        result = prime * result + irisDiameter
+        result = prime * result + irisOcclusion
+        result = prime * result + occlusionFilling
+        result = prime * result + rawImageHeight
+        result = prime * result + rawImageWidth
+        result = prime * result + (recordLength xor (recordLength ushr 32)).toInt()
+        result = prime * result + (if (sbh == null) 0 else sbh.hashCode())
+        result = prime * result + scanType
+        result = prime * result + verticalOrientation
+        return result
     }
-    return result;
-  }
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (!super.equals(obj)) {
+            return false
+        }
+        if (javaClass != obj!!.javaClass) {
+            return false
+        }
+
+        val other = obj as IrisInfo
+        if (sbh == null) {
+            if (other.sbh != null) {
+                return false
+            }
+        } else if (sbh != other.sbh) {
+            return false
+        }
+        if (boundaryExtraction != other.boundaryExtraction) {
+            return false
+        }
+        if (captureDeviceId != other.captureDeviceId) {
+            return false
+        }
+        if (!deviceUniqueId.contentEquals(other.deviceUniqueId)) {
+            return false
+        }
+        if (horizontalOrientation != other.horizontalOrientation) {
+            return false
+        }
+        if (imageFormat != other.imageFormat) {
+            return false
+        }
+        if (imageTransformation != other.imageTransformation) {
+            return false
+        }
+        if (intensityDepth != other.intensityDepth) {
+            return false
+        }
+        if (irisDiameter != other.irisDiameter) {
+            return false
+        }
+        if (irisOcclusion != other.irisOcclusion) {
+            return false
+        }
+        if (occlusionFilling != other.occlusionFilling) {
+            return false
+        }
+        if (rawImageHeight != other.rawImageHeight) {
+            return false
+        }
+        if (rawImageWidth != other.rawImageWidth) {
+            return false
+        }
+        if (recordLength != other.recordLength) {
+            return false
+        }
+        if (scanType != other.scanType) {
+            return false
+        }
+        if (verticalOrientation != other.verticalOrientation) {
+            return false
+        }
+        return true
+    }
+
+    /**
+     * Generates a textual representation of this object.
+     * 
+     * @return a textual representation of this object
+     * 
+     * @see Object.toString
+     */
+    override fun toString(): String {
+        val result = StringBuilder()
+        result.append("IrisInfo [")
+        // TODO: contents
+        result.append("]")
+        return result.toString()
+    }
+
+    val irisBiometricSubtypeInfos: MutableList<IrisBiometricSubtypeInfo?>
+        /**
+         * Returns the iris biometric subtype infos embedded in this iris info.
+         * 
+         * @return iris biometric subtype infos
+         */
+        get() = getSubRecords()
+
+    /**
+     * Adds an iris biometric subtype info to this iris info.
+     * 
+     * @param irisBiometricSubtypeInfo an iris biometric subtype info
+     */
+    fun addIrisBiometricSubtypeInfo(irisBiometricSubtypeInfo: IrisBiometricSubtypeInfo?) {
+        add(irisBiometricSubtypeInfo)
+    }
+
+    /**
+     * Removes an iris biometric subtype info from this iris info.
+     * 
+     * @param index the index of the biometric subtype info to remove
+     */
+    fun removeIrisBiometricSubtypeInfo(index: Int) {
+        remove(index)
+    }
+
+    /* ONLY PRIVATE METHODS BELOW */
+    private val biometricSubtype: Int
+        /**
+         * Returns a bit-mask for the biometric sub-types found in this iris info.
+         * 
+         * @return a bit-mask for the biometric sub-types found in this iris info
+         */
+        get() {
+            var result = CBEFFInfo.BIOMETRIC_SUBTYPE_NONE
+            val irisBiometricSubtypeInfos =
+                getSubRecords()
+            for (irisBiometricSubtypeInfo in irisBiometricSubtypeInfos) {
+                result = result and irisBiometricSubtypeInfo.getBiometricSubtype()
+            }
+            return result
+        }
+
+    companion object {
+        private val serialVersionUID = -3415309711643815511L
+
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+
+        /** Format identifier 'I', 'I', 'R', 0x00.  */
+        private const val FORMAT_IDENTIFIER = 0x49495200
+
+        /** Version number.  */
+        private const val VERSION_NUMBER = 0x30313000
+
+        /** Image format.  */
+        const val IMAGEFORMAT_MONO_RAW: Int = 2 /* (0x0002) */
+
+        /** Image format.  */
+        const val IMAGEFORMAT_RGB_RAW: Int = 4 /* (0x0004) */
+
+        /** Image format.  */
+        const val IMAGEFORMAT_MONO_JPEG: Int = 6 /* (0x0006) */
+
+        /** Image format.  */
+        const val IMAGEFORMAT_RGB_JPEG: Int = 8 /* (0x0008) */
+
+        /** Image format.  */
+        const val IMAGEFORMAT_MONO_JPEG_LS: Int = 10 /* (0x000A) */
+
+        /** Image format.  */
+        const val IMAGEFORMAT_RGB_JPEG_LS: Int = 12 /* (0x000C) */
+
+        /** Image format.  */
+        const val IMAGEFORMAT_MONO_JPEG2000: Int = 14 /* (0x000E) */
+
+        /** Image format.  */
+        const val IMAGEFORMAT_RGB_JPEG2000: Int = 16 /* (0x0010) */
+
+        /** Constant for capture device Id, based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val CAPTURE_DEVICE_UNDEF: Int = 0
+
+        /** Constant for horizontal and veritical orientation, based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val ORIENTATION_UNDEF: Int = 0
+
+        /** Constant for horizontal and veritical orientation, based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val ORIENTATION_BASE: Int = 1
+
+        /** Constant for horizontal and veritical orientation, based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val ORIENTATION_FLIPPED: Int = 2
+
+        /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val SCAN_TYPE_UNDEF: Int = 0
+
+        /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val SCAN_TYPE_PROGRESSIVE: Int = 1
+
+        /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val SCAN_TYPE_INTERLACE_FRAME: Int = 2
+
+        /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val SCAN_TYPE_INTERLACE_FIELD: Int = 3
+
+        /** Scan type (rectilinear only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val SCAN_TYPE_CORRECTED: Int = 4
+
+        /** Iris occlusion (polar only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val IROCC_UNDEF: Int = 0
+
+        /** Iris occlusion (polar only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val IROCC_PROCESSED: Int = 1
+
+        /** Iris occlusion filling (polar only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val IROCC_ZEROFILL: Int = 0
+
+        /** Iris occlusion filling (polar only), based on Table 2 in Section 5.5 in ISO 19794-6.  */
+        const val IROC_UNITFILL: Int = 1
+
+        /* TODO: reference to specification. */
+        const val INTENSITY_DEPTH_UNDEF: Int = 0
+
+        /* TODO: reference to specification. */
+        const val TRANS_UNDEF: Int = 0
+        const val TRANS_STD: Int = 1
+
+        /* TODO: reference to specification. */
+        const val IRBNDY_UNDEF: Int = 0
+        const val IRBNDY_PROCESSED: Int = 1
+    }
 }

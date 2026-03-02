@@ -32,369 +32,318 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import kmrtd.lds.ImageInfo
+import kmrtd.lds.iso39794.QualityBlock.Companion.decodeQualityBlocks
+import kmrtd.lds.iso39794.irisimage.CompressionHistoryCode
+import kmrtd.lds.iso39794.irisimage.EyeLabelCode
+import kmrtd.lds.iso39794.irisimage.HorizontalOrientationCode
+import kmrtd.lds.iso39794.irisimage.IrisImageKindCode
+import kmrtd.lds.iso39794.irisimage.RangingErrorCode
+import kmrtd.lds.iso39794.irisimage.VerticalOrientationCode
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1OctetString
+import org.bouncycastle.asn1.DEROctetString
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+import java.util.Objects
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+class IrisImageRepresentationBlock(asn1Encodable: ASN1Encodable) : Block(), ImageInfo {
+    enum class ImageDataFormatCode(val code: Int, mimeType: String) :
+        EncodableEnum<ImageDataFormatCode> {
+        PGM(0, "image/pgm"),
+        PPM(1, "image/ppm"),
+        PNG(2, "image/png"),
+        JPEG2000_LOSSLESS(3, "image/jp2"),
+        JPEG2000_LOSSY(4, "image/jp2");
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
+        val mimeType: String?
 
-import kmrtd.ASN1Util;
-import kmrtd.lds.ImageInfo;
-import kmrtd.lds.iso39794.irisimage.CompressionHistoryCode;
-import kmrtd.lds.iso39794.irisimage.EyeLabelCode;
-import kmrtd.lds.iso39794.irisimage.HorizontalOrientationCode;
-import kmrtd.lds.iso39794.irisimage.IrisImageKindCode;
-import kmrtd.lds.iso39794.irisimage.RangingErrorCode;
-import kmrtd.lds.iso39794.irisimage.VerticalOrientationCode;
+        init {
+            this.mimeType = mimeType
+        }
 
-public class IrisImageRepresentationBlock extends Block implements ImageInfo {
-
-  private static final long serialVersionUID = -982987535985932641L;
-
-    public static enum ImageDataFormatCode implements EncodableEnum<ImageDataFormatCode> {
-    PGM(0, "image/pgm"),
-    PPM(1, "image/ppm"),
-    PNG(2, "image/png"),
-    JPEG2000_LOSSLESS(3, "image/jp2"),
-    JPEG2000_LOSSY(4, "image/jp2");
-
-    private final int code;
-    private final String mimeType;
-
-    private ImageDataFormatCode(int code, String mimeType) {
-      this.code = code;
-      this.mimeType = mimeType;
+        companion object {
+            fun fromCode(code: Int): ImageDataFormatCode? {
+                return EncodableEnum.fromCode<ImageDataFormatCode?>(
+                    code,
+                    ImageDataFormatCode::class.java
+                )
+            }
+        }
     }
 
-    public int getCode() {
-      return code;
+    //  RangeOrError ::= CHOICE {
+    //    range   [0]     INTEGER (2..65533),
+    //    errorCode       [1]     RangingErrorCode
+    //  }
+    val eyeLabelCode: EyeLabelCode?
+
+    val irisImageKind: IrisImageKindCode?
+
+    val bitDepth: Int
+
+    val imageDataFormat: ImageDataFormatCode?
+
+    val horizontalOrientationCode: HorizontalOrientationCode?
+
+    val verticalOrientationCode: VerticalOrientationCode?
+
+    val compressionHistoryCode: CompressionHistoryCode?
+
+    private val imageData: ByteArray?
+
+    /** INTEGER (2..65533), is null iff rangingErrorCode is not null.  */
+    private var range: Int? = null
+    private var rangingErrorCode: RangingErrorCode? = null
+
+    private val captureDateTimeBlock: DateTimeBlock
+
+
+    var captureDeviceBlock: IrisImageCaptureDeviceBlock? = null
+        private set
+
+    var qualityBlocks: MutableList<QualityBlock?>? = null
+        private set
+
+    var rollAngleBlock: RollAngleBlock? = null
+        private set
+
+    var localisationBlock: IrisImageLocalisationBlock? = null
+        private set
+
+    var pADDataBlock: PADDataBlock? = null
+        private set
+
+    //  RepresentationBlock ::= SEQUENCE {
+    //    eyeLabelCode              [0]          EyeLabelCode,
+    //    irisImageKind             [1]          IrisImageKind,
+    //    bitDepth                  [2]          INTEGER (8..24),
+    //    imageDataFormat           [3]          ImageDataFormat,
+    //    horizontalOrientationCode [4]          HorizontalOrientationCode,
+    //    verticalOrientationCode   [5]          VerticalOrientationCode,
+    //    compressionHistoryCode    [6]          CompressionHistoryCode,
+    //    range                     [7]          RangeOrError,
+    //    captureDateTimeBlock      [8]          CaptureDateTimeBlock,
+    //    irisImageData             [9]          OCTET STRING,
+    //    captureDeviceBlock        [10]         CaptureDeviceBlock             OPTIONAL,
+    //    qualityBlocks             [11]         QualityBlocks                  OPTIONAL,
+    //    rollAngleBlock            [12]         RollAngleBlock                 OPTIONAL,
+    //    localisationBlock         [13]         LocalisationBlock              OPTIONAL,
+    //    pADDataBlock              [14]         PADDataBlock                   OPTIONAL,
+    //    ...
+    //  }
+    init {
+        requireNotNull(asn1Encodable) { "Cannot decode!" }
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        eyeLabelCode = EyeLabelCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(0)))
+        irisImageKind = IrisImageKindCode.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(1))
+        )
+        bitDepth = ASN1Util.decodeInt(taggedObjects.get(2))
+        this.imageDataFormat = ImageDataFormatCode.Companion.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(3))
+        )
+        horizontalOrientationCode =
+            HorizontalOrientationCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(4)))
+        verticalOrientationCode =
+            VerticalOrientationCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(5)))
+        compressionHistoryCode =
+            CompressionHistoryCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(6)))
+        decodeRangeOrError(taggedObjects.get(7))
+        captureDateTimeBlock = DateTimeBlock.from(taggedObjects.get(8))
+        imageData = (ASN1OctetString.getInstance(taggedObjects.get(9))).getOctets()
+        if (taggedObjects.containsKey(10)) {
+            captureDeviceBlock = IrisImageCaptureDeviceBlock(taggedObjects.get(10))
+        }
+        if (taggedObjects.containsKey(11)) {
+            qualityBlocks = decodeQualityBlocks(taggedObjects.get(11))
+        }
+        if (taggedObjects.containsKey(12)) {
+            rollAngleBlock = RollAngleBlock.from(taggedObjects.get(12))
+        }
+        if (taggedObjects.containsKey(13)) {
+            localisationBlock = IrisImageLocalisationBlock(taggedObjects.get(13))
+        }
+        if (taggedObjects.containsKey(14)) {
+            this.pADDataBlock = PADDataBlock(taggedObjects.get(14))
+        }
     }
 
-    public String getMimeType() {
-      return mimeType;
+    fun geImageData(): ByteArray? {
+        return imageData
     }
 
-    public static ImageDataFormatCode fromCode(int code) {
-      return EncodableEnum.fromCode(code, ImageDataFormatCode.class);
-    }
-  }
-
-  private final EyeLabelCode eyeLabelCode;
-
-  private final IrisImageKindCode irisImageKind;
-
-  private final int bitDepth;
-
-  private final ImageDataFormatCode imageDataFormatCode;
-
-  private final HorizontalOrientationCode horizontalOrientationCode;
-
-  private final VerticalOrientationCode verticalOrientationCode;
-
-  private final CompressionHistoryCode compressionHistoryCode;
-
-  private final byte[] imageData;
-
-  /** INTEGER (2..65533), is null iff rangingErrorCode is not null. */
-  private Integer range;
-  private RangingErrorCode rangingErrorCode;
-
-  private final DateTimeBlock captureDateTimeBlock;
-
-
-  private IrisImageCaptureDeviceBlock captureDeviceBlock;
-
-  private List<QualityBlock> qualityBlocks;
-
-  private RollAngleBlock rollAngleBlock;
-
-  private IrisImageLocalisationBlock localisationBlock;
-
-  private PADDataBlock padDataBlock;
-
-  //  RepresentationBlock ::= SEQUENCE {
-  //    eyeLabelCode              [0]          EyeLabelCode,
-  //    irisImageKind             [1]          IrisImageKind,
-  //    bitDepth                  [2]          INTEGER (8..24),
-  //    imageDataFormat           [3]          ImageDataFormat,
-  //    horizontalOrientationCode [4]          HorizontalOrientationCode,
-  //    verticalOrientationCode   [5]          VerticalOrientationCode,
-  //    compressionHistoryCode    [6]          CompressionHistoryCode,
-  //    range                     [7]          RangeOrError,
-  //    captureDateTimeBlock      [8]          CaptureDateTimeBlock,
-  //    irisImageData             [9]          OCTET STRING,
-  //    captureDeviceBlock        [10]         CaptureDeviceBlock             OPTIONAL,
-  //    qualityBlocks             [11]         QualityBlocks                  OPTIONAL,
-  //    rollAngleBlock            [12]         RollAngleBlock                 OPTIONAL,
-  //    localisationBlock         [13]         LocalisationBlock              OPTIONAL,
-  //    pADDataBlock              [14]         PADDataBlock                   OPTIONAL,
-  //    ...
-  //  }
-
-  public IrisImageRepresentationBlock(ASN1Encodable asn1Encodable) {
-    if (asn1Encodable == null) {
-      throw new IllegalArgumentException("Cannot decode!");
-    }
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    eyeLabelCode = EyeLabelCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(0)));
-    irisImageKind = IrisImageKindCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(1)));
-    bitDepth = ASN1Util.decodeInt(taggedObjects.get(2));
-    imageDataFormatCode = ImageDataFormatCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(3)));
-    horizontalOrientationCode =  HorizontalOrientationCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(4)));
-    verticalOrientationCode =  VerticalOrientationCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(5)));
-    compressionHistoryCode =  CompressionHistoryCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(6)));
-    decodeRangeOrError(taggedObjects.get(7));
-    captureDateTimeBlock = DateTimeBlock.from(taggedObjects.get(8));
-    imageData = (ASN1OctetString.getInstance(taggedObjects.get(9))).getOctets();
-    if (taggedObjects.containsKey(10)) {
-      captureDeviceBlock = new IrisImageCaptureDeviceBlock(taggedObjects.get(10));
-    }
-    if (taggedObjects.containsKey(11)) {
-      qualityBlocks = QualityBlock.decodeQualityBlocks(taggedObjects.get(11));
-    }
-    if (taggedObjects.containsKey(12)) {
-      rollAngleBlock = RollAngleBlock.from(taggedObjects.get(12));
-    }
-    if (taggedObjects.containsKey(13)) {
-      localisationBlock = new IrisImageLocalisationBlock(taggedObjects.get(13));
-    }
-    if (taggedObjects.containsKey(14)) {
-      padDataBlock = new PADDataBlock(taggedObjects.get(14));
-    }
-  }
-
-  //  RangeOrError ::= CHOICE {
-  //    range   [0]     INTEGER (2..65533),
-  //    errorCode       [1]     RangingErrorCode
-  //  }
-
-  public EyeLabelCode getEyeLabelCode() {
-    return eyeLabelCode;
-  }
-
-  public IrisImageKindCode getIrisImageKind() {
-    return irisImageKind;
-  }
-
-  public int getBitDepth() {
-    return bitDepth;
-  }
-
-  public ImageDataFormatCode getImageDataFormat() {
-    return imageDataFormatCode;
-  }
-
-  public HorizontalOrientationCode getHorizontalOrientationCode() {
-    return horizontalOrientationCode;
-  }
-
-  public VerticalOrientationCode getVerticalOrientationCode() {
-    return verticalOrientationCode;
-  }
-
-  public CompressionHistoryCode getCompressionHistoryCode() {
-    return compressionHistoryCode;
-  }
-
-  public byte[] geImageData() {
-    return imageData;
-  }
-
-  public IrisImageCaptureDeviceBlock getCaptureDeviceBlock() {
-    return captureDeviceBlock;
-  }
-
-  public List<QualityBlock> getQualityBlocks() {
-    return qualityBlocks;
-  }
-
-  public RollAngleBlock getRollAngleBlock() {
-    return rollAngleBlock;
-  }
-
-  public IrisImageLocalisationBlock getLocalisationBlock() {
-    return localisationBlock;
-  }
-
-  public PADDataBlock getPADDataBlock() {
-    return padDataBlock;
-  }
-
-  /* PACKAGE */
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(imageData);
-    result = prime * result + Objects.hash(bitDepth, captureDateTimeBlock, captureDeviceBlock, compressionHistoryCode,
-        eyeLabelCode, horizontalOrientationCode, imageDataFormatCode, irisImageKind, localisationBlock, padDataBlock,
-        qualityBlocks, range, rangingErrorCode, rollAngleBlock, verticalOrientationCode);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    /* PACKAGE */
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = 1
+        result = prime * result + imageData.contentHashCode()
+        result = prime * result + Objects.hash(
+            bitDepth, captureDateTimeBlock, captureDeviceBlock, compressionHistoryCode,
+            eyeLabelCode, horizontalOrientationCode,
+            this.imageDataFormat, irisImageKind, localisationBlock,
+            this.pADDataBlock,
+            qualityBlocks, range, rangingErrorCode, rollAngleBlock, verticalOrientationCode
+        )
+        return result
     }
 
-    IrisImageRepresentationBlock other = (IrisImageRepresentationBlock) obj;
-    return bitDepth == other.bitDepth && Objects.equals(captureDateTimeBlock, other.captureDateTimeBlock)
-        && Objects.equals(captureDeviceBlock, other.captureDeviceBlock)
-        && compressionHistoryCode == other.compressionHistoryCode && eyeLabelCode == other.eyeLabelCode
-        && horizontalOrientationCode == other.horizontalOrientationCode && Arrays.equals(imageData, other.imageData)
-        && imageDataFormatCode == other.imageDataFormatCode && irisImageKind == other.irisImageKind
-        && Objects.equals(localisationBlock, other.localisationBlock)
-        && Objects.equals(padDataBlock, other.padDataBlock) && Objects.equals(qualityBlocks, other.qualityBlocks)
-        && Objects.equals(range, other.range) && rangingErrorCode == other.rangingErrorCode
-        && Objects.equals(rollAngleBlock, other.rollAngleBlock)
-        && verticalOrientationCode == other.verticalOrientationCode;
-  }
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
 
-  @Override
-  public String toString() {
-    return "IrisImageRepresentationBlock ["
-        + "eyeLabelCode: " + eyeLabelCode
-        + ", irisImageKind: " + irisImageKind
-        + ", bitDepth: " + bitDepth
-        + ", imageDataFormat: " + imageDataFormatCode
-        + ", horizontalOrientationCode: " + horizontalOrientationCode
-        + ", verticalOrientationCode: " + verticalOrientationCode
-        + ", compressionHistoryCode: " + compressionHistoryCode
-        + ", imageData: " + (imageData != null ? "null" : imageData.length)
-        + ", range: " + (range != null ? range : rangingErrorCode)
-        + ", captureDateTimeBlock: " + captureDateTimeBlock
-        + ", captureDeviceBlock: " + captureDeviceBlock
-        + ", qualityBlocks: " + qualityBlocks
-        + ", rollAngleBlock: " + rollAngleBlock
-        + ", localisationBlock: " + localisationBlock
-        + ", padDataBlock: " + padDataBlock
-        + "]";
-  }
-
-  @Override
-  public int getType() {
-    return TYPE_IRIS;
-  }
-
-  @Override
-  public String getMimeType() {
-    if (imageDataFormatCode == null) {
-      return "image/raw";
+        val other = obj as IrisImageRepresentationBlock
+        return bitDepth == other.bitDepth && captureDateTimeBlock == other.captureDateTimeBlock
+                && captureDeviceBlock == other.captureDeviceBlock
+                && compressionHistoryCode == other.compressionHistoryCode && eyeLabelCode == other.eyeLabelCode && horizontalOrientationCode == other.horizontalOrientationCode && imageData.contentEquals(
+            other.imageData
+        ) && this.imageDataFormat == other.imageDataFormat && irisImageKind == other.irisImageKind && localisationBlock == other.localisationBlock
+                && this.pADDataBlock == other.pADDataBlock && qualityBlocks == other.qualityBlocks
+                && range == other.range && rangingErrorCode == other.rangingErrorCode && rollAngleBlock == other.rollAngleBlock
+                && verticalOrientationCode == other.verticalOrientationCode
     }
 
-    return imageDataFormatCode.getMimeType();
-  }
-
-  @Override
-  public int getWidth() {
-    return 0;
-  }
-
-  @Override
-  public int getHeight() {
-    return 0;
-  }
-
-  @Override
-  public long getRecordLength() {
-    return 0;
-  }
-
-  @Override
-  public int getImageLength() {
-    return imageData == null ? 0 : imageData.length;
-  }
-
-  @Override
-  public InputStream getImageInputStream() {
-    return new ByteArrayInputStream(imageData);
-  }
-
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    taggedObjects.put(0, ASN1Util.encodeInt(eyeLabelCode.getCode()));
-    taggedObjects.put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(irisImageKind.getCode()));
-    taggedObjects.put(2, ASN1Util.encodeInt(bitDepth));
-    taggedObjects.put(3, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(imageDataFormatCode.getCode()));
-    taggedObjects.put(4, ASN1Util.encodeInt(horizontalOrientationCode.getCode()));
-    taggedObjects.put(5, ASN1Util.encodeInt(verticalOrientationCode.getCode()));
-    taggedObjects.put(6, ASN1Util.encodeInt(compressionHistoryCode.getCode()));
-    if (range != null) {
-      taggedObjects.put(7, ASN1Util.encodeInt(range));
-    } else if (rangingErrorCode != null) {
-      taggedObjects.put(7, ASN1Util.encodeInt(rangingErrorCode.getCode()));
-    }
-    taggedObjects.put(8, captureDateTimeBlock.getASN1Object());
-    taggedObjects.put(9, new DEROctetString(imageData));
-    if (captureDeviceBlock != null) {
-      taggedObjects.put(10, captureDeviceBlock.getASN1Object());
-    }
-    if (qualityBlocks != null) {
-      taggedObjects.put(10, ISO39794Util.encodeBlocks(qualityBlocks));
-    }
-    if (rollAngleBlock != null) {
-      taggedObjects.put(12, rollAngleBlock.getASN1Object());
-    }
-    if (localisationBlock != null) {
-      taggedObjects.put(13, localisationBlock.getASN1Object());
-    }
-    if (padDataBlock != null) {
-      taggedObjects.put(14, padDataBlock.getASN1Object());
-    }
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
-
-  static List<IrisImageRepresentationBlock> decodeRepresentationBlocks(ASN1Encodable asn1Encodable) {
-    List<IrisImageRepresentationBlock> result = new ArrayList<IrisImageRepresentationBlock>();
-    if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-      List<ASN1Encodable> representationBlockASN1Objects = ASN1Util.list(asn1Encodable);
-      for (ASN1Encodable representationBlockASN1Object: representationBlockASN1Objects) {
-        result.add(new IrisImageRepresentationBlock(representationBlockASN1Object));
-      }
-    } else {
-      result.add(new IrisImageRepresentationBlock(asn1Encodable));
+    override fun toString(): String {
+        return ("IrisImageRepresentationBlock ["
+                + "eyeLabelCode: " + eyeLabelCode
+                + ", irisImageKind: " + irisImageKind
+                + ", bitDepth: " + bitDepth
+                + ", imageDataFormat: " + this.imageDataFormat
+                + ", horizontalOrientationCode: " + horizontalOrientationCode
+                + ", verticalOrientationCode: " + verticalOrientationCode
+                + ", compressionHistoryCode: " + compressionHistoryCode
+                + ", imageData: " + (if (imageData != null) "null" else imageData.size)
+                + ", range: " + (if (range != null) range else rangingErrorCode)
+                + ", captureDateTimeBlock: " + captureDateTimeBlock
+                + ", captureDeviceBlock: " + captureDeviceBlock
+                + ", qualityBlocks: " + qualityBlocks
+                + ", rollAngleBlock: " + rollAngleBlock
+                + ", localisationBlock: " + localisationBlock
+                + ", padDataBlock: " + this.pADDataBlock
+                + "]")
     }
 
-    return result;
-  }
-
-  /* NOTE: 39795-6 code value happens to be consistent with 19794-6 defined subtype. */
-  int getBiometricSubtype() {
-    if (eyeLabelCode == null) {
-      return EyeLabelCode.UNKNOWN.getCode();
+    override fun getType(): Int {
+        return ImageInfo.Companion.TYPE_IRIS
     }
-    return eyeLabelCode.getCode();
-  }
 
-  /* PRIVATE */
+    override fun getMimeType(): String? {
+        if (this.imageDataFormat == null) {
+            return "image/raw"
+        }
 
-  private void decodeRangeOrError(ASN1Encodable asn1Encodable) {
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    if (taggedObjects.containsKey(0)) {
-      range = ASN1Util.decodeInt(taggedObjects.get(0));
-      rangingErrorCode = null;
-    } else if (taggedObjects.containsKey(1)) {
-      range = null;
-      rangingErrorCode = RangingErrorCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(1)));
+        return imageDataFormat.mimeType
     }
-  }
+
+    override fun getWidth(): Int {
+        return 0
+    }
+
+    override fun getHeight(): Int {
+        return 0
+    }
+
+    override fun getRecordLength(): Long {
+        return 0
+    }
+
+    override fun getImageLength(): Int {
+        return if (imageData == null) 0 else imageData.size
+    }
+
+    override fun getImageInputStream(): InputStream {
+        return ByteArrayInputStream(imageData)
+    }
+
+    val aSN1Object: ASN1Encodable
+        get() {
+            val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+                HashMap<Int?, ASN1Encodable?>()
+            taggedObjects.put(0, ASN1Util.encodeInt(eyeLabelCode!!.code))
+            taggedObjects.put(
+                1,
+                ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(irisImageKind!!.code)
+            )
+            taggedObjects.put(2, ASN1Util.encodeInt(bitDepth))
+            taggedObjects.put(
+                3,
+                ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(imageDataFormat!!.code)
+            )
+            taggedObjects.put(4, ASN1Util.encodeInt(horizontalOrientationCode!!.code))
+            taggedObjects.put(5, ASN1Util.encodeInt(verticalOrientationCode!!.code))
+            taggedObjects.put(6, ASN1Util.encodeInt(compressionHistoryCode!!.code))
+            if (range != null) {
+                taggedObjects.put(7, ASN1Util.encodeInt(range!!))
+            } else if (rangingErrorCode != null) {
+                taggedObjects.put(7, ASN1Util.encodeInt(rangingErrorCode!!.code))
+            }
+            taggedObjects.put(8, captureDateTimeBlock.aSN1Object)
+            taggedObjects.put(9, DEROctetString(imageData))
+            if (captureDeviceBlock != null) {
+                taggedObjects.put(10, captureDeviceBlock!!.aSN1Object)
+            }
+            if (qualityBlocks != null) {
+                taggedObjects.put(10, ISO39794Util.encodeBlocks(qualityBlocks))
+            }
+            if (rollAngleBlock != null) {
+                taggedObjects.put(12, rollAngleBlock!!.aSN1Object)
+            }
+            if (localisationBlock != null) {
+                taggedObjects.put(13, localisationBlock!!.aSN1Object)
+            }
+            if (this.pADDataBlock != null) {
+                taggedObjects.put(14, pADDataBlock!!.aSN1Object)
+            }
+            return ASN1Util.encodeTaggedObjects(taggedObjects)
+        }
+
+    val biometricSubtype: Int
+        /* NOTE: 39795-6 code value happens to be consistent with 19794-6 defined subtype. */
+        get() {
+            if (eyeLabelCode == null) {
+                return EyeLabelCode.UNKNOWN.code
+            }
+            return eyeLabelCode.code
+        }
+
+    /* PRIVATE */
+    private fun decodeRangeOrError(asn1Encodable: ASN1Encodable?) {
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        if (taggedObjects.containsKey(0)) {
+            range = ASN1Util.decodeInt(taggedObjects.get(0))
+            rangingErrorCode = null
+        } else if (taggedObjects.containsKey(1)) {
+            range = null
+            rangingErrorCode = RangingErrorCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(1)))
+        }
+    }
+
+    companion object {
+        private val serialVersionUID = -982987535985932641L
+
+        fun decodeRepresentationBlocks(asn1Encodable: ASN1Encodable): MutableList<IrisImageRepresentationBlock?> {
+            val result: MutableList<IrisImageRepresentationBlock?> =
+                ArrayList<IrisImageRepresentationBlock?>()
+            if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+                val representationBlockASN1Objects = ASN1Util.list(asn1Encodable)
+                for (representationBlockASN1Object in representationBlockASN1Objects) {
+                    result.add(IrisImageRepresentationBlock(representationBlockASN1Object))
+                }
+            } else {
+                result.add(IrisImageRepresentationBlock(asn1Encodable))
+            }
+
+            return result
+        }
+    }
 }

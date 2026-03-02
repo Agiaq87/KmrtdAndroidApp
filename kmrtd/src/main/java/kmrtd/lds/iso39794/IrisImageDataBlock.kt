@@ -32,161 +32,164 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import kmrtd.cbeff.BiometricDataBlock
+import kmrtd.cbeff.CBEFFInfo
+import kmrtd.cbeff.ISO781611
+import kmrtd.cbeff.StandardBiometricHeader
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.BERTags
+import org.bouncycastle.asn1.DERTaggedObject
+import java.io.InputStream
+import java.util.Objects
+import java.util.SortedMap
+import java.util.TreeMap
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedMap;
-import java.util.TreeMap;
+class IrisImageDataBlock internal constructor(
+    sbh: StandardBiometricHeader?,
+    asn1Encodable: ASN1Encodable?
+) : Block(), BiometricDataBlock {
+    private var sbh: StandardBiometricHeader?
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.BERTags;
-import org.bouncycastle.asn1.DERTaggedObject;
+    val versionBlock: VersionBlock
 
-import kmrtd.ASN1Util;
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.StandardBiometricHeader;
+    val representationBlocks: MutableList<IrisImageRepresentationBlock>
 
-public class IrisImageDataBlock extends Block implements BiometricDataBlock {
+    constructor(inputStream: InputStream?) : this(null, inputStream)
 
-  private static final long serialVersionUID = 5915816895542698638L;
+    constructor(sbh: StandardBiometricHeader?, inputStream: InputStream?) : this(
+        sbh,
+        ASN1Util.readASN1Object(inputStream)
+    )
 
-  private StandardBiometricHeader sbh;
+    //  IrisImageDataBlock ::= [APPLICATION 6] SEQUENCE {
+    //    versionBlock         [0]   VersionBlock,
+    //    representationBlocks [1]   RepresentationBlocks,
+    //    ...
+    //  }
+    init {
+        var asn1Encodable = asn1Encodable
+        this.sbh = sbh
+        asn1Encodable = ASN1Util.checkTag(asn1Encodable, BERTags.APPLICATION, 6)
+        require(asn1Encodable is ASN1Sequence) { "Cannot decode!" }
 
-  private VersionBlock versionBlock;
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
 
-  private List<IrisImageRepresentationBlock> representationBlocks;
+        versionBlock = VersionBlock(taggedObjects.get(0))
 
-  public IrisImageDataBlock(InputStream inputStream) throws IOException {
-    this(null, inputStream);
-  }
-
-  public IrisImageDataBlock(StandardBiometricHeader sbh, InputStream inputStream) throws IOException {
-    this(sbh, ASN1Util.readASN1Object(inputStream));
-  }
-
-  //  IrisImageDataBlock ::= [APPLICATION 6] SEQUENCE {
-  //    versionBlock         [0]   VersionBlock,
-  //    representationBlocks [1]   RepresentationBlocks,
-  //    ...
-  //  }
-
-  IrisImageDataBlock(StandardBiometricHeader sbh, ASN1Encodable asn1Encodable) {
-    this.sbh = sbh;
-    asn1Encodable = ASN1Util.checkTag(asn1Encodable, BERTags.APPLICATION, 6);
-    if (!(asn1Encodable instanceof ASN1Sequence)) {
-      throw new IllegalArgumentException("Cannot decode!");
+        representationBlocks =
+            IrisImageRepresentationBlock.Companion.decodeRepresentationBlocks(taggedObjects.get(1))
     }
 
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
+    val standardBiometricHeader: StandardBiometricHeader
+        /**
+         * Returns the standard biometric header of this iris info.
+         * 
+         * @return the standard biometric header
+         */
+        get() {
+            if (sbh == null) {
+                val biometricType =
+                    byteArrayOf(CBEFFInfo.BIOMETRIC_TYPE_IRIS.toByte())
+                val biometricSubtype =
+                    byteArrayOf(this.biometricSubtype.toByte())
+                val formatOwner = byteArrayOf(
+                    ((StandardBiometricHeader.Companion.JTC1_SC37_FORMAT_OWNER_VALUE and 0xFF00) shr 8).toByte(),
+                    (StandardBiometricHeader.Companion.JTC1_SC37_FORMAT_OWNER_VALUE and 0xFF).toByte()
+                )
+                val formatType = byteArrayOf(
+                    ((StandardBiometricHeader.Companion.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE and 0xFF00) shr 8).toByte(),
+                    (StandardBiometricHeader.Companion.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE and 0xFF).toByte()
+                )
 
-    versionBlock = new VersionBlock(taggedObjects.get(0));
+                val elements: SortedMap<Int?, ByteArray?> =
+                    TreeMap<Int?, ByteArray?>()
+                elements.put(ISO781611.BIOMETRIC_TYPE_TAG, biometricType) // 81 -> 0x10
+                elements.put(
+                    ISO781611.BIOMETRIC_SUBTYPE_TAG,
+                    biometricSubtype
+                ) // 82 -> depends on left/right eye
+                elements.put(ISO781611.FORMAT_OWNER_TAG, formatOwner) // 87 -> 0x0101
+                elements.put(ISO781611.FORMAT_TYPE_TAG, formatType) // 88 -> 0x002c
 
-    representationBlocks = IrisImageRepresentationBlock.decodeRepresentationBlocks(taggedObjects.get(1));
-  }
+                sbh = StandardBiometricHeader(elements)
+            }
+            return sbh!!
+        }
 
-  public VersionBlock getVersionBlock() {
-    return versionBlock;
-  }
-
-  public List<IrisImageRepresentationBlock> getRepresentationBlocks() {
-    return representationBlocks;
-  }
-
-  /**
-   * Returns the standard biometric header of this iris info.
-   *
-   * @return the standard biometric header
-   */
-  @Override
-  public StandardBiometricHeader getStandardBiometricHeader() {
-    if (sbh == null) {
-      byte[] biometricType = { (byte)CBEFFInfo.BIOMETRIC_TYPE_IRIS };
-      byte[] biometricSubtype = { (byte)getBiometricSubtype() };
-      byte[] formatOwner = { (byte)((StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF00) >> 8), (byte)(StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF) };
-      byte[] formatType = { (byte)((StandardBiometricHeader.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE & 0xFF00) >> 8), (byte)(StandardBiometricHeader.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE & 0xFF) };
-
-      SortedMap<Integer, byte[]> elements = new TreeMap<Integer, byte[]>();
-      elements.put(ISO781611.BIOMETRIC_TYPE_TAG, biometricType); // 81 -> 0x10
-      elements.put(ISO781611.BIOMETRIC_SUBTYPE_TAG, biometricSubtype); // 82 -> depends on left/right eye
-      elements.put(ISO781611.FORMAT_OWNER_TAG, formatOwner); // 87 -> 0x0101
-      elements.put(ISO781611.FORMAT_TYPE_TAG, formatType); // 88 -> 0x002c
-
-      sbh = new StandardBiometricHeader(elements);
-    }
-    return sbh;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(representationBlocks, sbh, versionBlock);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    override fun hashCode(): Int {
+        return Objects.hash(representationBlocks, sbh, versionBlock)
     }
 
-    IrisImageDataBlock other = (IrisImageDataBlock) obj;
-    return Objects.equals(representationBlocks, other.representationBlocks) && Objects.equals(sbh, other.sbh)
-        && Objects.equals(versionBlock, other.versionBlock);
-  }
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
 
-  @Override
-  public String toString() {
-    return "IrisImageDataBlock ["
-        + "sbh: " + sbh
-        + ", versionBlock: " + versionBlock
-        + ", representationBlocks: " + representationBlocks
-        + "]";
-  }
-
-  /* PACKAGE */
-
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    taggedObjects.put(0, versionBlock.getASN1Object());
-    taggedObjects.put(1, ISO39794Util.encodeBlocks(representationBlocks));
-    return  new DERTaggedObject(false, BERTags.APPLICATION, 0x06, ASN1Util.encodeTaggedObjects(taggedObjects));
-  }
-
-  /* PRIVATE */
-
-  /**
-   * Returns the biometric sub-type bit mask for the iris images.
-   *
-   * @return a biometric sub-type bit mask
-   */
-  private int getBiometricSubtype() {
-    int result = CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    boolean isFirst = true;
-
-    List<IrisImageRepresentationBlock> blocks = getRepresentationBlocks();;
-    for (IrisImageRepresentationBlock block: blocks) {
-      int subType = block.getBiometricSubtype();
-      if (isFirst) {
-        result = subType;
-        isFirst = false;
-      } else {
-        result &= subType;
-      }
+        val other = obj as IrisImageDataBlock
+        return representationBlocks == other.representationBlocks && sbh == other.sbh
+                && versionBlock == other.versionBlock
     }
-    return result;
-  }
+
+    override fun toString(): String {
+        return ("IrisImageDataBlock ["
+                + "sbh: " + sbh
+                + ", versionBlock: " + versionBlock
+                + ", representationBlocks: " + representationBlocks
+                + "]")
+    }
+
+    val aSN1Object: ASN1Encodable
+        /* PACKAGE */
+        get() {
+            val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+                HashMap<Int?, ASN1Encodable?>()
+            taggedObjects.put(0, versionBlock.aSN1Object)
+            taggedObjects.put(1, ISO39794Util.encodeBlocks(representationBlocks))
+            return DERTaggedObject(
+                false,
+                BERTags.APPLICATION,
+                0x06,
+                ASN1Util.encodeTaggedObjects(taggedObjects)
+            )
+        }
+
+    /* PRIVATE */
+    private val biometricSubtype: Int
+        /**
+         * Returns the biometric sub-type bit mask for the iris images.
+         * 
+         * @return a biometric sub-type bit mask
+         */
+        get() {
+            var result = CBEFFInfo.BIOMETRIC_SUBTYPE_NONE
+            var isFirst = true
+
+            val blocks =
+                this.representationBlocks
+
+            for (block in blocks) {
+                val subType = block.getBiometricSubtype()
+                if (isFirst) {
+                    result = subType
+                    isFirst = false
+                } else {
+                    result = result and subType
+                }
+            }
+            return result
+        }
+
+    companion object {
+        private const val serialVersionUID = 5915816895542698638L
+    }
 }

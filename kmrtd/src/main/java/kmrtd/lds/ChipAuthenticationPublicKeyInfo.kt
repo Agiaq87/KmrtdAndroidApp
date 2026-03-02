@@ -19,256 +19,231 @@
  *
  * $Id: ChipAuthenticationPublicKeyInfo.java 1819 2019-09-26 12:40:53Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.math.BigInteger;
-import java.security.PublicKey;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DLSequence;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-
-import kmrtd.Util;
+import kmrtd.Util
+import org.bouncycastle.asn1.ASN1EncodableVector
+import org.bouncycastle.asn1.ASN1Integer
+import org.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.DLSequence
+import java.math.BigInteger
+import java.security.PublicKey
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * A concrete SecurityInfo structure that stores chip authentication public
  * key info, see EAC TR 03110 1.11 specification.
- *
+ * 
  * This data structure provides a Chip Authentication Public Key of the MRTD chip.
- * <ul>
- * <li>The object identifier <code>protocol</code> SHALL identify the type of the public key
- *     (i.e. DH or ECDH).</li>
- * <li>The sequence <code>chipAuthenticationPublicKey</code> SHALL contain the public key
- *     in encoded form.</li>
- * <li>The integer <code>keyId</code> MAY be used to indicate the local key identifier.
- *     It MUST be used if the MRTD chip provides multiple public keys for Chip
- *     Authentication.</li>
- * </ul>
- *
+ * 
+ *  * The object identifier `protocol` SHALL identify the type of the public key
+ * (i.e. DH or ECDH).
+ *  * The sequence `chipAuthenticationPublicKey` SHALL contain the public key
+ * in encoded form.
+ *  * The integer `keyId` MAY be used to indicate the local key identifier.
+ * It MUST be used if the MRTD chip provides multiple public keys for Chip
+ * Authentication.
+ * 
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1819 $
  */
-public class ChipAuthenticationPublicKeyInfo extends SecurityInfo {
+class ChipAuthenticationPublicKeyInfo @JvmOverloads constructor(
+    private val oid: String, publicKey: PublicKey?,
+    /**
+     * Returns a key identifier stored in this ChipAuthenticationPublicKeyInfo
+     * structure, `null` if not present.
+     * 
+     * @return key identifier stored in this ChipAuthenticationPublicKeyInfo structure
+     */
+    /* Optional, use null if implicit. */val keyId: BigInteger? = null
+) : SecurityInfo() {
+    /**
+     * Returns a SubjectPublicKeyInfo contained in this
+     * ChipAuthenticationPublicKeyInfo structure.
+     * 
+     * @return SubjectPublicKeyInfo contained in this
+     * ChipAuthenticationPublicKeyInfo structure
+     */
+    val subjectPublicKey: PublicKey?
 
-  private static final long serialVersionUID = 5687291829854501771L;
+    /**
+     * Creates a public key info structure.
+     * 
+     * @param publicKey Either a DH public key or an EC public key
+     * @param keyId key identifier
+     */
+    /**
+     * Creates a public key info structure with implicit key identifier.
+     * 
+     * @param publicKey Either a DH public key or an EC public key
+     */
+    @JvmOverloads
+    constructor(
+        publicKey: PublicKey,
+        keyId: BigInteger? = null
+    ) : this(Util.inferProtocolIdentifier(publicKey), publicKey, keyId)
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-
-  private String oid;
-
-  /* Optional, use null if implicit. */
-  private BigInteger keyId;
-
-  private PublicKey publicKey;
-
-  /**
-   * Creates a public key info structure with implicit key identifier.
-   *
-   * @param publicKey Either a DH public key or an EC public key
-   */
-  public ChipAuthenticationPublicKeyInfo(PublicKey publicKey) {
-    this(publicKey, null);
-  }
-
-  /**
-   * Creates a public key info structure.
-   *
-   * @param publicKey Either a DH public key or an EC public key
-   * @param keyId key identifier
-   */
-  public ChipAuthenticationPublicKeyInfo(PublicKey publicKey, BigInteger keyId) {
-    this(Util.inferProtocolIdentifier(publicKey), publicKey, keyId);
-  }
-
-  /**
-   * Creates a public key info structure with implicit key identifier.
-   *
-   * @param oid a proper public key identifier
-   * @param publicKey appropriate public key
-   */
-  public ChipAuthenticationPublicKeyInfo(String oid, PublicKey publicKey) {
-    this(oid, publicKey, null);
-  }
-
-  /**
-   * Creates a public key info structure.
-   *
-   * @param oid a proper public key identifier
-   * @param publicKey appropriate public key
-   * @param keyId the key identifier or {@code null} if not present
-   */
-  public ChipAuthenticationPublicKeyInfo(String oid, PublicKey publicKey, BigInteger keyId) {
-    this.oid = oid;
-    this.publicKey = Util.reconstructPublicKey(publicKey);
-    this.keyId = keyId;
-    checkFields();
-  }
-
-  /**
-   * Returns a DER object with this SecurityInfo data (DER sequence).
-   *
-   * @return a DER object with this SecurityInfo data
-   *
-   * @deprecated Remove this method from visible interface (because of dependency on BC API)
-   */
-  @Override
-  @Deprecated
-  public ASN1Primitive getDERObject() {
-    ASN1EncodableVector vector = new ASN1EncodableVector();
-    SubjectPublicKeyInfo subjectPublicKeyInfo = Util.toSubjectPublicKeyInfo(publicKey);
-    if (subjectPublicKeyInfo == null) {
-      LOGGER.log(Level.WARNING, "Could not convert public key to subject-public-key-info structure");
-    } else {
-      vector.add(new ASN1ObjectIdentifier(oid));
-      vector.add((subjectPublicKeyInfo.toASN1Primitive()));
-      if (keyId != null) {
-        vector.add(new ASN1Integer(keyId));
-      }
-    }
-    return new DLSequence(vector);
-  }
-
-  @Override
-  public String getObjectIdentifier() {
-    return oid;
-  }
-
-  /**
-   * Returns the protocol object identifier as a human readable string.
-   *
-   * @return a string
-   */
-  @Override
-  public String getProtocolOIDString() {
-    return toProtocolOIDString(oid);
-  }
-
-  /**
-   * Returns a key identifier stored in this ChipAuthenticationPublicKeyInfo
-   * structure, {@code null} if not present.
-   *
-   * @return key identifier stored in this ChipAuthenticationPublicKeyInfo structure
-   */
-  public BigInteger getKeyId() {
-    return keyId;
-  }
-
-  /**
-   * Returns a SubjectPublicKeyInfo contained in this
-   * ChipAuthenticationPublicKeyInfo structure.
-   *
-   * @return SubjectPublicKeyInfo contained in this
-   *         ChipAuthenticationPublicKeyInfo structure
-   */
-  public PublicKey getSubjectPublicKey() {
-    return publicKey;
-  }
-
-  /**
-   * Checks the correctness of the data for this instance of {@code SecurityInfo}.
-   */
-  // FIXME: also check type of public key
-  protected void checkFields() {
-    try {
-      if (!checkRequiredIdentifier(oid)) {
-        throw new IllegalArgumentException("Wrong identifier: " + oid);
-      }
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Malformed ChipAuthenticationInfo", e);
-    }
-  }
-
-  /**
-   * Checks whether the given object identifier identifies a
-   * ChipAuthenticationPublicKeyInfo structure.
-   *
-   * @param oid object identifier
-   *
-   * @return true if the match is positive
-   */
-  public static boolean checkRequiredIdentifier(String oid) {
-    return ID_PK_DH.equals(oid) || ID_PK_ECDH.equals(oid);
-  }
-
-  @Override
-  public String toString() {
-    return "ChipAuthenticationPublicKeyInfo ["
-        + "protocol: " + toProtocolOIDString(oid) + ", "
-        + "chipAuthenticationPublicKey: " + Util.getDetailedPublicKeyAlgorithm(getSubjectPublicKey()) + ", "
-        + "keyId: " + (keyId == null ? "-" : keyId.toString())
-        + "]";
-  }
-
-  @Override
-  public int hashCode() {
-    return 	123 + 1337 * (oid.hashCode() + (keyId == null ? 111 : keyId.hashCode()) + (publicKey == null ? 111 : publicKey.hashCode()));
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (other == null) {
-      return false;
-    }
-    if (other == this) {
-      return true;
-    }
-    if (!ChipAuthenticationPublicKeyInfo.class.equals(other.getClass())) {
-      return false;
+    /**
+     * Creates a public key info structure.
+     * 
+     * @param oid a proper public key identifier
+     * @param publicKey appropriate public key
+     * @param keyId the key identifier or `null` if not present
+     */
+    /**
+     * Creates a public key info structure with implicit key identifier.
+     * 
+     * @param oid a proper public key identifier
+     * @param publicKey appropriate public key
+     */
+    init {
+        this.subjectPublicKey = Util.reconstructPublicKey(publicKey)
+        checkFields()
     }
 
-    ChipAuthenticationPublicKeyInfo otherInfo = (ChipAuthenticationPublicKeyInfo)other;
-    return oid.equals(otherInfo.oid)
-        && (keyId == null && otherInfo.keyId == null || keyId != null && keyId.equals(otherInfo.keyId))
-        && publicKey.equals(otherInfo.publicKey);
-  }
-
-  /**
-   * Returns the key agreement algorithm ({@code "DH"} or {@code "ECDH"}
-   * for the given Chip Authentication Public Key info object identifier.
-   * This may throw an unchecked exception if the given object identifier not
-   * a known Chip Authentication Public Key info object identifier.
-   *
-   * @param oid a EAC-CA public key info object identifier
-   *
-   * @return the key agreement algorithm
-   */
-  public static String toKeyAgreementAlgorithm(String oid) {
-    if (oid == null) {
-      throw new NumberFormatException("Unknown OID: null");
+    /**
+     * Returns a DER object with this SecurityInfo data (DER sequence).
+     * 
+     * @return a DER object with this SecurityInfo data
+     * 
+     */
+    @Deprecated("Remove this method from visible interface (because of dependency on BC API)")
+    override fun getDERObject(): ASN1Primitive {
+        val vector = ASN1EncodableVector()
+        val subjectPublicKeyInfo = Util.toSubjectPublicKeyInfo(
+            this.subjectPublicKey
+        )
+        if (subjectPublicKeyInfo == null) {
+            LOGGER.log(
+                Level.WARNING,
+                "Could not convert public key to subject-public-key-info structure"
+            )
+        } else {
+            vector.add(ASN1ObjectIdentifier(oid))
+            vector.add((subjectPublicKeyInfo.toASN1Primitive()))
+            if (keyId != null) {
+                vector.add(ASN1Integer(keyId))
+            }
+        }
+        return DLSequence(vector)
     }
 
-    if (ID_PK_DH.equals(oid)) {
-      return "DH";
-    }
-    if (ID_PK_ECDH.equals(oid)) {
-      return "ECDH";
+    override fun getObjectIdentifier(): String {
+        return oid
     }
 
-    throw new NumberFormatException("Unknown OID: \"" + oid + "\"");
-  }
-
-  /**
-   * Returns an ASN1 name for the protocol object identifier.
-   *
-   * @param oid the protocol object identifier
-   *
-   * @return an ASN1 name if known, or the object identifier itself if not
-   */
-  private static String toProtocolOIDString(String oid) {
-    if (ID_PK_DH.equals(oid)) {
-      return "id-PK-DH";
-    }
-    if (ID_PK_ECDH.equals(oid)) {
-      return "id-PK-ECDH";
+    /**
+     * Returns the protocol object identifier as a human readable string.
+     * 
+     * @return a string
+     */
+    override fun getProtocolOIDString(): String? {
+        return toProtocolOIDString(oid)
     }
 
-    return oid;
-  }
+    /**
+     * Checks the correctness of the data for this instance of `SecurityInfo`.
+     */
+    // FIXME: also check type of public key
+    protected fun checkFields() {
+        try {
+            require(checkRequiredIdentifier(oid)) { "Wrong identifier: " + oid }
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Malformed ChipAuthenticationInfo", e)
+        }
+    }
+
+    override fun toString(): String {
+        return ("ChipAuthenticationPublicKeyInfo ["
+                + "protocol: " + toProtocolOIDString(oid) + ", "
+                + "chipAuthenticationPublicKey: " + Util.getDetailedPublicKeyAlgorithm(this.subjectPublicKey) + ", "
+                + "keyId: " + (if (keyId == null) "-" else keyId.toString())
+                + "]")
+    }
+
+    override fun hashCode(): Int {
+        return 123 + 1337 * (oid.hashCode() + (if (keyId == null) 111 else keyId.hashCode()) + (if (this.subjectPublicKey == null) 111 else subjectPublicKey.hashCode()))
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (other === this) {
+            return true
+        }
+        if (ChipAuthenticationPublicKeyInfo::class.java != other.javaClass) {
+            return false
+        }
+
+        val otherInfo = other as ChipAuthenticationPublicKeyInfo
+        return oid == otherInfo.oid
+                && (keyId == null && otherInfo.keyId == null || keyId != null && keyId == otherInfo.keyId)
+                && this.subjectPublicKey == otherInfo.subjectPublicKey
+    }
+
+    companion object {
+        private const val serialVersionUID = 5687291829854501771L
+
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+
+        /**
+         * Checks whether the given object identifier identifies a
+         * ChipAuthenticationPublicKeyInfo structure.
+         * 
+         * @param oid object identifier
+         * 
+         * @return true if the match is positive
+         */
+        fun checkRequiredIdentifier(oid: String?): Boolean {
+            return SecurityInfo.Companion.ID_PK_DH == oid || SecurityInfo.Companion.ID_PK_ECDH == oid
+        }
+
+        /**
+         * Returns the key agreement algorithm (`"DH"` or `"ECDH"`
+         * for the given Chip Authentication Public Key info object identifier.
+         * This may throw an unchecked exception if the given object identifier not
+         * a known Chip Authentication Public Key info object identifier.
+         * 
+         * @param oid a EAC-CA public key info object identifier
+         * 
+         * @return the key agreement algorithm
+         */
+        fun toKeyAgreementAlgorithm(oid: String): String {
+            if (oid == null) {
+                throw NumberFormatException("Unknown OID: null")
+            }
+
+            if (SecurityInfo.Companion.ID_PK_DH == oid) {
+                return "DH"
+            }
+            if (SecurityInfo.Companion.ID_PK_ECDH == oid) {
+                return "ECDH"
+            }
+
+            throw NumberFormatException("Unknown OID: \"" + oid + "\"")
+        }
+
+        /**
+         * Returns an ASN1 name for the protocol object identifier.
+         * 
+         * @param oid the protocol object identifier
+         * 
+         * @return an ASN1 name if known, or the object identifier itself if not
+         */
+        private fun toProtocolOIDString(oid: String?): String? {
+            if (SecurityInfo.Companion.ID_PK_DH == oid) {
+                return "id-PK-DH"
+            }
+            if (SecurityInfo.Companion.ID_PK_ECDH == oid) {
+                return "id-PK-ECDH"
+            }
+
+            return oid
+        }
+    }
 }

@@ -32,110 +32,88 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import org.bouncycastle.asn1.ASN1Encodable
+import java.util.Objects
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+class FingerImageSpatialSamplingRateBlock : Block {
+    //  UnitDimensionCode ::= ENUMERATED {
+    //    inch(0),
+    //    cm(1)
+    //  }
+    enum class UnitDimensionCode(val code: Int) : EncodableEnum<UnitDimensionCode> {
+        INCH(0),
+        CM(1);
 
-import org.bouncycastle.asn1.ASN1Encodable;
-
-import kmrtd.ASN1Util;
-
-public class FingerImageSpatialSamplingRateBlock extends Block {
-
-  private static final long serialVersionUID = 3134105261906116624L;
-
-  //  UnitDimensionCode ::= ENUMERATED {
-  //    inch(0),
-  //    cm(1)
-  //  }
-
-  public static enum UnitDimensionCode implements EncodableEnum<UnitDimensionCode> {
-    INCH(0),
-    CM(1);
-
-    private int code;
-
-    private UnitDimensionCode(int code) {
-      this.code = code;
+        companion object {
+            fun fromCode(code: Int): UnitDimensionCode? {
+                return EncodableEnum.fromCode<UnitDimensionCode?>(
+                    code,
+                    UnitDimensionCode::class.java
+                )
+            }
+        }
     }
 
-    public int getCode() {
-      return code;
+    val samplesPerUnit: Int
+
+    val unitDimension: UnitDimensionCode?
+
+    constructor(samplesPerUnit: Int, unitDimension: UnitDimensionCode?) {
+        this.samplesPerUnit = samplesPerUnit
+        this.unitDimension = unitDimension
     }
 
-    public static UnitDimensionCode fromCode(int code) {
-      return EncodableEnum.fromCode(code, UnitDimensionCode.class);
-    }
-  }
-
-  private int samplesPerUnit;
-
-  private UnitDimensionCode unitDimension;
-
-  public FingerImageSpatialSamplingRateBlock(int samplesPerUnit, UnitDimensionCode unitDimension) {
-    this.samplesPerUnit = samplesPerUnit;
-    this.unitDimension = unitDimension;
-  }
-
-  //  SpatialSamplingRateBlock ::= SEQUENCE {
-  //    samplesPerUnit [0] INTEGER (0..65535),
-  //    unitDimension [1] UnitDimensionCode
-  //  }
-
-  FingerImageSpatialSamplingRateBlock(ASN1Encodable asn1Encodable) {
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    samplesPerUnit = ASN1Util.decodeInt(taggedObjects.get(0));
-    unitDimension = UnitDimensionCode.fromCode(ASN1Util.decodeInt(taggedObjects.get(1)));
-  }
-
-  public int getSamplesPerUnit() {
-    return samplesPerUnit;
-  }
-
-  public UnitDimensionCode getUnitDimension() {
-    return unitDimension;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(samplesPerUnit, unitDimension);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    //  SpatialSamplingRateBlock ::= SEQUENCE {
+    //    samplesPerUnit [0] INTEGER (0..65535),
+    //    unitDimension [1] UnitDimensionCode
+    //  }
+    internal constructor(asn1Encodable: ASN1Encodable?) {
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        samplesPerUnit = ASN1Util.decodeInt(taggedObjects.get(0))
+        unitDimension =
+            UnitDimensionCode.Companion.fromCode(ASN1Util.decodeInt(taggedObjects.get(1)))
     }
 
-    FingerImageSpatialSamplingRateBlock other = (FingerImageSpatialSamplingRateBlock) obj;
-    return samplesPerUnit == other.samplesPerUnit && unitDimension == other.unitDimension;
-  }
+    public override fun hashCode(): Int {
+        return Objects.hash(samplesPerUnit, unitDimension)
+    }
 
-  @Override
-  public String toString() {
-    return "FingerImageSpatialSamplingRateBlock ["
-        + "samplesPerUnit: " + samplesPerUnit
-        + ", unitDimension: " + unitDimension
-        + "]";
-  }
+    public override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
 
-  /* PACKAGE */
+        val other = obj as FingerImageSpatialSamplingRateBlock
+        return samplesPerUnit == other.samplesPerUnit && unitDimension == other.unitDimension
+    }
 
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    taggedObjects.put(0, ASN1Util.encodeInt(samplesPerUnit));
-    taggedObjects.put(1, ASN1Util.encodeInt(unitDimension.getCode()));
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
+    override fun toString(): String {
+        return ("FingerImageSpatialSamplingRateBlock ["
+                + "samplesPerUnit: " + samplesPerUnit
+                + ", unitDimension: " + unitDimension
+                + "]")
+    }
 
+    val aSN1Object: ASN1Encodable
+        /* PACKAGE */
+        get() {
+            val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+                HashMap<Int?, ASN1Encodable?>()
+            taggedObjects.put(0, ASN1Util.encodeInt(samplesPerUnit))
+            taggedObjects.put(1, ASN1Util.encodeInt(unitDimension!!.code))
+            return ASN1Util.encodeTaggedObjects(taggedObjects)
+        }
+
+    companion object {
+        private const val serialVersionUID = 3134105261906116624L
+    }
 }

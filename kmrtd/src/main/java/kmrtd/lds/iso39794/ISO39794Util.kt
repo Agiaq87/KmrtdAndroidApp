@@ -19,77 +19,64 @@
  *
  * $Id: ISO39794Util.java 1905 2025-09-25 08:49:09Z martijno $
  */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.DERSequence
+import org.bouncycastle.asn1.DERTaggedObject
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+internal object ISO39794Util {
+    fun decodeCodeFromChoiceExtensionBlockFallback(asn1Encodable: ASN1Encodable?): Int? {
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        if (taggedObjects.containsKey(0)) {
+            return ASN1Util.decodeInt(taggedObjects.get(0))
+        }
+        if (taggedObjects.containsKey(1)) {
+            val extensionTaggedObjects = ASN1Util.decodeTaggedObjects(taggedObjects.get(1))
+            /* Fallback: */
+            return ASN1Util.decodeInt(extensionTaggedObjects.get(0))
+        }
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERTaggedObject;
-
-import kmrtd.ASN1Util;
-
-class ISO39794Util {
-
-  /** Hides default constructor. */
-  private ISO39794Util() {
-  }
-
-  public static Integer decodeCodeFromChoiceExtensionBlockFallback(ASN1Encodable asn1Encodable) {
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    if (taggedObjects.containsKey(0)) {
-      return ASN1Util.decodeInt(taggedObjects.get(0));
-    }
-    if (taggedObjects.containsKey(1)) {
-      Map<Integer, ASN1Encodable> extensionTaggedObjects = ASN1Util.decodeTaggedObjects(taggedObjects.get(1));
-      /* Fallback: */
-      return ASN1Util.decodeInt(extensionTaggedObjects.get(0));
+        return null
     }
 
-    return null;
-  }
-
-  public static ASN1Encodable encodeCodeAsChoiceExtensionBlockFallback(int code) {
-    return new DERSequence(new DERTaggedObject(false, 0, ASN1Util.encodeInt(code)));
-  }
-
-  //  ScoreOrError ::= CHOICE {
-  //    score   [0] Score,
-  //    error   [1] ScoringError
-  //  }
-
-  public static int decodeScoreOrError(ASN1Encodable asn1Encodable) {
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    if (taggedObjects.containsKey(0)) {
-      return ASN1Util.decodeInt(taggedObjects.get(0));
+    fun encodeCodeAsChoiceExtensionBlockFallback(code: Int): ASN1Encodable {
+        return DERSequence(DERTaggedObject(false, 0, ASN1Util.encodeInt(code)))
     }
 
-    /* NOTE: We could navigate the object under [1], and distinguish between failureToAssess or extension. */
-    return -1;
-  }
+    //  ScoreOrError ::= CHOICE {
+    //    score   [0] Score,
+    //    error   [1] ScoringError
+    //  }
+    fun decodeScoreOrError(asn1Encodable: ASN1Encodable?): Int {
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        if (taggedObjects.containsKey(0)) {
+            return ASN1Util.decodeInt(taggedObjects.get(0))
+        }
 
-  public static ASN1Encodable encodeScoreOrError(int score) {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    if (score >= 0) {
-      taggedObjects.put(0, ASN1Util.encodeInt(score));
+        /* NOTE: We could navigate the object under [1], and distinguish between failureToAssess or extension. */
+        return -1
     }
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
 
-  public static ASN1Encodable encodeBlocks(List<? extends Block> blocks) {
-    if (blocks == null) {
-      return null;
+    fun encodeScoreOrError(score: Int): ASN1Encodable? {
+        val taggedObjects: MutableMap<Int?, ASN1Encodable?> = HashMap<Int?, ASN1Encodable?>()
+        if (score >= 0) {
+            taggedObjects.put(0, ASN1Util.encodeInt(score))
+        }
+        return ASN1Util.encodeTaggedObjects(taggedObjects)
     }
-    List<ASN1Encodable> asn1Objects = new ArrayList<ASN1Encodable>(blocks.size());
-    for (Block block: blocks) {
-      if (block != null) {
-        asn1Objects.add(block.getASN1Object());
-      }
+
+    fun encodeBlocks(blocks: MutableList<out Block?>?): ASN1Encodable? {
+        if (blocks == null) {
+            return null
+        }
+        val asn1Objects: MutableList<ASN1Encodable?> = ArrayList<ASN1Encodable?>(blocks.size)
+        for (block in blocks) {
+            if (block != null) {
+                asn1Objects.add(block.aSN1Object)
+            }
+        }
+        return DERSequence(asn1Objects.toTypedArray<ASN1Encodable?>())
     }
-    return new DERSequence(asn1Objects.toArray(new ASN1Encodable[0]));
-  }
 }

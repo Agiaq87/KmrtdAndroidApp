@@ -19,16 +19,13 @@
  *
  * $Id: $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.util.Arrays;
-
-import org.bouncycastle.asn1.ASN1EncodableVector;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.DLSequence;
+import org.bouncycastle.asn1.ASN1EncodableVector
+import org.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.bouncycastle.asn1.ASN1OctetString
+import org.bouncycastle.asn1.ASN1Primitive
+import org.bouncycastle.asn1.DLSequence
 
 /*
  * EFDIRInfo ::= SEQUENCE {
@@ -40,54 +37,48 @@ import org.bouncycastle.asn1.DLSequence;
  *   id-icao-mrtd-security 13
  * }
  */
-
 /**
  * Encapsulates a full copy of the content of the
  * transparent elementary file EF-DIR contained in the Master File.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: $
  */
-public class EFDIRInfo extends SecurityInfo {
+class EFDIRInfo(efDIR: ByteArray) : SecurityInfo() {
+    private val efDIR: ByteArray
 
-  private static final long serialVersionUID = 6778691696414558842L;
-
-  private static final String EF_DIR_PROTOCOL_OID = "2.23.136.1.1.13";
-
-  private byte[] efDIR;
-
-  public EFDIRInfo(byte[] efDIR) {
-    if (efDIR == null) {
-      throw new IllegalArgumentException("Cannot create EFDIRInfo for null");
+    init {
+        requireNotNull(efDIR) { "Cannot create EFDIRInfo for null" }
+        this.efDIR = efDIR.copyOf(efDIR.size)
     }
-    this.efDIR = Arrays.copyOf(efDIR, efDIR.length);
-  }
 
-  /**
-   * The contents of the EF-DIR file.
-   *
-   * @return the contents of the EF-DIR file
-   */
-  public byte[] getEFDIR() {
-    return Arrays.copyOf(efDIR, efDIR.length);
-  }
+    val eFDIR: ByteArray
+        /**
+         * The contents of the EF-DIR file.
+         * 
+         * @return the contents of the EF-DIR file
+         */
+        get() = efDIR.copyOf(efDIR.size)
 
-  @Override
-  public ASN1Primitive getDERObject() {
-    ASN1EncodableVector v = new ASN1EncodableVector();
-    v.add(new ASN1ObjectIdentifier(EF_DIR_PROTOCOL_OID));
-    v.add(ASN1OctetString.getInstance(efDIR));
-    return DLSequence.getInstance(v);
-  }
+    override fun getDERObject(): ASN1Primitive? {
+        val v = ASN1EncodableVector()
+        v.add(ASN1ObjectIdentifier(EF_DIR_PROTOCOL_OID))
+        v.add(ASN1OctetString.getInstance(efDIR))
+        return DLSequence.getInstance(v)
+    }
 
-  @Override
-  public String getObjectIdentifier() {
-    return EF_DIR_PROTOCOL_OID;
-  }
+    override fun getObjectIdentifier(): String {
+        return EF_DIR_PROTOCOL_OID
+    }
 
-  @Override
-  public String getProtocolOIDString() {
-    return "id-EFDIR";
-  }
+    override fun getProtocolOIDString(): String {
+        return "id-EFDIR"
+    }
+
+    companion object {
+        private const val serialVersionUID = 6778691696414558842L
+
+        private const val EF_DIR_PROTOCOL_OID = "2.23.136.1.1.13"
+    }
 }

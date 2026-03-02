@@ -19,82 +19,81 @@
  *
  * $Id: LDSFile.java 1751 2018-01-15 15:35:45Z martijno $
  */
-
-package kmrtd.lds;
+package kmrtd.lds
 
 /**
  * LDS element at file level.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1751 $
  */
-public interface LDSFile extends LDSElement {
+interface LDSFile : LDSElement {
+    /*
+       * FIXME: Note that this is not necessarily the total length of the file:
+       * For TLV files this gives the length of the value. -- MO
+       */
+    /**
+     * Returns the length of this file.
+     * 
+     * @return the length of this file
+     */
+    val length: Int
 
-  /* NOTE: In EAC 1.11 documents there is also the CVCA file that has no tag. */
+    companion object {
+        /* NOTE: In EAC 1.11 documents there is also the CVCA file that has no tag. */
+        /** ICAO tag for document index (COM).  */
+        const val EF_COM_TAG: Int = 0x60
 
-  /** ICAO tag for document index (COM). */
-  public static final int EF_COM_TAG = 0x60;
+        /** ICAO data group tag for DG1.  */
+        const val EF_DG1_TAG: Int = 0x61
 
-  /** ICAO data group tag for DG1. */
-  public static final int EF_DG1_TAG = 0x61;
+        /** ICAO data group tag for DG2.  */
+        const val EF_DG2_TAG: Int = 0x75
 
-  /** ICAO data group tag for DG2. */
-  public static final int EF_DG2_TAG = 0x75;
+        /** ICAO data group tag for DG3.  */
+        const val EF_DG3_TAG: Int = 0x63
 
-  /** ICAO data group tag for DG3. */
-  public static final int EF_DG3_TAG = 0x63;
+        /** ICAO data group tag for DG4.  */
+        const val EF_DG4_TAG: Int = 0x76
 
-  /** ICAO data group tag for DG4. */
-  public static final int EF_DG4_TAG = 0x76;
+        /** ICAO data group tag for DG5.  */
+        const val EF_DG5_TAG: Int = 0x65
 
-  /** ICAO data group tag for DG5. */
-  public static final int EF_DG5_TAG = 0x65;
+        /** ICAO data group tag for DG6.  */
+        const val EF_DG6_TAG: Int = 0x66
 
-  /** ICAO data group tag for DG6. */
-  public static final int EF_DG6_TAG = 0x66;
+        /** ICAO data group tag for DG7.  */
+        const val EF_DG7_TAG: Int = 0x67
 
-  /** ICAO data group tag for DG7. */
-  public static final int EF_DG7_TAG = 0x67;
+        /** ICAO data group tag for DG8.  */
+        const val EF_DG8_TAG: Int = 0x68
 
-  /** ICAO data group tag for DG8. */
-  public static final int EF_DG8_TAG = 0x68;
+        /** ICAO data group tag for DG9.  */
+        const val EF_DG9_TAG: Int = 0x69
 
-  /** ICAO data group tag for DG9. */
-  public static final int EF_DG9_TAG = 0x69;
+        /** ICAO data group tag for DG10.  */
+        const val EF_DG10_TAG: Int = 0x6A
 
-  /** ICAO data group tag for DG10. */
-  public static final int EF_DG10_TAG = 0x6A;
+        /** ICAO data group tag for DG11.  */
+        const val EF_DG11_TAG: Int = 0x6B
 
-  /** ICAO data group tag for DG11. */
-  public static final int EF_DG11_TAG = 0x6B;
+        /** ICAO data group tag for DG12.  */
+        const val EF_DG12_TAG: Int = 0x6C
 
-  /** ICAO data group tag for DG12. */
-  public static final int EF_DG12_TAG = 0x6C;
+        /** ICAO data group tag for DG13.  */
+        const val EF_DG13_TAG: Int = 0x6D
 
-  /** ICAO data group tag for DG13. */
-  public static final int EF_DG13_TAG = 0x6D;
+        /** ICAO data group tag for DG14.  */
+        const val EF_DG14_TAG: Int = 0x6E
 
-  /** ICAO data group tag for DG14. */
-  public static final int EF_DG14_TAG = 0x6E;
+        /** ICAO data group tag for DG15.  */
+        const val EF_DG15_TAG: Int = 0x6F
 
-  /** ICAO data group tag for DG15. */
-  public static final int EF_DG15_TAG = 0x6F;
+        /** ICAO data group tag for DG16.  */
+        const val EF_DG16_TAG: Int = 0x70
 
-  /** ICAO data group tag for DG16. */
-  public static final int EF_DG16_TAG = 0x70;
-
-  /** ICAO tag for document security index (SOd). */
-  public static final int EF_SOD_TAG = 0x77;
-
-  /*
-   * FIXME: Note that this is not necessarily the total length of the file:
-   * For TLV files this gives the length of the value. -- MO
-   */
-  /**
-   * Returns the length of this file.
-   *
-   * @return the length of this file
-   */
-  int getLength();
+        /** ICAO tag for document security index (SOd).  */
+        const val EF_SOD_TAG: Int = 0x77
+    }
 }

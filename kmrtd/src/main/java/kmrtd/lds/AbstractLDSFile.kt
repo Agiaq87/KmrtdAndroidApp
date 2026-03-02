@@ -19,70 +19,75 @@
  *
  * $Id: AbstractLDSFile.java 1775 2018-04-09 10:13:04Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Base class for all files (EF_COM, EF_SOD, and data groups) in the LDS.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1775 $
  */
-abstract class AbstractLDSFile implements LDSFile {
+internal abstract class AbstractLDSFile
+/**
+ * Constructor only visible to the other
+ * classes in this package.
+ */
+    : LDSFile {
+    val encoded: ByteArray?
+        /**
+         * Returns the contents of this file as byte array,
+         * includes the ICAO tag and length.
+         * 
+         * @return a byte array containing the file
+         */
+        get() {
+            try {
+                val out = ByteArrayOutputStream()
+                writeObject(out)
+                out.flush()
+                out.close()
+                return out.toByteArray()
+            } catch (ioe: IOException) {
+                LOGGER.log(
+                    Level.WARNING,
+                    "Exception",
+                    ioe
+                )
+                return null
+            }
+        }
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
+    /**
+     * Reads the file from an input stream.
+     * 
+     * @param inputStream the input stream to read from
+     * 
+     * @throws IOException if reading fails
+     */
+    @Throws(IOException::class)
+    protected abstract fun readObject(inputStream: InputStream?)
 
-  private static final long serialVersionUID = -4908935713109830409L;
+    /**
+     * Writes the file to an output stream.
+     * 
+     * @param outputStream the output stream to write to
+     * 
+     * @throws IOException if writing fails
+     */
+    @Throws(IOException::class)
+    protected abstract fun writeObject(outputStream: OutputStream?)
 
-  /**
-   * Constructor only visible to the other
-   * classes in this package.
-   */
-  AbstractLDSFile() {
-  }
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
 
-  /**
-   * Returns the contents of this file as byte array,
-   * includes the ICAO tag and length.
-   *
-   * @return a byte array containing the file
-   */
-  public byte[] getEncoded() {
-    try {
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      writeObject(out);
-      out.flush();
-      out.close();
-      return out.toByteArray();
-    } catch (IOException ioe) {
-      LOGGER.log(Level.WARNING, "Exception", ioe);
-      return null;
+        private val serialVersionUID = -4908935713109830409L
     }
-  }
-
-  /**
-   * Reads the file from an input stream.
-   *
-   * @param inputStream the input stream to read from
-   *
-   * @throws IOException if reading fails
-   */
-  protected abstract void readObject(InputStream inputStream) throws IOException;
-
-  /**
-   * Writes the file to an output stream.
-   *
-   * @param outputStream the output stream to write to
-   *
-   * @throws IOException if writing fails
-   */
-  protected abstract void writeObject(OutputStream outputStream) throws IOException;
 }

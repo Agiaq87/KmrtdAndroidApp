@@ -19,64 +19,59 @@
  *
  * $Id: AAProtocol.java 1878 2023-07-31 13:19:51Z martijno $
  */
+package kmrtd.protocol
 
-package kmrtd.protocol;
-
-import java.security.PublicKey;
-
-import kmrtd.APDULevelAACapable;
-import kmrtd.CardServiceProtocolException;
-import kmrtd.Util;
-
-import net.sf.scuba.smartcards.CardServiceException;
+import kmrtd.APDULevelAACapable
+import kmrtd.CardServiceProtocolException
+import kmrtd.Util
+import net.sf.scuba.smartcards.CardServiceException
+import java.security.PublicKey
 
 /**
  * The Active Authentication protocol.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1878 $
- *
+ * 
  * @since 0.5.6
  */
-public class AAProtocol {
-
-  private APDULevelAACapable service;
-
-  private SecureMessagingWrapper wrapper;
-
-  /**
-   * Creates a protocol instance.
-   *
-   * @param service the service for APDU communication
-   * @param wrapper the secure messaging wrapper
-   */
-  public AAProtocol(APDULevelAACapable service, SecureMessagingWrapper wrapper) {
-    this.service = service;
-    this.wrapper = wrapper;
-  }
-
-  /**
-   * Performs the Active Authentication protocol.
-   *
-   * @param publicKey the public key to use (usually read from the card)
-   * @param digestAlgorithm the digest algorithm to use, or null
-   * @param signatureAlgorithm signature algorithm
-   * @param challenge challenge
-   *
-   * @return a boolean indicating whether the card was authenticated
-   *
-   * @throws CardServiceException on error
-   */
-  public AAResult doAA(PublicKey publicKey, String digestAlgorithm, String signatureAlgorithm, byte[] challenge) throws CardServiceException {
-    try {
-      if (challenge == null || challenge.length != 8) {
-        throw new IllegalArgumentException("AA failed: bad challenge");
-      }
-      byte[] response = service.sendInternalAuthenticate(wrapper, Util.getApproximateSignatureSize(publicKey), challenge);
-      return new AAResult(publicKey, digestAlgorithm, signatureAlgorithm, challenge, response);
-    } catch (Exception e) {
-      throw new CardServiceProtocolException("Exception", 1, e);
+class AAProtocol
+/**
+ * Creates a protocol instance.
+ * 
+ * @param service the service for APDU communication
+ * @param wrapper the secure messaging wrapper
+ */(private val service: APDULevelAACapable, private val wrapper: SecureMessagingWrapper) {
+    /**
+     * Performs the Active Authentication protocol.
+     * 
+     * @param publicKey the public key to use (usually read from the card)
+     * @param digestAlgorithm the digest algorithm to use, or null
+     * @param signatureAlgorithm signature algorithm
+     * @param challenge challenge
+     * 
+     * @return a boolean indicating whether the card was authenticated
+     * 
+     * @throws CardServiceException on error
+     */
+    @Throws(CardServiceException::class)
+    fun doAA(
+        publicKey: PublicKey?,
+        digestAlgorithm: String?,
+        signatureAlgorithm: String?,
+        challenge: ByteArray
+    ): AAResult {
+        try {
+            require(!(challenge == null || challenge.size != 8)) { "AA failed: bad challenge" }
+            val response = service.sendInternalAuthenticate(
+                wrapper,
+                Util.getApproximateSignatureSize(publicKey),
+                challenge
+            )
+            return AAResult(publicKey, digestAlgorithm, signatureAlgorithm, challenge, response)
+        } catch (e: Exception) {
+            throw CardServiceProtocolException("Exception", 1, e)
+        }
     }
-  }
 }

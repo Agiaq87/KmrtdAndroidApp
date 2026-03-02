@@ -19,92 +19,92 @@
  *
  * $Id: PACESecretKeySpec.java 1786 2018-07-08 21:06:32Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * A secret key for PACE.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1786 $
- *
+ * 
  * (Contributions by g.giorkhelidze.)
  */
-public class PACESecretKeySpec extends SecretKeySpec implements AccessKeySpec {
+class PACESecretKeySpec : SecretKeySpec, AccessKeySpec {
+    /**
+     * Returns reference specifying the type of key from BSI TR-03110 (Appendix B).
+     * 
+     * @return a key reference
+     */
+    val keyReference: Byte
 
-  private static final long serialVersionUID = -5181060361947453857L;
-
-  private byte keyReference;
-
-  /**
-   * Constructs a secret key from the given byte array, using the first {@code len}
-   * bytes of {@code key}, starting at {@code offset} inclusive.
-   *
-   * @param key the key bytes
-   * @param offset the offset with {@code key}
-   * @param len the length of the key within {@code key}
-   * @param algorithm the name of the secret-key algorithm to be associated with the given key material
-   * @param paceKeyReference a reference specifying the type of key from BSI TR-03110 (Appendix B)
-   */
-  public PACESecretKeySpec(byte[] key, int offset, int len, String algorithm, byte paceKeyReference) {
-    super(key, offset, len, algorithm);
-    this.keyReference = paceKeyReference;
-  }
-
-  /**
-   * Constructs a secret key from the given byte array.
-   *
-   * @param key the key bytes
-   * @param algorithm the name of the secret-key algorithm to be associated with the given key material
-   * @param paceKeyReference a reference specifying the type of key from BSI TR-03110 (Appendix B)
-   */
-  public PACESecretKeySpec(byte[] key, String algorithm, byte paceKeyReference) {
-    super(key, algorithm);
-    this.keyReference = paceKeyReference;
-  }
-
-  /**
-   * Returns reference specifying the type of key from BSI TR-03110 (Appendix B).
-   *
-   * @return a key reference
-   */
-  public byte getKeyReference() {
-    return keyReference;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = super.hashCode();
-    result = prime * result + keyReference;
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!super.equals(obj)) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    /**
+     * Constructs a secret key from the given byte array, using the first `len`
+     * bytes of `key`, starting at `offset` inclusive.
+     * 
+     * @param key the key bytes
+     * @param offset the offset with `key`
+     * @param len the length of the key within `key`
+     * @param algorithm the name of the secret-key algorithm to be associated with the given key material
+     * @param paceKeyReference a reference specifying the type of key from BSI TR-03110 (Appendix B)
+     */
+    constructor(
+        key: ByteArray,
+        offset: Int,
+        len: Int,
+        algorithm: String,
+        paceKeyReference: Byte
+    ) : super(key, offset, len, algorithm) {
+        this.keyReference = paceKeyReference
     }
 
-    PACESecretKeySpec other = (PACESecretKeySpec)obj;
-    return keyReference == other.keyReference;
-  }
+    /**
+     * Constructs a secret key from the given byte array.
+     * 
+     * @param key the key bytes
+     * @param algorithm the name of the secret-key algorithm to be associated with the given key material
+     * @param paceKeyReference a reference specifying the type of key from BSI TR-03110 (Appendix B)
+     */
+    constructor(key: ByteArray, algorithm: String?, paceKeyReference: Byte) : super(
+        key,
+        algorithm
+    ) {
+        this.keyReference = paceKeyReference
+    }
 
-  /**
-   * Returns the encoded key (key seed) used in key derivation.
-   *
-   * @return the encoded key
-   */
-  public byte[] getKey() {
-    return super.getEncoded();
-  }
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = super.hashCode()
+        result = prime * result + keyReference
+        return result
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (!super.equals(obj)) {
+            return false
+        }
+        if (javaClass != obj!!.javaClass) {
+            return false
+        }
+
+        val other = obj as PACESecretKeySpec
+        return keyReference == other.keyReference
+    }
+
+    val key: ByteArray
+        /**
+         * Returns the encoded key (key seed) used in key derivation.
+         * 
+         * @return the encoded key
+         */
+        get() = super.getEncoded()
+
+    companion object {
+        private val serialVersionUID = -5181060361947453857L
+    }
 }

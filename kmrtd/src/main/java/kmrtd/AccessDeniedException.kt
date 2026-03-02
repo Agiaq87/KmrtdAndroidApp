@@ -19,57 +19,50 @@
  *
  * $Id: AccessDeniedException.java 1851 2021-05-27 20:56:53Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.CardServiceException
 
 /**
  * Exception for signaling failed BAC.
- *
+ * 
  * @author The JMRTD team
- *
+ * 
  * @version $Revision: 1851 $
- *
+ * 
  * @since 0.7.0
- *
- * @deprecated Use {@link CardServiceProtocolException} instead.
+ * 
  */
-@Deprecated
-public class AccessDeniedException extends CardServiceException {
+@Deprecated("Use {@link CardServiceProtocolException} instead.")
+class AccessDeniedException(msg: String?, bacKey: AccessKeySpec?, sw: Int) :
+    CardServiceException(msg, sw) {
+    /**
+     * Returns the BAC key that was tried before BAC failed.
+     * 
+     * @return a BAC key
+     */
+    val accessKey: AccessKeySpec?
 
-  private static final long serialVersionUID = -7094953658210693249L;
+    /**
+     * Creates an exception.
+     * 
+     * @param msg the message
+     * @param sw status word or `-1`
+     */
+    constructor(msg: String?, sw: Int) : this(msg, null, sw)
 
-  private final AccessKeySpec bacKey;
+    /**
+     * Creates an exception.
+     * 
+     * @param msg the message
+     * @param bacKey the BAC entry that was tried, or `null`
+     * @param sw status word or `-1`
+     */
+    init {
+        this.accessKey = bacKey
+    }
 
-  /**
-   * Creates an exception.
-   *
-   * @param msg the message
-   * @param sw status word or <code>-1</code>
-   */
-  public AccessDeniedException(String msg, int sw) {
-    this(msg, null, sw);
-  }
-
-  /**
-   * Creates an exception.
-   *
-   * @param msg the message
-   * @param bacKey the BAC entry that was tried, or {@code null}
-   * @param sw status word or {@code -1}
-   */
-  public AccessDeniedException(String msg, AccessKeySpec bacKey, int sw) {
-    super(msg, sw);
-    this.bacKey = bacKey;
-  }
-
-  /**
-   * Returns the BAC key that was tried before BAC failed.
-   *
-   * @return a BAC key
-   */
-  public AccessKeySpec getAccessKey() {
-    return bacKey;
-  }
+    companion object {
+        private val serialVersionUID = -7094953658210693249L
+    }
 }

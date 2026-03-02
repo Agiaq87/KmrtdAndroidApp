@@ -19,233 +19,210 @@
  *
  * $Id: CVCAFile.java 1824 2019-11-06 08:25:39Z martijno $
  */
+package kmrtd.lds
 
-package kmrtd.lds;
+import kmrtd.PassportService
+import kmrtd.cert.CVCPrincipal
+import java.io.DataInputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import kmrtd.PassportService;
-import kmrtd.cert.CVCPrincipal;
-
-/* TODO: Use CVCPrincipal instead of String for references? */
-/**
+/* TODO: Use CVCPrincipal instead of String for references? */ /**
  * File structure for CVCA file (on EAC protected documents).
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1824 $
  */
-public class CVCAFile extends AbstractLDSFile {
+class CVCAFile : AbstractLDSFile {
+    /**
+     * Returns the file identifier of this CVCA file.
+     * 
+     * @return the file identifier
+     */
+    val fID: Short
 
-  private static final long serialVersionUID = -1100904058684365703L;
+    private var caReference: String? = null
 
-  public static final byte CAR_TAG = 0x42;
-  public static final int LENGTH = 36;
+    private var altCAReference: String? = null
 
-  private short fid;
+    /**
+     * Constructs a CVCA file by reading from a stream.
+     * 
+     * @param inputStream the stream to read from
+     * 
+     * @throws IOException on error reading from the stream
+     */
+    constructor(inputStream: InputStream) : this(PassportService.Companion.EF_CVCA, inputStream)
 
-  private String caReference = null;
-
-  private String altCAReference = null;
-
-  /**
-   * Constructs a CVCA file by reading from a stream.
-   *
-   * @param inputStream the stream to read from
-   *
-   * @throws IOException on error reading from the stream
-   */
-  public CVCAFile(InputStream inputStream) throws IOException {
-    this(PassportService.EF_CVCA, inputStream);
-  }
-
-  /**
-   * Constructs a new CVCA file from the data contained in an input stream.
-   *
-   * @param fid file identifier
-   * @param inputStream stream with the data to be parsed
-   *
-   * @throws IOException on error reading from input stream
-   */
-  public CVCAFile(short fid, InputStream inputStream) throws IOException {
-    this.fid = fid;
-    readObject(inputStream);
-  }
-
-  /**
-   * Constructs a new CVCA file with default file identifier.
-   *
-   * @param caReference CA reference
-   * @param altCAReference alternative CA reference
-   */
-  public CVCAFile(String caReference, String altCAReference) {
-    this(PassportService.EF_CVCA, caReference, altCAReference);
-  }
-
-  /**
-   * Constructs a new CVCA file with the given certificate references.
-   *
-   * @param fid file identifier
-   * @param caReference main CA certificate reference
-   * @param altCAReference second (alternative) CA certificate reference
-   */
-  public CVCAFile(short fid, String caReference, String altCAReference) {
-    if (caReference == null
-        || caReference.length() > 16
-        || (altCAReference != null && altCAReference.length() > 16)) {
-      throw new IllegalArgumentException();
-    }
-    this.fid = fid;
-    this.caReference = caReference;
-    this.altCAReference = altCAReference;
-  }
-
-  /**
-   * Constructs a new CVCA file with the given certificate reference.
-   *
-   * @param fid file identifier
-   * @param caReference main CA certificate reference
-   */
-  public CVCAFile(short fid, String caReference) {
-    this(fid, caReference, null);
-  }
-
-  /**
-   * Returns the file identifier of this CVCA file.
-   *
-   * @return the file identifier
-   */
-  public short getFID() {
-    return fid;
-  }
-
-  @Override
-  protected void readObject(InputStream inputStream) throws IOException {
-    DataInputStream dataIn = new DataInputStream(inputStream);
-    int tag = dataIn.read();
-    if (tag != CAR_TAG) {
-      throw new IllegalArgumentException("Wrong tag, expected " + Integer.toHexString(CAR_TAG) + ", found " + Integer.toHexString(tag));
-    }
-    int length = dataIn.read();
-    if (length > 16) {
-      throw new IllegalArgumentException("Wrong length");
-    }
-    byte[] data = new byte[length];
-    dataIn.readFully(data);
-    caReference = new String(data);
-    tag = dataIn.read();
-    if (tag != 0 && tag != -1) {
-      if (tag != CAR_TAG) {
-        throw new IllegalArgumentException("Wrong tag");
-      }
-      length = dataIn.read();
-      if (length > 16) {
-        throw new IllegalArgumentException("Wrong length");
-      }
-      data = new byte[length];
-      dataIn.readFully(data);
-      altCAReference = new String(data);
-      tag = dataIn.read();
-    }
-    while (tag != -1) {
-      if (tag != 0) {
-        throw new IllegalArgumentException("Bad file padding");
-      }
-      tag = dataIn.read();
-    }
-  }
-
-  @Override
-  protected void writeObject(OutputStream outputStream) throws IOException {
-    byte[] result = new byte[LENGTH];
-    result[0] = CAR_TAG;
-    result[1] = (byte)caReference.length();
-    System.arraycopy(caReference.getBytes(), 0, result, 2, result[1]);
-    if (altCAReference != null) {
-      int index = result[1] + 2;
-      result[index] = CAR_TAG;
-      result[index + 1] = (byte)altCAReference.length();
-      System.arraycopy(altCAReference.getBytes(), 0, result, index + 2,
-          result[index + 1]);
-    }
-    outputStream.write(result);
-  }
-
-  /**
-   * Returns the CA Certificate identifier.
-   *
-   * @return the CA Certificate identifier
-   */
-  public CVCPrincipal getCAReference() {
-    return caReference == null ? null : new CVCPrincipal(caReference);
-  }
-
-  /**
-   * Returns the second (alternative) CA Certificate identifier, null if none
-   * exists.
-   *
-   * @return the second (alternative) CA Certificate identifier
-   */
-  public CVCPrincipal getAltCAReference() {
-    return altCAReference == null ? null : new CVCPrincipal(altCAReference);
-  }
-
-  /**
-   * Returns a textual representation of this CVCAFile.
-   *
-   * @return a textual representation of this CVCAFile
-   */
-  @Override
-  public String toString() {
-    return new StringBuilder()
-        .append("CA reference: \"").append(caReference).append("\"")
-        .append(((altCAReference != null) ? ", Alternative CA reference: " + altCAReference : ""))
-        .toString();
-  }
-
-  /**
-   * Tests whether this CVCAFile is equal to the provided object.
-   *
-   * @param other some other object
-   *
-   * @return whether this CVCAFile equals the other object
-   */
-  @Override
-  public boolean equals(Object other) {
-    if (other == null) {
-      return false;
-    }
-    if (!this.getClass().equals(other.getClass())) {
-      return false;
+    /**
+     * Constructs a new CVCA file from the data contained in an input stream.
+     * 
+     * @param fid file identifier
+     * @param inputStream stream with the data to be parsed
+     * 
+     * @throws IOException on error reading from input stream
+     */
+    constructor(fid: Short, inputStream: InputStream) {
+        this.fID = fid
+        readObject(inputStream)
     }
 
-    CVCAFile otherCVCAFile = (CVCAFile)other;
-    return caReference.equals(otherCVCAFile.caReference)
-        && ((altCAReference == null && otherCVCAFile.altCAReference == null)
-            || (altCAReference != null && altCAReference.equals(otherCVCAFile.altCAReference)));
-  }
+    /**
+     * Constructs a new CVCA file with default file identifier.
+     * 
+     * @param caReference CA reference
+     * @param altCAReference alternative CA reference
+     */
+    constructor(
+        caReference: String,
+        altCAReference: String?
+    ) : this(PassportService.Companion.EF_CVCA, caReference, altCAReference)
 
-  /**
-   * Computes a hash code of this CVCAFile.
-   *
-   * @return a hash code
-   */
-  @Override
-  public int hashCode() {
-    return 11 * caReference.hashCode()
-        + ((altCAReference != null) ? 13 * altCAReference.hashCode() : 0)
-        + 5;
-  }
+    /**
+     * Constructs a new CVCA file with the given certificate references.
+     * 
+     * @param this.fID file identifier
+     * @param caReference main CA certificate reference
+     * @param altCAReference second (alternative) CA certificate reference
+     */
+    /**
+     * Constructs a new CVCA file with the given certificate reference.
+     * 
+     * @param fid file identifier
+     * @param caReference main CA certificate reference
+     */
+    @JvmOverloads
+    constructor(fid: Short, caReference: String, altCAReference: String? = null) {
+        require(!(caReference == null || caReference.length > 16 || (altCAReference != null && altCAReference.length > 16)))
+        this.fID = fid
+        this.caReference = caReference
+        this.altCAReference = altCAReference
+    }
 
-  /**
-   * Returns the length of the content of this CVCA file. This always returns {@value #LENGTH}.
-   *
-   * @return {@value #LENGTH}
-   */
-  public int getLength() {
-    return LENGTH;
-  }
+    @Throws(IOException::class)
+    override fun readObject(inputStream: InputStream) {
+        val dataIn = DataInputStream(inputStream)
+        var tag = dataIn.read()
+        require(tag == CAR_TAG.toInt()) {
+            "Wrong tag, expected " + Integer.toHexString(CAR_TAG.toInt()) + ", found " + Integer.toHexString(
+                tag
+            )
+        }
+        var length = dataIn.read()
+        require(length <= 16) { "Wrong length" }
+        var data = ByteArray(length)
+        dataIn.readFully(data)
+        caReference = String(data)
+        tag = dataIn.read()
+        if (tag != 0 && tag != -1) {
+            require(tag == CAR_TAG.toInt()) { "Wrong tag" }
+            length = dataIn.read()
+            require(length <= 16) { "Wrong length" }
+            data = ByteArray(length)
+            dataIn.readFully(data)
+            altCAReference = String(data)
+            tag = dataIn.read()
+        }
+        while (tag != -1) {
+            require(tag == 0) { "Bad file padding" }
+            tag = dataIn.read()
+        }
+    }
+
+    @Throws(IOException::class)
+    override fun writeObject(outputStream: OutputStream) {
+        val result = ByteArray(LENGTH)
+        result[0] = CAR_TAG
+        result[1] = caReference!!.length.toByte()
+        System.arraycopy(caReference!!.toByteArray(), 0, result, 2, result[1].toInt())
+        if (altCAReference != null) {
+            val index = result[1] + 2
+            result[index] = CAR_TAG
+            result[index + 1] = altCAReference!!.length.toByte()
+            System.arraycopy(
+                altCAReference!!.toByteArray(), 0, result, index + 2,
+                result[index + 1].toInt()
+            )
+        }
+        outputStream.write(result)
+    }
+
+    val cAReference: CVCPrincipal?
+        /**
+         * Returns the CA Certificate identifier.
+         * 
+         * @return the CA Certificate identifier
+         */
+        get() = if (caReference == null) null else CVCPrincipal(caReference)
+
+    /**
+     * Returns the second (alternative) CA Certificate identifier, null if none
+     * exists.
+     * 
+     * @return the second (alternative) CA Certificate identifier
+     */
+    fun getAltCAReference(): CVCPrincipal? {
+        return if (altCAReference == null) null else CVCPrincipal(altCAReference)
+    }
+
+    /**
+     * Returns a textual representation of this CVCAFile.
+     * 
+     * @return a textual representation of this CVCAFile
+     */
+    override fun toString(): String {
+        return StringBuilder()
+            .append("CA reference: \"").append(caReference).append("\"")
+            .append((if (altCAReference != null) ", Alternative CA reference: " + altCAReference else ""))
+            .toString()
+    }
+
+    /**
+     * Tests whether this CVCAFile is equal to the provided object.
+     * 
+     * @param other some other object
+     * 
+     * @return whether this CVCAFile equals the other object
+     */
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (this.javaClass != other.javaClass) {
+            return false
+        }
+
+        val otherCVCAFile = other as CVCAFile
+        return caReference == otherCVCAFile.caReference
+                && ((altCAReference == null && otherCVCAFile.altCAReference == null)
+                || (altCAReference != null && altCAReference == otherCVCAFile.altCAReference))
+    }
+
+    /**
+     * Computes a hash code of this CVCAFile.
+     * 
+     * @return a hash code
+     */
+    override fun hashCode(): Int {
+        return (11 * caReference.hashCode() + (if (altCAReference != null) 13 * altCAReference.hashCode() else 0)
+                + 5)
+    }
+
+    /**
+     * Returns the length of the content of this CVCA file. This always returns {@value #LENGTH}.
+     * 
+     * @return {@value #LENGTH}
+     */
+    override fun getLength(): Int {
+        return LENGTH
+    }
+
+    companion object {
+        private val serialVersionUID = -1100904058684365703L
+
+        const val CAR_TAG: Byte = 0x42
+        const val LENGTH: Int = 36
+    }
 }

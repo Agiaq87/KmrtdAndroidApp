@@ -19,47 +19,42 @@
  *
  * $Id: BACDeniedException.java 1851 2021-05-27 20:56:53Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.CardServiceException
 
 /**
  * Exception for signaling failed BAC.
- *
+ * 
  * @author The JMRTD team
- *
+ * 
  * @version $Revision: 1851 $
- *
+ * 
  * @since 0.4.8
- *
- * @deprecated Use {@link CardServiceProtocolException} instead.
+ * 
  */
-@Deprecated
-public class BACDeniedException extends CardServiceException {
+@Deprecated("Use {@link CardServiceProtocolException} instead.")
+class BACDeniedException(msg: String?, bacKey: BACKeySpec?, sw: Int) :
+    CardServiceException(msg, sw) {
+    /**
+     * Returns the BAC key that was tried before BAC failed.
+     * 
+     * @return a BAC key
+     */
+    val bACKey: BACKeySpec?
 
-  private static final long serialVersionUID = -7094953658210693249L;
+    /**
+     * Creates an exception.
+     * 
+     * @param msg the message
+     * @param bacKey the BAC entry that was tried
+     * @param sw status word or `-1`
+     */
+    init {
+        this.bACKey = bacKey
+    }
 
-  private final BACKeySpec bacKey;
-
-  /**
-   * Creates an exception.
-   *
-   * @param msg the message
-   * @param bacKey the BAC entry that was tried
-   * @param sw status word or <code>-1</code>
-   */
-  public BACDeniedException(String msg, BACKeySpec bacKey, int sw) {
-    super(msg, sw);
-    this.bacKey = bacKey;
-  }
-
-  /**
-   * Returns the BAC key that was tried before BAC failed.
-   *
-   * @return a BAC key
-   */
-  public BACKeySpec getBACKey() {
-    return bacKey;
-  }
+    companion object {
+        private val serialVersionUID = -7094953658210693249L
+    }
 }

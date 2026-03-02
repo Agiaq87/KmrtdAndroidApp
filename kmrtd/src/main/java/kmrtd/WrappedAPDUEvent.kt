@@ -18,68 +18,60 @@
  *
  * $Id: WrappedAPDUEvent.java 1763 2018-02-18 07:41:30Z martijno $
  */
+package kmrtd
 
-package kmrtd;
-
-import java.io.Serializable;
-
-import net.sf.scuba.smartcards.APDUEvent;
-import net.sf.scuba.smartcards.CommandAPDU;
-import net.sf.scuba.smartcards.ResponseAPDU;
+import net.sf.scuba.smartcards.APDUEvent
+import net.sf.scuba.smartcards.CommandAPDU
+import net.sf.scuba.smartcards.ResponseAPDU
+import java.io.Serializable
 
 /**
  * An event signifying an exchange of wrapped (protected) command and response APDUs.
  * This makes the underlying unprotected APDUs available.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1763 $
- *
+ * 
  * @since 0.6.4
  */
-public class WrappedAPDUEvent extends APDUEvent {
+class WrappedAPDUEvent(
+    source: Any, type: Serializable?, sequenceNumber: Int,
+    plainTextCommandAPDU: CommandAPDU?, plainTextResponseAPDU: ResponseAPDU?,
+    wrappedCommandAPDU: CommandAPDU?, wrappedResponseAPDU: ResponseAPDU?
+) : APDUEvent(source, type, sequenceNumber, wrappedCommandAPDU, wrappedResponseAPDU) {
+    /**
+     * Returns the unprotected, plain-text Command APDU.
+     * 
+     * @return the unprotected, plain-text Command APDU
+     */
+    val plainTextCommandAPDU: CommandAPDU?
 
-  private static final long serialVersionUID = 5958662425525890224L;
+    /**
+     * Returns the unprotected, plain-text Response APDU.
+     * 
+     * @return the unprotected, plain-text Response APDU
+     */
+    val plainTextResponseAPDU: ResponseAPDU?
 
-  private CommandAPDU plainTextCommandAPDU;
+    /**
+     * Creates an APDU exchange event.
+     * 
+     * @param source the source of the event, typically a card service
+     * @param type the type of event, typically this identifies the APDU wrapper somehow
+     * @param sequenceNumber the sequence number of the APDU exchange within a session
+     * @param plainTextCommandAPDU the unprotected command APDU
+     * @param plainTextResponseAPDU the unprotected response APDU
+     * @param wrappedCommandAPDU the protected command APDU
+     * @param wrappedResponseAPDU the protected command APDU
+     */
+    init {
+        this.plainTextCommandAPDU = plainTextCommandAPDU
+        this.plainTextResponseAPDU = plainTextResponseAPDU
+    }
 
-  private ResponseAPDU plainTextResponseAPDU;
-
-  /**
-   * Creates an APDU exchange event.
-   *
-   * @param source the source of the event, typically a card service
-   * @param type the type of event, typically this identifies the APDU wrapper somehow
-   * @param sequenceNumber the sequence number of the APDU exchange within a session
-   * @param plainTextCommandAPDU the unprotected command APDU
-   * @param plainTextResponseAPDU the unprotected response APDU
-   * @param wrappedCommandAPDU the protected command APDU
-   * @param wrappedResponseAPDU the protected command APDU
-   */
-  public WrappedAPDUEvent(Object source, Serializable type, int sequenceNumber,
-      CommandAPDU plainTextCommandAPDU, ResponseAPDU plainTextResponseAPDU,
-      CommandAPDU wrappedCommandAPDU, ResponseAPDU wrappedResponseAPDU) {
-    super(source, type, sequenceNumber, wrappedCommandAPDU, wrappedResponseAPDU);
-    this.plainTextCommandAPDU = plainTextCommandAPDU;
-    this.plainTextResponseAPDU = plainTextResponseAPDU;
-  }
-
-  /**
-   * Returns the unprotected, plain-text Command APDU.
-   *
-   * @return the unprotected, plain-text Command APDU
-   */
-  public CommandAPDU getPlainTextCommandAPDU() {
-    return plainTextCommandAPDU;
-  }
-
-  /**
-   * Returns the unprotected, plain-text Response APDU.
-   *
-   * @return the unprotected, plain-text Response APDU
-   */
-  public ResponseAPDU getPlainTextResponseAPDU() {
-    return plainTextResponseAPDU;
-  }
+    companion object {
+        private const val serialVersionUID = 5958662425525890224L
+    }
 }
 

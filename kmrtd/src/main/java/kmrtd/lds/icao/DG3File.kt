@@ -19,235 +19,245 @@
  *
  * $Id: DG3File.java 1905 2025-09-25 08:49:09Z martijno $
  */
+package kmrtd.lds.icao
 
-package kmrtd.lds.icao;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.BiometricDataBlockDecoder;
-import kmrtd.cbeff.BiometricDataBlockEncoder;
-import kmrtd.cbeff.BiometricEncodingType;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.ISO781611Decoder;
-import kmrtd.cbeff.ISO781611Encoder;
-import kmrtd.cbeff.StandardBiometricHeader;
-import kmrtd.lds.CBEFFDataGroup;
-import kmrtd.lds.iso19794.FingerInfo;
-import kmrtd.lds.iso39794.FingerImageDataBlock;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
+import kmrtd.cbeff.BiometricDataBlock
+import kmrtd.cbeff.BiometricDataBlockDecoder
+import kmrtd.cbeff.BiometricDataBlockEncoder
+import kmrtd.cbeff.BiometricEncodingType
+import kmrtd.cbeff.ISO781611
+import kmrtd.cbeff.ISO781611Decoder
+import kmrtd.cbeff.ISO781611Encoder
+import kmrtd.cbeff.StandardBiometricHeader
+import kmrtd.lds.CBEFFDataGroup
+import kmrtd.lds.LDSFile
+import kmrtd.lds.iso19794.FingerInfo
+import kmrtd.lds.iso39794.FingerImageDataBlock
+import net.sf.scuba.tlv.TLVInputStream
+import net.sf.scuba.tlv.TLVOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 /**
  * File structure for the EF_DG3 file.
  * based on ISO/IEC 19794-4 and ISO/IEC 39794-4.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1905 $
  */
-public class DG3File extends CBEFFDataGroup {
+class DG3File : CBEFFDataGroup {
+    /**
+     * Creates a new file with the specified records.
+     * 
+     * @param fingerInfos records
+     * 
+     */
+    @Deprecated("Use the corresponding factory method for ISO19794 instead")
+    constructor(fingerInfos: MutableList<FingerInfo?>?) : this(fingerInfos, true)
 
-  private static final long serialVersionUID = -1037522331623814528L;
+    /**
+     * Creates a new file with the specified records.
+     * 
+     * @param fingerInfos records
+     * @param shouldAddRandomDataIfEmpty whether to add random data when there are no records to encode
+     * 
+     */
+    @Deprecated("Use the corresponding factory method for ISO19794 instead")
+    constructor(fingerInfos: MutableList<FingerInfo?>?, shouldAddRandomDataIfEmpty: Boolean) : this(
+        BiometricEncodingType.ISO_19794,
+        fingerInfos,
+        shouldAddRandomDataIfEmpty
+    )
 
-  private static final ISO781611Decoder<BiometricDataBlock> DECODER = new ISO781611Decoder<BiometricDataBlock>(getDecoderMap());
+    private constructor(
+        encodingType: BiometricEncodingType?,
+        dataBlocks: MutableList<out BiometricDataBlock?>?,
+        shouldAddRandomDataIfEmpty: Boolean
+    ) : super(LDSFile.Companion.EF_DG3_TAG, encodingType, dataBlocks, shouldAddRandomDataIfEmpty)
 
-  private static Map<Integer, BiometricDataBlockDecoder<BiometricDataBlock>> getDecoderMap() {
-    Map<Integer, BiometricDataBlockDecoder<BiometricDataBlock>> decoders = new HashMap<Integer, BiometricDataBlockDecoder<BiometricDataBlock>>();
+    /**
+     * Creates a new file based on an input stream.
+     * 
+     * @param inputStream an input stream
+     * 
+     * @throws IOException on error reading from input stream
+     */
+    constructor(inputStream: InputStream?) : super(LDSFile.Companion.EF_DG3_TAG, inputStream, false)
 
-    /* 5F2E */
-    decoders.put(ISO781611.BIOMETRIC_DATA_BLOCK_TAG, new BiometricDataBlockDecoder<BiometricDataBlock>() {
-      public BiometricDataBlock decode(InputStream inputStream, StandardBiometricHeader sbh, int index, int length) throws IOException {
-        return new FingerInfo(sbh, inputStream);
-      }
-    });
+    override fun getDecoder(): ISO781611Decoder<BiometricDataBlock?> {
+        return DECODER
+    }
 
-    /* 7F2E */
-    decoders.put(ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG, new BiometricDataBlockDecoder<BiometricDataBlock>() {
-      public BiometricDataBlock decode(InputStream inputStream, StandardBiometricHeader sbh, int index, int length) throws IOException {
-        if (sbh != null && sbh.hasFormatType(StandardBiometricHeader.ISO_19794_FINGER_IMAGE_FORMAT_TYPE_VALUE)) {
-          return new FingerInfo(sbh, inputStream);
+    override fun getEncoder(): ISO781611Encoder<BiometricDataBlock?> {
+        if (encodingType == null) {
+            return ISO_19794_ENCODER
         }
-        if (sbh != null && !sbh.hasFormatType(StandardBiometricHeader.ISO_39794_FINGER_IMAGE_FORMAT_TYPE_VALUE)) {
-          LOGGER.warning("Unexpected format type in standard biometric header " + sbh + ", assuming ISO-39794 encoding");
+        when (encodingType) {
+            BiometricEncodingType.ISO_19794 -> return ISO_19794_ENCODER
+            BiometricEncodingType.ISO_39794 -> return ISO_39794_ENCODER
+            else -> return ISO_19794_ENCODER
         }
-        TLVInputStream tlvInputStream = inputStream instanceof TLVInputStream ? (TLVInputStream)inputStream : new TLVInputStream(inputStream);
-        int tag = tlvInputStream.readTag(); // 0xA1
-        if (tag != ISO781611.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG) {
-          /* ISO/IEC 39794-5 Application Profile for eMRTDs Version – 1.00: Table 2: Data Structure under DO7F2E. */
-          LOGGER.warning("Expected tag A1, found " + Integer.toHexString(tag));
+    }
+
+    /**
+     * Returns a textual representation of this file.
+     * 
+     * @return a textual representation of this file
+     */
+    override fun toString(): String {
+        return "DG3File [" + super.toString() + "]"
+    }
+
+    @get:Deprecated("Use {@link #getSubRecords()} and check with {@code instanceof} instead")
+    val fingerInfos: MutableList<FingerInfo?>?
+        /**
+         * Returns the finger infos embedded in this file.
+         * 
+         * @return finger infos
+         * 
+         */
+        get() = toFingerInfos(getSubRecords())
+
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + (if (shouldAddRandomDataIfEmpty) 1231 else 1237)
+        return result
+    }
+
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
         }
-        tlvInputStream.readLength();
-        return new FingerImageDataBlock(sbh, inputStream);
-      }
-    });
+        if (!super.equals(obj)) {
+            return false
+        }
+        if (javaClass != obj!!.javaClass) {
+            return false
+        }
 
-    return decoders;
-  }
-
-  private static final ISO781611Encoder<BiometricDataBlock> ISO_19794_ENCODER = new ISO781611Encoder<BiometricDataBlock>(new BiometricDataBlockEncoder<BiometricDataBlock>() {
-
-    @Override
-    public void encode(BiometricDataBlock info, OutputStream outputStream) throws IOException {
-      if (info instanceof FingerInfo) {
-        ((FingerInfo)info).writeObject(outputStream);
-      }
+        val other = obj as DG3File
+        return shouldAddRandomDataIfEmpty == other.shouldAddRandomDataIfEmpty
     }
 
-    @Override
-    public BiometricEncodingType getEncodingType() {
-      return BiometricEncodingType.ISO_19794;
+    companion object {
+        private val serialVersionUID = -1037522331623814528L
+
+        private val DECODER: ISO781611Decoder<BiometricDataBlock?> =
+            ISO781611Decoder<BiometricDataBlock?>(
+                decoderMap
+            )
+
+        private val decoderMap: MutableMap<Int?, BiometricDataBlockDecoder<BiometricDataBlock?>?>
+            get() {
+                val decoders: MutableMap<Int?, BiometricDataBlockDecoder<BiometricDataBlock?>?> =
+                    HashMap<Int?, BiometricDataBlockDecoder<BiometricDataBlock?>?>()
+
+                /* 5F2E */
+                decoders.put(
+                    ISO781611.BIOMETRIC_DATA_BLOCK_TAG,
+                    object : BiometricDataBlockDecoder<BiometricDataBlock> {
+                        @Throws(IOException::class)
+                        override fun decode(
+                            inputStream: InputStream?,
+                            sbh: StandardBiometricHeader?,
+                            index: Int,
+                            length: Int
+                        ): BiometricDataBlock {
+                            return FingerInfo(sbh, inputStream)
+                        }
+                    })
+
+                /* 7F2E */
+                decoders.put(
+                    ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG,
+                    object : BiometricDataBlockDecoder<BiometricDataBlock> {
+                        @Throws(IOException::class)
+                        override fun decode(
+                            inputStream: InputStream?,
+                            sbh: StandardBiometricHeader?,
+                            index: Int,
+                            length: Int
+                        ): BiometricDataBlock {
+                            if (sbh != null && sbh.hasFormatType(StandardBiometricHeader.Companion.ISO_19794_FINGER_IMAGE_FORMAT_TYPE_VALUE)) {
+                                return FingerInfo(sbh, inputStream)
+                            }
+                            if (sbh != null && !sbh.hasFormatType(StandardBiometricHeader.Companion.ISO_39794_FINGER_IMAGE_FORMAT_TYPE_VALUE)) {
+                                CBEFFDataGroup.Companion.LOGGER.warning("Unexpected format type in standard biometric header " + sbh + ", assuming ISO-39794 encoding")
+                            }
+                            val tlvInputStream =
+                                if (inputStream is TLVInputStream) inputStream else TLVInputStream(
+                                    inputStream
+                                )
+                            val tag = tlvInputStream.readTag() // 0xA1
+                            if (tag != ISO781611.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG) {
+                                /* ISO/IEC 39794-5 Application Profile for eMRTDs Version – 1.00: Table 2: Data Structure under DO7F2E. */
+                                CBEFFDataGroup.Companion.LOGGER.warning(
+                                    "Expected tag A1, found " + Integer.toHexString(
+                                        tag
+                                    )
+                                )
+                            }
+                            tlvInputStream.readLength()
+                            return FingerImageDataBlock(sbh, inputStream)
+                        }
+                    })
+
+                return decoders
+            }
+
+        private val ISO_19794_ENCODER = ISO781611Encoder<BiometricDataBlock?>(object :
+            BiometricDataBlockEncoder<BiometricDataBlock> {
+            @Throws(IOException::class)
+            override fun encode(info: BiometricDataBlock?, outputStream: OutputStream?) {
+                if (info is FingerInfo) {
+                    info.writeObject(outputStream)
+                }
+            }
+
+            val encodingType: BiometricEncodingType
+                get() = BiometricEncodingType.ISO_19794
+        })
+
+        private val ISO_39794_ENCODER = ISO781611Encoder<BiometricDataBlock?>(object :
+            BiometricDataBlockEncoder<BiometricDataBlock> {
+            @Throws(IOException::class)
+            override fun encode(info: BiometricDataBlock?, outputStream: OutputStream?) {
+                if (info is FingerImageDataBlock) {
+                    val tlvOutputStream =
+                        if (outputStream is TLVOutputStream) outputStream else TLVOutputStream(
+                            outputStream
+                        )
+                    tlvOutputStream.writeTag(0xA1)
+                    tlvOutputStream.writeValue(info.encoded)
+                }
+            }
+
+            val encodingType: BiometricEncodingType
+                get() = BiometricEncodingType.ISO_39794
+        })
+
+        fun createISO19794DG3File(fingerInfos: MutableList<FingerInfo?>?): DG3File {
+            return DG3File(BiometricEncodingType.ISO_19794, fingerInfos, false)
+        }
+
+        fun createISO39794DG3File(fingerImageDataBlocks: MutableList<FingerImageDataBlock?>?): DG3File {
+            return DG3File(BiometricEncodingType.ISO_39794, fingerImageDataBlocks, false)
+        }
+
+        private fun toFingerInfos(records: MutableList<BiometricDataBlock?>?): MutableList<FingerInfo?>? {
+            if (records == null) {
+                return null
+            }
+
+            val FingerInfos: MutableList<FingerInfo?> = ArrayList<FingerInfo?>(records.size)
+            for (record in records) {
+                if (record is FingerInfo) {
+                    FingerInfos.add(record)
+                }
+            }
+            return FingerInfos
+        }
     }
-  });
-
-  private static final ISO781611Encoder<BiometricDataBlock> ISO_39794_ENCODER = new ISO781611Encoder<BiometricDataBlock>(new BiometricDataBlockEncoder<BiometricDataBlock>() {
-
-    @Override
-    public void encode(BiometricDataBlock info, OutputStream outputStream) throws IOException {
-      if (info instanceof FingerImageDataBlock) {
-        TLVOutputStream tlvOutputStream = outputStream instanceof TLVOutputStream ? (TLVOutputStream)outputStream : new TLVOutputStream(outputStream);
-        tlvOutputStream.writeTag(0xA1);
-        tlvOutputStream.writeValue(((FingerImageDataBlock)info).getEncoded());
-      }
-    }
-
-    @Override
-    public BiometricEncodingType getEncodingType() {
-      return BiometricEncodingType.ISO_39794;
-    }
-  });
-
-  /**
-   * Creates a new file with the specified records.
-   *
-   * @param fingerInfos records
-   *
-   * @deprecated Use the corresponding factory method for ISO19794 instead
-   */
-  @Deprecated
-  public DG3File(List<FingerInfo> fingerInfos) {
-    this(fingerInfos, true);
-  }
-
-  /**
-   * Creates a new file with the specified records.
-   *
-   * @param fingerInfos records
-   * @param shouldAddRandomDataIfEmpty whether to add random data when there are no records to encode
-   *
-   * @deprecated Use the corresponding factory method for ISO19794 instead
-   */
-  @Deprecated
-  public DG3File(List<FingerInfo> fingerInfos, boolean shouldAddRandomDataIfEmpty) {
-    this(BiometricEncodingType.ISO_19794, fingerInfos, shouldAddRandomDataIfEmpty);
-  }
-
-  private DG3File(BiometricEncodingType encodingType, List<? extends BiometricDataBlock> dataBlocks, boolean shouldAddRandomDataIfEmpty) {
-    super(EF_DG3_TAG, encodingType, dataBlocks, shouldAddRandomDataIfEmpty);
-  }
-
-  /**
-   * Creates a new file based on an input stream.
-   *
-   * @param inputStream an input stream
-   *
-   * @throws IOException on error reading from input stream
-   */
-  public DG3File(InputStream inputStream) throws IOException {
-    super(EF_DG3_TAG, inputStream, false);
-  }
-
-  public static DG3File createISO19794DG3File(List<FingerInfo> fingerInfos) {
-    return new DG3File(BiometricEncodingType.ISO_19794, fingerInfos, false);
-  }
-
-  public static DG3File createISO39794DG3File(List<FingerImageDataBlock> fingerImageDataBlocks) {
-    return new DG3File(BiometricEncodingType.ISO_39794, fingerImageDataBlocks, false);
-  }
-
-  @Override
-  public ISO781611Decoder<BiometricDataBlock> getDecoder() {
-    return DECODER;
-  }
-
-  @Override
-  public ISO781611Encoder<BiometricDataBlock> getEncoder() {
-    if (encodingType == null) {
-      return ISO_19794_ENCODER;
-    }
-    switch (encodingType) {
-    case ISO_19794:
-      return ISO_19794_ENCODER;
-    case ISO_39794:
-      return ISO_39794_ENCODER;
-    default:
-      return ISO_19794_ENCODER;
-    }
-  }
-
-  /**
-   * Returns a textual representation of this file.
-   *
-   * @return a textual representation of this file
-   */
-  @Override
-  public String toString() {
-    return "DG3File [" + super.toString() + "]";
-  }
-
-  /**
-   * Returns the finger infos embedded in this file.
-   *
-   * @return finger infos
-   *
-   * @deprecated Use {@link #getSubRecords()} and check with {@code instanceof} instead
-   */
-  @Deprecated
-  public List<FingerInfo> getFingerInfos() {
-    return toFingerInfos(getSubRecords());
-  }
-
-  @Override
-  public int hashCode() {
-    int result = super.hashCode();
-    result = 31 * result + (shouldAddRandomDataIfEmpty ? 1231 : 1237);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!super.equals(obj)) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-
-    DG3File other = (DG3File)obj;
-    return shouldAddRandomDataIfEmpty == other.shouldAddRandomDataIfEmpty;
-  }
-
-  private static List<FingerInfo> toFingerInfos(List<BiometricDataBlock> records) {
-    if (records == null) {
-      return null;
-    }
-
-    List<FingerInfo> FingerInfos = new ArrayList<FingerInfo>(records.size());
-    for (BiometricDataBlock record: records) {
-      if (record instanceof FingerInfo) {
-        FingerInfos.add((FingerInfo)record);
-      }
-    }
-    return FingerInfos;
-  }
 }

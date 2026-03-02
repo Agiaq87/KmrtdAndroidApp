@@ -40,9 +40,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
 import kmrtd.lds.iso39794.fingerimage.FingerImageCaptureDeviceTechnologyIdCode
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class FingerImageCaptureDeviceBlock(
     /** Identification of the model capture device.  */
@@ -204,7 +204,7 @@ data class FingerImageCaptureDeviceBlock(
          *   ...
          * }
          */
-        fun from(asn1Encodable: ASN1Encodable): FingerImageCaptureDeviceBlock {
+        fun from(asn1Encodable: ASN1Encodable?): FingerImageCaptureDeviceBlock {
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
 
             if (
