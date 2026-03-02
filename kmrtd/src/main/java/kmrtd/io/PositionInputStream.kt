@@ -19,97 +19,96 @@
  *
  * $Id: PositionInputStream.java 1817 2019-08-02 12:09:17Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.io
 
-package kmrtd.io;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.logging.Logger;
+import java.io.IOException
+import java.io.InputStream
+import java.util.logging.Logger
 
 /**
  * A stream that decorates an existing stream and keeps track of the current position.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1817 $
  */
-public class PositionInputStream extends InputStream {
+class PositionInputStream(private val carrier: InputStream) : InputStream() {
+    /**
+     * Returns the position within the input stream.
+     * 
+     * @return the position within the input stream
+     */
+    var position: Long = 0L
+        private set
+    private var markedPosition: Long
 
-  private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-
-  private static final long MARK_NOT_SET = -1L;
-
-  private InputStream carrier;
-
-  private long position;
-  private long markedPosition;
-
-  /**
-   * Constructs a position input stream by decorating an existing input stream.
-   *
-   * @param carrier the existing input stream
-   */
-  public PositionInputStream(InputStream carrier) {
-    this.carrier = carrier;
-    position = 0L;
-    markedPosition = MARK_NOT_SET;
-  }
-
-  @Override
-  public int read() throws IOException {
-    int b = carrier.read();
-    if (b >= 0) {
-      position++;
-    }
-    return b;
-  }
-
-  @Override
-  public int read(byte[] dest) throws IOException {
-    return read(dest, 0, dest.length);
-  }
-
-  @Override
-  public int read(byte[] dest, int offset, int length) throws IOException {
-    int bytesRead = carrier.read(dest, offset, length);
-    position += bytesRead;
-    return bytesRead;
-  }
-
-  @Override
-  public long skip(long n) throws IOException {
-    long skippedBytes = carrier.skip(n);
-    if (skippedBytes <= 0) {
-      LOGGER.warning("Carrier (" + carrier.getClass().getCanonicalName() + ")'s skip(" + n + ") only skipped " + skippedBytes + ", position = " + position);
+    /**
+     * Constructs a position input stream by decorating an existing input stream.
+     * 
+     * @param carrier the existing input stream
+     */
+    init {
+        markedPosition = MARK_NOT_SET
     }
 
-    position += skippedBytes;
-    return skippedBytes;
-  }
+    @Throws(IOException::class)
+    override fun read(): Int {
+        val b = carrier.read()
+        if (b >= 0) {
+            position++
+        }
+        return b
+    }
 
-  @Override
-  public synchronized void mark(int readLimit) {
-    carrier.mark(readLimit);
-    markedPosition = position;
-  }
+    @Throws(IOException::class)
+    override fun read(dest: ByteArray): Int {
+        return read(dest, 0, dest.size)
+    }
 
-  @Override
-  public synchronized void reset() throws IOException {
-    carrier.reset();
-    position = markedPosition;
-  }
+    @Throws(IOException::class)
+    override fun read(dest: ByteArray, offset: Int, length: Int): Int {
+        val bytesRead = carrier.read(dest, offset, length)
+        position += bytesRead.toLong()
+        return bytesRead
+    }
 
-  @Override
-  public boolean markSupported() {
-    return carrier.markSupported();
-  }
+    @Throws(IOException::class)
+    override fun skip(n: Long): Long {
+        val skippedBytes = carrier.skip(n)
+        if (skippedBytes <= 0) {
+            LOGGER.warning("Carrier (" + carrier.javaClass.getCanonicalName() + ")'s skip(" + n + ") only skipped " + skippedBytes + ", position = " + position)
+        }
 
-  /**
-   * Returns the position within the input stream.
-   *
-   * @return the position within the input stream
-   */
-  public long getPosition() {
-    return position;
-  }
+        position += skippedBytes
+        return skippedBytes
+    }
+
+    @Synchronized
+    override fun mark(readLimit: Int) {
+        carrier.mark(readLimit)
+        markedPosition = position
+    }
+
+    @Synchronized
+    @Throws(IOException::class)
+    override fun reset() {
+        carrier.reset()
+        position = markedPosition
+    }
+
+    override fun markSupported(): Boolean {
+        return carrier.markSupported()
+    }
+
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+
+        private val MARK_NOT_SET = -1L
+    }
 }

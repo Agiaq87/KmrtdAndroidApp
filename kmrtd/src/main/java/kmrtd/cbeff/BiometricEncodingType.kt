@@ -19,66 +19,70 @@
  *
  * $Id: BiometricEncodingType.java 1897 2025-05-27 12:34:36Z martijno $
  */
-
-package kmrtd.cbeff;
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.cbeff
 
 /**
  * Specifies what encoding (ISO/IEC-19794 or ISO/IEC-39794)
  * was used for biometric data blocks.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1897 $
  */
-public enum BiometricEncodingType {
+enum class BiometricEncodingType {
+    /** Unknown encoding.  */
+    UNKNOWN,
 
-  /** Unknown encoding. */
-  UNKNOWN,
+    /** Uses ISO-19794 records BDB.  */
+    ISO_19794,
 
-  /** Uses ISO-19794 records BDB. */
-  ISO_19794,
+    /** Used ISO-39794 records BDB.  */
+    ISO_39794;
 
-  /** Used ISO-39794 records BDB. */
-  ISO_39794;
+    companion object {
+        /**
+         * Maps tag to encoding type.
+         * 
+         * @param bioDataBlockTag either `0x5F2E` or `0x7F2E`
+         * 
+         * @return the corresponding type
+         */
+        @JvmStatic
+        fun fromBDBTag(bioDataBlockTag: Int): BiometricEncodingType {
+            return when (bioDataBlockTag) {
+                ISO781611.BIOMETRIC_DATA_BLOCK_TAG ->  /* 5F2E */
+                    BiometricEncodingType.ISO_19794
 
-  /**
-   * Maps tag to encoding type.
-   *
-   * @param bioDataBlockTag either {@code 0x5F2E} or {@code 0x7F2E}
-   *
-   * @return the corresponding type
-   */
-  public static BiometricEncodingType fromBDBTag(int bioDataBlockTag) {
-    switch (bioDataBlockTag) {
-    case ISO781611.BIOMETRIC_DATA_BLOCK_TAG:
-      /* 5F2E */
-      return ISO_19794;
-    case ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG:
-      /* 7F2E */
-      return ISO_39794;
-    default:
-      return UNKNOWN;
+                ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG ->  /* 7F2E */
+                    BiometricEncodingType.ISO_39794
+
+                else -> BiometricEncodingType.UNKNOWN
+            }
+        }
+
+        /**
+         * Maps encoding type to tag.
+         * Defaults to ISO-19794 (`0x5F2E`).
+         * 
+         * @param encodingType one of the enum values
+         * 
+         * @return either `0x5F2E` or `0x7F2E`
+         */
+        @JvmStatic
+        fun toBDBTag(encodingType: BiometricEncodingType): Int {
+            return when (encodingType) {
+                BiometricEncodingType.ISO_39794 ->  /* 7F2E */
+                    ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG
+
+                else ->  /* 5F2E */
+                    ISO781611.BIOMETRIC_DATA_BLOCK_TAG
+            }
+        }
     }
-  }
-
-  /**
-   * Maps encoding type to tag.
-   * Defaults to ISO-19794 ({@code 0x5F2E}).
-   *
-   * @param encodingType one of the enum values
-   *
-   * @return either {@code 0x5F2E} or {@code 0x7F2E}
-   */
-  public static int toBDBTag(BiometricEncodingType encodingType) {
-    switch (encodingType) {
-    case ISO_39794:
-      /* 7F2E */
-      return ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG;
-    case ISO_19794:
-      // Fall through...
-    default:
-      /* 5F2E */
-      return ISO781611.BIOMETRIC_DATA_BLOCK_TAG;
-    }
-  }
 }
