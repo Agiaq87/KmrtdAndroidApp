@@ -35,6 +35,14 @@
 
 package kmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1VisibleString;
+import org.bouncycastle.asn1.DEROctetString;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERVisibleString;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -45,84 +53,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1VisibleString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERVisibleString;
-
 import kmrtd.ASN1Util;
 import kmrtd.cbeff.CBEFFInfo;
 import kmrtd.lds.ImageInfo;
 import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode;
+import kmrtd.lds.iso39794.fingerimage.ImageDataFormatCode;
+import kmrtd.lds.iso39794.fingerimage.ImpressionCode;
 
 public class FingerImageRepresentationBlock extends Block implements ImageInfo {
 
   private static final long serialVersionUID = -9136319709147388829L;
 
-  public static enum ImpressionCode implements EncodableEnum<ImpressionCode> {
-    PLAIN_CONTACT(0),
-    ROLLED_CONTACT(1),
-    LATENT_IMAGE(4),
-    SWIPE_CONTACT(8),
-    STATIONARY_SUBJECT_CONTACTLESS_PLAIN(24),
-    STATIONARY_SUBJECT_CONTACTLESS_ROLLED(25),
-    MOVING_SUBJECT_CONTACTLESS_PLAIN(41),
-    MOVING_SUBJECT_CONTACTLESS_ROLLED(42),
-    OTHER_IMPRESSION(28),
-    UNKNOWN_IMPRESSION(29);
+  private final FingerImagePositionCode position;
 
-    private int code;
+  private final ImpressionCode impression;
 
-    private ImpressionCode(int code) {
-      this.code = code;
-    }
-
-    @Override
-    public int getCode() {
-      return code;
-    }
-
-    public static ImpressionCode fromCode(int code) {
-      return EncodableEnum.fromCode(code, ImpressionCode.class);
-    }
-  }
-
-  public static enum ImageDataFormatCode implements EncodableEnum<ImageDataFormatCode> {
-    PGM(0, "image/pgm"),
-    WSQ(1, "image/x-wsq"),
-    JPEG2000_LOSSY(2, "image/jp2"),
-    JPEG2000_LOSSLESS(3, "image/jp2"),
-    PNG(4, "image/png");
-
-    private int code;
-    private String mimeType;
-
-    private ImageDataFormatCode(int code, String mimeType) {
-      this.code = code;
-    }
-
-    @Override
-    public int getCode() {
-      return code;
-    }
-
-    public String getMimeType() {
-      return mimeType;
-    }
-
-    public static ImageDataFormatCode fromCode(int code) {
-      return EncodableEnum.fromCode(code, ImageDataFormatCode.class);
-    }
-  }
-
-  private FingerImagePositionCode position;
-
-  private ImpressionCode impression;
-
-  private ImageDataFormatCode imageDataFormat;
+  private final ImageDataFormatCode imageDataFormat;
 
   private DateTimeBlock captureDateTimeBlock;
 
@@ -147,7 +93,7 @@ public class FingerImageRepresentationBlock extends Block implements ImageInfo {
 
   private PADDataBlock padDataBlock;
 
-  private byte[] imageData;
+  private final byte[] imageData;
 
   private List<String> commentBlocks;
 
@@ -211,7 +157,7 @@ public class FingerImageRepresentationBlock extends Block implements ImageInfo {
     imageDataFormat = ImageDataFormatCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(2)));
     imageData = (ASN1OctetString.getInstance(taggedObjects.get(3))).getOctets();
     if (taggedObjects.containsKey(4)) {
-      captureDateTimeBlock = new DateTimeBlock(taggedObjects.get(4));
+      captureDateTimeBlock = DateTimeBlock.from(taggedObjects.get(4));
     }
     if (taggedObjects.containsKey(5)) {
       captureDeviceBlock = new FingerImageCaptureDeviceBlock(taggedObjects.get(5));
@@ -241,7 +187,7 @@ public class FingerImageRepresentationBlock extends Block implements ImageInfo {
       annotationBlocks = FingerImageAnnotationBlock.decodeFingerImageAnnotationBlocks(taggedObjects.get(13));
     }
     if (taggedObjects.containsKey(14)) {
-      padDataBlock = new PADDataBlock(taggedObjects.get(14));
+      padDataBlock = PADDataBlock.from(taggedObjects.get(14));
     }
     if (taggedObjects.containsKey(15)) {
       commentBlocks = decodeCommentBlocks(taggedObjects.get(15));
@@ -432,10 +378,122 @@ public class FingerImageRepresentationBlock extends Block implements ImageInfo {
     return toBiometricSubtype(position);
   }
 
+  private static List<String> decodeCommentBlocks(ASN1Encodable asn1Encodable) {
+    if (asn1Encodable instanceof ASN1Sequence) {
+      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
+      List<String> blocks = new ArrayList<String>(blockASN1Objects.size());
+      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
+        blocks.add(ASN1VisibleString.getInstance(blockASN1Object).getString());
+      }
+      return blocks;
+    } else if (asn1Encodable instanceof ASN1VisibleString) {
+      return Collections.singletonList(ASN1VisibleString.getInstance(asn1Encodable).getString());
+    }
+
+    //LOGGER.warning("Cannot decode comment blocks!");
+    return null;
+  }
+
+  static List<FingerImageRepresentationBlock> decodeRepresentationBlocks(ASN1Encodable asn1Encodable) {
+    List<FingerImageRepresentationBlock> blocks = new ArrayList<FingerImageRepresentationBlock>();
+    if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
+      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
+        blocks.add(new FingerImageRepresentationBlock(blockASN1Object));
+      }
+    } else {
+      blocks.add(new FingerImageRepresentationBlock(asn1Encodable));
+    }
+
+    return blocks;
+  }
+
+  /* PRIVATE */
+
+  /**
+   * Converts from 37984-4 position coding to 7816-11 (BHT) coding.
+   *
+   * @param position an ISO 39794-4 finger position code
+   *
+   * @return a ISO7816-11 biometric subtype mask combination
+   */
+  private static int toBiometricSubtype(FingerImagePositionCode position) {
+    if (position ==  null) {
+      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+    }
+    return switch (position) {
+      case UNKNOWN_POSITION -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+      case RIGHT_THUMB_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
+      case RIGHT_INDEX_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
+      case RIGHT_MIDDLE_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
+      case RIGHT_RING_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
+      case RIGHT_LITTLE_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
+      case LEFT_THUMB_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
+      case LEFT_INDEX_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
+      case LEFT_MIDDLE_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
+      case LEFT_RING_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
+      case LEFT_LITTLE_FINGER ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
+      case RIGHT_FOUR_FINGERS ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+      case LEFT_FOUR_FINGERS ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      case BOTH_THUMB_FINGERS ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
+      case UNKNOWN_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+      case RIGHT_FULL_PALM ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+      case RIGHT_WRITERS_PALM -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+      case LEFT_FULL_PALM ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      case LEFT_WRITERS_PALM ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      case RIGHT_LOWER_PALM ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+      case RIGHT_UPPER_PALM ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+      case LEFT_LOWER_PALM ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      case LEFT_UPPER_PALM ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      case RIGHT_INTERDIGITAL ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+      case RIGHT_THENAR ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+      case RIGHT_HYPOTHENAR ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+      case LEFT_INTERDIGITAL ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      case LEFT_THENAR -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      case LEFT_HYPOTHENAR ->
+              CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+      // Fall through...
+      default -> CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+    };
+  }
+
+  private static ASN1Encodable encodeCommentBlocks(List<String> comments) {
+    ASN1Encodable[] asn1Objects = new ASN1Encodable[comments.size()];
+    int i = 0;
+    for (String comment: comments) {
+      asn1Objects[i++] = new DERVisibleString(comment);
+    }
+    return new DERSequence(asn1Objects);
+  }
+
   @Override
   ASN1Encodable getASN1Object() {
     Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    taggedObjects.put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(position.code));
+    taggedObjects.put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(position.getCode()));
     taggedObjects.put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(impression.getCode()));
     taggedObjects.put(2, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(imageDataFormat.getCode()));
     taggedObjects.put(3, new DEROctetString(imageData));
@@ -479,123 +537,5 @@ public class FingerImageRepresentationBlock extends Block implements ImageInfo {
       taggedObjects.put(16, ISO39794Util.encodeBlocks(vendorSpecificDataBlocks));
     }
     return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
-
-  static List<FingerImageRepresentationBlock> decodeRepresentationBlocks(ASN1Encodable asn1Encodable) {
-    List<FingerImageRepresentationBlock> blocks = new ArrayList<FingerImageRepresentationBlock>();
-    if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
-      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
-        blocks.add(new FingerImageRepresentationBlock(blockASN1Object));
-      }
-    } else {
-      blocks.add(new FingerImageRepresentationBlock(asn1Encodable));
-    }
-
-    return blocks;
-  }
-
-  /* PRIVATE */
-
-  private static List<String> decodeCommentBlocks(ASN1Encodable asn1Encodable) {
-    if (asn1Encodable instanceof ASN1Sequence) {
-      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
-      List<String> blocks = new ArrayList<String>(blockASN1Objects.size());
-      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
-        blocks.add(ASN1VisibleString.getInstance(blockASN1Object).getString());
-      }
-      return blocks;
-    } else if (asn1Encodable instanceof ASN1VisibleString) {
-      return Collections.singletonList(ASN1VisibleString.getInstance(asn1Encodable).getString());
-    }
-
-    LOGGER.warning("Cannot decode comment blocks!");
-    return null;
-  }
-
-  private static ASN1Encodable encodeCommentBlocks(List<String> comments) {
-    ASN1Encodable[] asn1Objects = new ASN1Encodable[comments.size()];
-    int i = 0;
-    for (String comment: comments) {
-      asn1Objects[i++] = new DERVisibleString(comment);
-    }
-    return new DERSequence(asn1Objects);
-  }
-
-  /**
-   * Converts from 37984-4 position coding to 7816-11 (BHT) coding.
-   *
-   * @param position an ISO 39794-4 finger position code
-   *
-   * @return a ISO7816-11 biometric subtype mask combination
-   */
-  private static int toBiometricSubtype(FingerImagePositionCode position) {
-    if (position ==  null) {
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    }
-    switch (position) {
-    case UNKNOWN_POSITION:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    case RIGHT_THUMB_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
-    case RIGHT_INDEX_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
-    case RIGHT_MIDDLE_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
-    case RIGHT_RING_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
-    case RIGHT_LITTLE_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
-    case LEFT_THUMB_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
-    case LEFT_INDEX_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
-    case LEFT_MIDDLE_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
-    case LEFT_RING_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
-    case LEFT_LITTLE_FINGER:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
-    case RIGHT_FOUR_FINGERS:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-    case LEFT_FOUR_FINGERS:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case BOTH_THUMB_FINGERS:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
-    case UNKNOWN_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    case RIGHT_FULL_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-    case RIGHT_WRITERS_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    case LEFT_FULL_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case LEFT_WRITERS_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case RIGHT_LOWER_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-    case RIGHT_UPPER_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-    case LEFT_LOWER_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case LEFT_UPPER_PALM:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case RIGHT_INTERDIGITAL:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-    case RIGHT_THENAR:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-    case RIGHT_HYPOTHENAR:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
-    case LEFT_INTERDIGITAL:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case LEFT_THENAR:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case LEFT_HYPOTHENAR:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
-    case OTHER_POSITION:
-      // Fall through...
-    default:
-      return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
-    }
   }
 }

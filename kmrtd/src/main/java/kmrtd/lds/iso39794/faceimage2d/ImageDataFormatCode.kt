@@ -12,7 +12,7 @@ enum class ImageDataFormatCode(override val code: Int, val mimeType: String) :
     companion object {
         @JvmStatic
         fun fromCode(code: Int): ImageDataFormatCode? {
-            return EncodableEnum.Companion.fromCode<ImageDataFormatCode>(
+            return EncodableEnum.fromCode(
                 code,
                 ImageDataFormatCode::class.java
             )

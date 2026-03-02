@@ -32,128 +32,146 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.faceimagecapturedevice2d.CaptureDeviceTechnologyId2DCode
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1Sequence
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+data class FaceImageCaptureDevice2DBlock(
+    val captureDeviceSpectral2DBlock: FaceImageCaptureDeviceSpectral2DBlock?,
+    val captureDeviceTechnologyId2D: CaptureDeviceTechnologyId2DCode?
+) : Block() {
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Sequence;
+    /*constructor(
+        captureDeviceSpectral2DBlock: FaceImageCaptureDeviceSpectral2DBlock?,
+        captureDeviceTechnologyId2D: CaptureDeviceTechnologyId2DCode?
+    ) {
+        this.captureDeviceSpectral2DBlock = captureDeviceSpectral2DBlock
+        this.captureDeviceTechnologyId2D = captureDeviceTechnologyId2D
+    }*/
 
-import kmrtd.ASN1Util;
+    //  CaptureDevice2DBlock ::= SEQUENCE {
+    //    captureDeviceSpectral2DBlock [0] CaptureDeviceSpectral2DBlock OPTIONAL,
+    //    captureDeviceTechnologyId2D [1] CaptureDeviceTechnologyId2D OPTIONAL,
+    //    ...
+    //  }
+    /*internal constructor(asn1Encodable: ASN1Encodable) {
+        requireNotNull(asn1Encodable) { "Cannot decode null!" }
 
-public class FaceImageCaptureDevice2DBlock extends Block {
+        if (asn1Encodable is ASN1Sequence) {
+            val taggedObjects =
+                ASN1Util.decodeTaggedObjects(ASN1Sequence.getInstance(asn1Encodable))
+            if (taggedObjects.containsKey(0)) {
+                captureDeviceSpectral2DBlock =
+                    FaceImageCaptureDeviceSpectral2DBlock.from(taggedObjects[0])
+            }
 
-  private static final long serialVersionUID = -8445632002285427924L;
+            if (taggedObjects.containsKey(1)) {
+                captureDeviceTechnologyId2D = fromCode(
+                    ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(
+                        taggedObjects[1]
+                    )
+                )
+            }
+        }
+    }*/
 
-  public static enum CaptureDeviceTechnologyId2DCode implements EncodableEnum<CaptureDeviceTechnologyId2DCode> {
-    UNKNOWN(0),
-    STATIC_PHOTOGRAPH_FROM_UNKNOWN_SOURCE(1),
-    STATIC_PHOTOGRAPH_FROM_DIGITAL_STILL_IMAGE_CAMERA(2),
-    STATIC_PHOTOGRAPH_FROM_SCANNER(3),
-    VIDEO_FRAME_FROM_UNKNOWN_SOURCE(4),
-    VIDEO_FRAME_FROM_ANALOGUE_VIDEO_CAMERA(5),
-    VIDEO_FRAME_FROM_DIGITAL_VIDEO_CAMERA(6);
-
-    private int code;
-
-    private CaptureDeviceTechnologyId2DCode(int code) {
-      this.code = code;
+    /*public override fun hashCode(): Int {
+        return Objects.hash(captureDeviceSpectral2DBlock, captureDeviceTechnologyId2D)
     }
 
-    public int getCode() {
-      return code;
+    public override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
+
+        val other = obj as FaceImageCaptureDevice2DBlock
+        return captureDeviceSpectral2DBlock == other.captureDeviceSpectral2DBlock
+                && captureDeviceTechnologyId2D == other.captureDeviceTechnologyId2D
     }
 
-    public static CaptureDeviceTechnologyId2DCode fromCode(int code) {
-      return EncodableEnum.fromCode(code, CaptureDeviceTechnologyId2DCode.class);
+    override fun toString(): String {
+        return ("FaceImageCaptureDevice2DBlock ["
+                + "captureDeviceSpectral2DBlock: " + captureDeviceSpectral2DBlock
+                + ", captureDeviceTechnologyId2D: " + captureDeviceTechnologyId2D
+                + "]")
+    }*/
+
+    override val aSN1Object: ASN1Encodable
+        get() = ASN1Util.encodeTaggedObjects(
+            buildMap {
+                captureDeviceSpectral2DBlock?.let {
+                    put(0, it.aSN1Object)
+                }
+                captureDeviceTechnologyId2D?.let {
+                    put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+                }
+            }
+        )
+    /* PACKAGE */
+    /*get() {
+        val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+            HashMap<Int?, ASN1Encodable?>()
+        if (captureDeviceSpectral2DBlock != null) {
+            taggedObjects[0] = captureDeviceSpectral2DBlock.aSN1Object
+        }
+        if (captureDeviceTechnologyId2D != null) {
+            taggedObjects[1] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(
+                captureDeviceTechnologyId2D.code
+            )
+        }
+        return ASN1Util.encodeTaggedObjects(taggedObjects)
+    }*/
+
+    companion object {
+        private const val serialVersionUID = -8445632002285427924L
+
+        /**
+         * Factory method
+         *
+         * CaptureDevice2DBlock ::= SEQUENCE {
+         *   captureDeviceSpectral2DBlock [0] CaptureDeviceSpectral2DBlock OPTIONAL,
+         *   captureDeviceTechnologyId2D [1] CaptureDeviceTechnologyId2D OPTIONAL,
+         *   ...
+         * }
+         */
+        @JvmStatic
+        fun from(asn1Encodable: ASN1Encodable): FaceImageCaptureDevice2DBlock {
+            if (asn1Encodable is ASN1Sequence) {
+
+                val taggedObjects =
+                    ASN1Util.decodeTaggedObjects(ASN1Sequence.getInstance(asn1Encodable))
+
+                return FaceImageCaptureDevice2DBlock(
+                    captureDeviceSpectral2DBlock = if (taggedObjects.containsKey(0)) FaceImageCaptureDeviceSpectral2DBlock.from(
+                        taggedObjects[0]
+                    ) else null,
+                    captureDeviceTechnologyId2D = if (taggedObjects.containsKey(1)) CaptureDeviceTechnologyId2DCode.fromCode(
+                        ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(
+                            taggedObjects[1]
+                        )
+                    ) else null
+                )
+            }
+
+            return FaceImageCaptureDevice2DBlock(
+                captureDeviceSpectral2DBlock = null,
+                captureDeviceTechnologyId2D = null
+            )
+        }
     }
-  }
-
-  private FaceImageCaptureDeviceSpectral2DBlock captureDeviceSpectral2DBlock;
-
-  private CaptureDeviceTechnologyId2DCode captureDeviceTechnologyId2D;
-
-  public FaceImageCaptureDevice2DBlock(FaceImageCaptureDeviceSpectral2DBlock captureDeviceSpectral2DBlock,
-      CaptureDeviceTechnologyId2DCode captureDeviceTechnologyId2D) {
-    this.captureDeviceSpectral2DBlock = captureDeviceSpectral2DBlock;
-    this.captureDeviceTechnologyId2D = captureDeviceTechnologyId2D;
-  }
-
-  //  CaptureDevice2DBlock ::= SEQUENCE {
-  //    captureDeviceSpectral2DBlock [0] CaptureDeviceSpectral2DBlock OPTIONAL,
-  //    captureDeviceTechnologyId2D [1] CaptureDeviceTechnologyId2D OPTIONAL,
-  //    ...
-  //  }
-
-  FaceImageCaptureDevice2DBlock(ASN1Encodable asn1Encodable) {
-    if (asn1Encodable == null) {
-      throw new IllegalArgumentException("Cannot decode null!");
-    }
-
-    if (asn1Encodable instanceof ASN1Sequence) {
-      Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(ASN1Sequence.getInstance(asn1Encodable));
-      if (taggedObjects.containsKey(0)) {
-        captureDeviceSpectral2DBlock = new FaceImageCaptureDeviceSpectral2DBlock(taggedObjects.get(0));
-      }
-
-      if (taggedObjects.containsKey(1)) {
-        captureDeviceTechnologyId2D = CaptureDeviceTechnologyId2DCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(1)));
-      }
-    }
-  }
-
-  public FaceImageCaptureDeviceSpectral2DBlock getCaptureDeviceSpectral2DBlock() {
-    return captureDeviceSpectral2DBlock;
-  }
-
-  public CaptureDeviceTechnologyId2DCode getCaptureDeviceTechnologyId2D() {
-    return captureDeviceTechnologyId2D;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(captureDeviceSpectral2DBlock, captureDeviceTechnologyId2D);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-
-    FaceImageCaptureDevice2DBlock other = (FaceImageCaptureDevice2DBlock) obj;
-    return Objects.equals(captureDeviceSpectral2DBlock, other.captureDeviceSpectral2DBlock)
-        && captureDeviceTechnologyId2D == other.captureDeviceTechnologyId2D;
-  }
-
-  @Override
-  public String toString() {
-    return "FaceImageCaptureDevice2DBlock ["
-        + "captureDeviceSpectral2DBlock: " + captureDeviceSpectral2DBlock
-        + ", captureDeviceTechnologyId2D: " + captureDeviceTechnologyId2D
-        + "]";
-  }
-
-  /* PACKAGE */
-
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    if (captureDeviceSpectral2DBlock != null) {
-      taggedObjects.put(0, captureDeviceSpectral2DBlock.getASN1Object());
-    }
-    if (captureDeviceTechnologyId2D != null) {
-      taggedObjects.put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(captureDeviceTechnologyId2D.getCode()));
-    }
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
 }

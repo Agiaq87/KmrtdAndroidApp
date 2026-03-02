@@ -32,131 +32,139 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.lds.iso39794
 
-package kmrtd.lds.iso39794;
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.fingerimage.AnnotationReasonCode
+import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode
+import org.bouncycastle.asn1.ASN1Encodable
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+data class FingerImageAnnotationBlock(
+    val positionCode: FingerImagePositionCode?,
+    val reasonCode: AnnotationReasonCode?
+) : Block() {
 
-import org.bouncycastle.asn1.ASN1Encodable;
+    //  AnnotationBlock ::= SEQUENCE {
+    //    position [0] Position,
+    //    reason [1] AnnotationReason,
+    //    ...
+    //  }
+    /*internal constructor(asn1Encodable: ASN1Encodable?) {
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        positionCode = FingerImagePositionCode.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(0))
+        )
+        reasonCode = AnnotationReasonCode.fromCode(
+            ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(1))
+        )
+    }*/
 
-import kmrtd.ASN1Util;
-import kmrtd.lds.iso39794.fingerimage.FingerImagePositionCode;
-
-public class FingerImageAnnotationBlock extends Block {
-
-  private static final long serialVersionUID = -716107883353729322L;
-
-  public static enum AnnotationReasonCode implements EncodableEnum<AnnotationReasonCode> {
-    UNKNOWN(0),
-    OTHER(1),
-    AMPUTATED(2),
-    UNABLE_TO_PRINT(3),
-    BANDAGED(4),
-    PHYSICALLY_CHALLENGED(5),
-    DISEASED(6);
-
-    private int code;
-
-    private AnnotationReasonCode(int code) {
-      this.code = code;
+    /*public override fun hashCode(): Int {
+        return Objects.hash(positionCode, reasonCode)
     }
 
-    public int getCode() {
-      return code;
+    public override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
+        }
+        if (obj == null) {
+            return false
+        }
+        if (javaClass != obj.javaClass) {
+            return false
+        }
+
+        val other = obj as FingerImageAnnotationBlock
+        return positionCode == other.positionCode && reasonCode == other.reasonCode
     }
 
-    public static AnnotationReasonCode fromCode(int code) {
-      return EncodableEnum.fromCode(code, AnnotationReasonCode.class);
+    override fun toString(): String {
+        return ("FingerImageAnnotationBlock ["
+                + "positionCode: " + positionCode
+                + ", reasonCode: " + reasonCode
+                + "]")
+    }*/
+
+    override val aSN1Object: ASN1Encodable
+        get() = ASN1Util.encodeTaggedObjects(
+            buildMap {
+                positionCode?.let {
+                    put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+                }
+                reasonCode?.let {
+                    put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+                }
+            }
+        )
+    /*get() {
+        val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+            HashMap<Int?, ASN1Encodable?>()
+        taggedObjects[0] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(positionCode!!.code)
+        taggedObjects[1] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(reasonCode!!.code)
+        return ASN1Util.encodeTaggedObjects(taggedObjects)
+    }*/
+
+    companion object {
+        const val serialversionuid: Long = -716107883353729322L
+
+        /* PACKAGE */
+        @JvmStatic
+        fun decodeFingerImageAnnotationBlocks(asn1Encodable: ASN1Encodable?): List<FingerImageAnnotationBlock> =
+            if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+                ASN1Util.list(asn1Encodable).map { FingerImageAnnotationBlock.from(it) }
+            } else {
+                listOf(
+                    FingerImageAnnotationBlock.from(
+                        asn1Encodable
+                    )
+                )
+            }
+
+        /*{
+            if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+                val blockASN1Objects = ASN1Util.list(asn1Encodable)
+                val blocks: MutableList<FingerImageAnnotationBlock> =
+                    ArrayList<FingerImageAnnotationBlock?>(blockASN1Objects.size)
+                for (blockASN1Object in blockASN1Objects) {
+                    blocks.add(FingerImageAnnotationBlock(blockASN1Object))
+                }
+                return blocks
+            } else {
+                return mutableListOf<FingerImageAnnotationBlock>(
+                    FingerImageAnnotationBlock(
+                        asn1Encodable
+                    )
+                )
+            }
+        }*/
+
+        /**
+         * Factory method
+         *
+         * AnnotationBlock ::= SEQUENCE {
+         *   position [0] Position,
+         *   reason [1] AnnotationReason,
+         *   ...
+         * }
+         */
+        @JvmStatic
+        fun from(asn1Encodable: ASN1Encodable?): FingerImageAnnotationBlock {
+            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            return FingerImageAnnotationBlock(
+                positionCode = FingerImagePositionCode.fromCode(
+                    ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[0])
+                ),
+                reasonCode = AnnotationReasonCode.fromCode(
+                    ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[1])
+                )
+            )
+        }
+
     }
-  }
-
-  private FingerImagePositionCode positionCode;
-
-  private AnnotationReasonCode reasonCode;
-
-  public FingerImageAnnotationBlock(FingerImagePositionCode positionCode, AnnotationReasonCode reasonCode) {
-    this.positionCode = positionCode;
-    this.reasonCode = reasonCode;
-  }
-
-  //  AnnotationBlock ::= SEQUENCE {
-  //    position [0] Position,
-  //    reason [1] AnnotationReason,
-  //    ...
-  //  }
-
-  FingerImageAnnotationBlock(ASN1Encodable asn1Encodable) {
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    positionCode = FingerImagePositionCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(0)));
-    reasonCode = AnnotationReasonCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(1)));
-  }
-
-  public static long getSerialversionuid() {
-    return serialVersionUID;
-  }
-
-  public FingerImagePositionCode getPositionCode() {
-    return positionCode;
-  }
-
-  public AnnotationReasonCode getReasonCode() {
-    return reasonCode;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(positionCode, reasonCode);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-
-    FingerImageAnnotationBlock other = (FingerImageAnnotationBlock) obj;
-    return positionCode == other.positionCode && reasonCode == other.reasonCode;
-  }
-
-  @Override
-  public String toString() {
-    return "FingerImageAnnotationBlock ["
-        + "positionCode: " + positionCode
-        + ", reasonCode: " + reasonCode
-        + "]";
-  }
-
-  /* PACKAGE */
-
-  static List<FingerImageAnnotationBlock> decodeFingerImageAnnotationBlocks(ASN1Encodable asn1Encodable) {
-    if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
-      List<FingerImageAnnotationBlock> blocks = new ArrayList<FingerImageAnnotationBlock>(blockASN1Objects.size());
-      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
-        blocks.add(new FingerImageAnnotationBlock(blockASN1Object));
-      }
-      return blocks;
-    } else {
-      return Collections.singletonList(new FingerImageAnnotationBlock(asn1Encodable));
-    }
-  }
-
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    taggedObjects.put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(positionCode.code));
-    taggedObjects.put(1, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(reasonCode.getCode()));
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
 }

@@ -38,314 +38,380 @@
  *
  * Licensed under LGPL 3.0
  */
-package kmrtd.lds.iso39794;
+package kmrtd.lds.iso39794
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.PADScoreBlock.Companion.decodePADScoreBlocks
+import kmrtd.lds.iso39794.pad.PADCaptureContextCode
+import kmrtd.lds.iso39794.pad.PADCriteriaCategoryCode
+import kmrtd.lds.iso39794.pad.PADDecisionCode
+import kmrtd.lds.iso39794.pad.PADSupervisionLevelCode
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1OctetString
+import org.bouncycastle.asn1.DEROctetString
+import org.bouncycastle.asn1.DERSequence
+import java.util.Objects
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
+data class PADDataBlock(
+    val pADDecisionCode: PADDecisionCode?,
+    val padScoreBlocks: List<PADScoreBlock>?,
+    val padExtendedDataBlocks: List<ExtendedDataBlock>?,
+    val pADCaptureContextCode: PADCaptureContextCode?,
+    val pADSupervisionLevelCode: PADSupervisionLevelCode?,
+    /** INTEGER (0..100).  */
+    val riskLevel: Int,
+    val pADCriteriaCategoryCode: PADCriteriaCategoryCode?,
+    val parameter: ByteArray?,
+    val challenges: List<ByteArray>?,
+    val captureDateTimeBlock: DateTimeBlock?
+) : Block() {
 
-import kmrtd.ASN1Util;
-import kmrtd.lds.iso39794.pad.PADCaptureContextCode;
-import kmrtd.lds.iso39794.pad.PADCriteriaCategoryCode;
-import kmrtd.lds.iso39794.pad.PADDecisionCode;
-import kmrtd.lds.iso39794.pad.PADSupervisionLevelCode;
 
-import net.sf.scuba.util.Hex;
+    /*constructor(
+        padDecisionCode: PADDecisionCode?,
+        padScoreBlocks: MutableList<PADScoreBlock?>?,
+        padExtendedDataBlocks: MutableList<ExtendedDataBlock?>?,
+        padCaptureContextCode: PADCaptureContextCode?,
+        padSupervisionLevelCode: PADSupervisionLevelCode?,
+        riskLevel: Int,
+        padCriteriaCategoryCode: PADCriteriaCategoryCode?,
+        parameter: ByteArray?,
+        challenges: MutableList<ByteArray>?,
+        captureDateTimeBlock: DateTimeBlock?
+    ) {
+        this.pADDecisionCode = padDecisionCode
+        this.padScoreBlocks = padScoreBlocks
+        this.padExtendedDataBlocks = padExtendedDataBlocks
+        this.pADCaptureContextCode = padCaptureContextCode
+        this.pADSupervisionLevelCode = padSupervisionLevelCode
+        this.riskLevel = riskLevel
+        this.pADCriteriaCategoryCode = padCriteriaCategoryCode
+        this.parameter = parameter
+        this.challenges = challenges
+        this.captureDateTimeBlock = captureDateTimeBlock
+    }*/
 
-public class PADDataBlock extends Block {
+    //  PADDataBlock ::= SEQUENCE {
+    //    decision              [0] PADDecision            OPTIONAL,
+    //    scoreBlocks           [1] PADScoreBlocks         OPTIONAL,
+    //    extendedDataBlocks    [2] PADExtendedDataBlocks  OPTIONAL,
+    //    captureContext        [3] PADCaptureContext      OPTIONAL,
+    //    supervisionLevel      [4] PADSupervisionLevel    OPTIONAL,
+    //    riskLevel             [5] PADRiskLevel           OPTIONAL,
+    //    criteriaCategory      [6] PADCriteriaCategory    OPTIONAL,
+    //    parameter             [7] OCTET STRING           OPTIONAL,
+    //    challenges            [8] PADChallenges          OPTIONAL,
+    //    captureDateTimeBlock  [9] CaptureDateTimeBlock   OPTIONAL,
+    //    ...
+    //  }
+    /*internal constructor(asn1Encodable: ASN1Encodable?) {
+        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        if (taggedObjects.containsKey(0)) {
+            this.pADDecisionCode = PADDecisionCode.fromCode(
+                ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(0))
+            )
+        }
+        if (taggedObjects.containsKey(1)) {
+            padScoreBlocks = decodePADScoreBlocks(taggedObjects.get(1))
+        }
+        if (taggedObjects.containsKey(2)) {
+            padExtendedDataBlocks =
+                ExtendedDataBlock.decodeExtendedDataBlocks(taggedObjects.get(2)!!)
+        }
+        if (taggedObjects.containsKey(3)) {
+            this.pADCaptureContextCode = PADCaptureContextCode.fromCode(
+                ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(3))
+            )
+        }
+        if (taggedObjects.containsKey(4)) {
+            this.pADSupervisionLevelCode = PADSupervisionLevelCode.fromCode(
+                ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(4))
+            )
+        }
+        if (taggedObjects.containsKey(5)) {
+            riskLevel = ASN1Util.decodeInt(taggedObjects.get(5))
+        }
+        if (taggedObjects.containsKey(6)) {
+            this.pADCriteriaCategoryCode = PADCriteriaCategoryCode.fromCode(
+                ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(6))
+            )
+        }
+        if (taggedObjects.containsKey(7)) {
+            parameter = ASN1OctetString.getInstance(taggedObjects.get(7)).getOctets()
+        }
+        if (taggedObjects.containsKey(8)) {
+            challenges = decodePADChallenges(taggedObjects.get(8))
+        }
+        if (taggedObjects.containsKey(9)) {
+            captureDateTimeBlock = from(taggedObjects.get(9))
+        }
+    }*/
 
-  private static final long serialVersionUID = 1498548397505331884L;
-
-  private PADDecisionCode padDecisionCode;
-
-  private List<PADScoreBlock> padScoreBlocks;
-
-  private List<ExtendedDataBlock> padExtendedDataBlocks;
-
-  private PADCaptureContextCode padCaptureContextCode;
-
-  private PADSupervisionLevelCode padSupervisionLevelCode;
-
-  /** INTEGER (0..100). */
-  private int riskLevel;
-
-  private PADCriteriaCategoryCode padCriteriaCategoryCode;
-
-  private byte[] parameter;
-
-  private List<byte[]> challenges;
-
-  private DateTimeBlock captureDateTimeBlock;
-
-  public PADDataBlock(PADDecisionCode padDecisionCode, List<PADScoreBlock> padScoreBlocks,
-      List<ExtendedDataBlock> padExtendedDataBlocks, PADCaptureContextCode padCaptureContextCode,
-      PADSupervisionLevelCode padSupervisionLevelCode, int riskLevel, PADCriteriaCategoryCode padCriteriaCategoryCode,
-      byte[] parameter, List<byte[]> challenges, DateTimeBlock captureDateTimeBlock) {
-    this.padDecisionCode = padDecisionCode;
-    this.padScoreBlocks = padScoreBlocks;
-    this.padExtendedDataBlocks = padExtendedDataBlocks;
-    this.padCaptureContextCode = padCaptureContextCode;
-    this.padSupervisionLevelCode = padSupervisionLevelCode;
-    this.riskLevel = riskLevel;
-    this.padCriteriaCategoryCode = padCriteriaCategoryCode;
-    this.parameter = parameter;
-    this.challenges = challenges;
-    this.captureDateTimeBlock = captureDateTimeBlock;
-  }
-
-  //  PADDataBlock ::= SEQUENCE {
-  //    decision              [0] PADDecision            OPTIONAL,
-  //    scoreBlocks           [1] PADScoreBlocks         OPTIONAL,
-  //    extendedDataBlocks    [2] PADExtendedDataBlocks  OPTIONAL,
-  //    captureContext        [3] PADCaptureContext      OPTIONAL,
-  //    supervisionLevel      [4] PADSupervisionLevel    OPTIONAL,
-  //    riskLevel             [5] PADRiskLevel           OPTIONAL,
-  //    criteriaCategory      [6] PADCriteriaCategory    OPTIONAL,
-  //    parameter             [7] OCTET STRING           OPTIONAL,
-  //    challenges            [8] PADChallenges          OPTIONAL,
-  //    captureDateTimeBlock  [9] CaptureDateTimeBlock   OPTIONAL,
-  //    ...
-  //  }
-
-  PADDataBlock(ASN1Encodable asn1Encodable) {
-    Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);
-    if (taggedObjects.containsKey(0)) {
-      padDecisionCode = PADDecisionCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(0)));
-    }
-    if (taggedObjects.containsKey(1)) {
-      padScoreBlocks = PADScoreBlock.decodePADScoreBlocks(taggedObjects.get(1));
-    }
-    if (taggedObjects.containsKey(2)) {
-      padExtendedDataBlocks = ExtendedDataBlock.decodeExtendedDataBlocks(taggedObjects.get(2));
-    }
-    if (taggedObjects.containsKey(3)) {
-      padCaptureContextCode =  PADCaptureContextCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(3)));
-    }
-    if (taggedObjects.containsKey(4)) {
-      padSupervisionLevelCode = PADSupervisionLevelCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(4)));
-    }
-    if (taggedObjects.containsKey(5)) {
-      riskLevel = ASN1Util.decodeInt(taggedObjects.get(5));
-    }
-    if (taggedObjects.containsKey(6)) {
-      padCriteriaCategoryCode = PADCriteriaCategoryCode.fromCode(ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects.get(6)));
-    }
-    if (taggedObjects.containsKey(7)) {
-      parameter = ASN1OctetString.getInstance(taggedObjects.get(7)).getOctets();
-    }
-    if (taggedObjects.containsKey(8)) {
-      challenges = decodePADChallenges(taggedObjects.get(8));
-    }
-    if (taggedObjects.containsKey(9)) {
-      captureDateTimeBlock = DateTimeBlock.from(taggedObjects.get(9));
-    }
-  }
-
-  public PADDecisionCode getPADDecisionCode() {
-    return padDecisionCode;
-  }
-
-  public List<PADScoreBlock> getPadScoreBlocks() {
-    return padScoreBlocks;
-  }
-
-  public List<ExtendedDataBlock> getPadExtendedDataBlocks() {
-    return padExtendedDataBlocks;
-  }
-
-  public PADCaptureContextCode getPADCaptureContextCode() {
-    return padCaptureContextCode;
-  }
-
-  public PADSupervisionLevelCode getPADSupervisionLevelCode() {
-    return padSupervisionLevelCode;
-  }
-
-  public int getRiskLevel() {
-    return riskLevel;
-  }
-
-  public PADCriteriaCategoryCode getPADCriteriaCategoryCode() {
-    return padCriteriaCategoryCode;
-  }
-
-  public byte[] getParameter() {
-    return parameter;
-  }
-
-  public List<byte[]> getChallenges() {
-    return challenges;
-  }
-
-  public DateTimeBlock getCaptureDateTimeBlock() {
-    return captureDateTimeBlock;
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + Arrays.hashCode(parameter);
-    result = prime * result
-        + Objects.hash(captureDateTimeBlock, challenges, padCaptureContextCode, padCriteriaCategoryCode,
-            padDecisionCode, padExtendedDataBlocks, padScoreBlocks, padSupervisionLevelCode, riskLevel);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
+    override fun hashCode(): Int {
+        val prime = 31
+        var result = 1
+        result = prime * result + parameter.contentHashCode()
+        result = (prime * result
+                + Objects.hash(
+            captureDateTimeBlock, challenges,
+            this.pADCaptureContextCode,
+            this.pADCriteriaCategoryCode,
+            this.pADDecisionCode, padExtendedDataBlocks, padScoreBlocks,
+            this.pADSupervisionLevelCode, riskLevel
+        ))
+        return result
     }
 
-    PADDataBlock other = (PADDataBlock)obj;
-    return Objects.equals(captureDateTimeBlock, other.captureDateTimeBlock)
-        && equalBytes(challenges, other.challenges)
-        && padCaptureContextCode == other.padCaptureContextCode
-        && padCriteriaCategoryCode == other.padCriteriaCategoryCode && padDecisionCode == other.padDecisionCode
-        && Objects.equals(padExtendedDataBlocks, other.padExtendedDataBlocks)
-        && Objects.equals(padScoreBlocks, other.padScoreBlocks)
-        && padSupervisionLevelCode == other.padSupervisionLevelCode && Arrays.equals(parameter, other.parameter)
-        && riskLevel == other.riskLevel;
-  }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
+            return true
+        }
+        if (other == null) {
+            return false
+        }
+        if (javaClass != other.javaClass) {
+            return false
+        }
 
-  @Override
-  public String toString() {
-    return "PADDataBlock [padDecisionCode: " + padDecisionCode
-        + ", padScoreBlocks: " + padScoreBlocks
-        + ", padExtendedDataBlocks: " + padExtendedDataBlocks
-        + ", padCaptureContextCode: " + padCaptureContextCode
-        + ", padSupervisionLevelCode: " + padSupervisionLevelCode
-        + ", riskLevel: " + riskLevel
-        + ", padCriteriaCategoryCode: " + padCriteriaCategoryCode
-        + ", parameter: " + Hex.bytesToHexString(parameter)
-        + ", challenges: " + toString(challenges)
-        + ", captureDateTimeBlock: " + captureDateTimeBlock + "]";
-  }
+        val that = other as PADDataBlock
+        return captureDateTimeBlock == that.captureDateTimeBlock
+                && equalBytes(challenges, that.challenges)
+                && this.pADCaptureContextCode == that.pADCaptureContextCode &&
+                this.pADCriteriaCategoryCode == that.pADCriteriaCategoryCode &&
+                this.pADDecisionCode == that.pADDecisionCode && padExtendedDataBlocks == that.padExtendedDataBlocks &&
+                padScoreBlocks == that.padScoreBlocks &&
+                this.pADSupervisionLevelCode == that.pADSupervisionLevelCode &&
+                parameter.contentEquals(
+                    that.parameter
+                ) &&
+                riskLevel == that.riskLevel
+    }
 
-  /* PACKAGE */
+    /*    override fun toString(): String {
+            return ("PADDataBlock [padDecisionCode: " + this.pADDecisionCode
+                    + ", padScoreBlocks: " + padScoreBlocks
+                    + ", padExtendedDataBlocks: " + padExtendedDataBlocks
+                    + ", padCaptureContextCode: " + this.pADCaptureContextCode
+                    + ", padSupervisionLevelCode: " + this.pADSupervisionLevelCode
+                    + ", riskLevel: " + riskLevel
+                    + ", padCriteriaCategoryCode: " + this.pADCriteriaCategoryCode
+                    + ", parameter: " + Hex.bytesToHexString(parameter)
+                    + ", challenges: " + toString(challenges)
+                    + ", captureDateTimeBlock: " + captureDateTimeBlock + "]")
+        }*/
 
-  static List<PADDataBlock> decodePADDataBlocks(ASN1Encodable asn1Encodable) {
-    if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-      List<ASN1Encodable> blockASN1Objects = ASN1Util.list(asn1Encodable);
-      List<PADDataBlock> blocks = new ArrayList<PADDataBlock>(blockASN1Objects.size());
-      for (ASN1Encodable blockASN1Object: blockASN1Objects) {
-        blocks.add(new PADDataBlock(blockASN1Object));
-      }
-      return blocks;
-    } else {
-      PADDataBlock block = new PADDataBlock(asn1Encodable);
-      return Collections.singletonList(block);
-    }
-  }
+    override val aSN1Object: ASN1Encodable
+        get() = ASN1Util.encodeTaggedObjects(
+            buildMap {
+                pADDecisionCode?.let {
+                    put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+                }
+                padScoreBlocks?.let {
+                    put(1, ISO39794Util.encodeBlocks(it))
+                }
+                padExtendedDataBlocks?.let {
+                    put(2, ISO39794Util.encodeBlocks(it))
 
-  @Override
-  ASN1Encodable getASN1Object() {
-    Map<Integer, ASN1Encodable> taggedObjects = new HashMap<Integer, ASN1Encodable>();
-    if (padDecisionCode != null) {
-      taggedObjects.put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(padDecisionCode.getCode()));
-    }
-    if (padScoreBlocks != null) {
-      taggedObjects.put(1, ISO39794Util.encodeBlocks(padScoreBlocks));
-    }
-    if (padExtendedDataBlocks != null) {
-      taggedObjects.put(2, ISO39794Util.encodeBlocks(padExtendedDataBlocks));
-    }
-    if (padCaptureContextCode != null) {
-      taggedObjects.put(3, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(padCaptureContextCode.getCode()));
-    }
-    if (padSupervisionLevelCode != null) {
-      taggedObjects.put(4, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(padSupervisionLevelCode.getCode()));
-    }
-    if (riskLevel >= 0) {
-      taggedObjects.put(5, ASN1Util.encodeInt(riskLevel));
-    }
-    if (padCriteriaCategoryCode != null) {
-      taggedObjects.put(6, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(padCriteriaCategoryCode.getCode()));
-    }
-    if (parameter != null) {
-      taggedObjects.put(7, new DEROctetString(parameter));
-    }
-    if (challenges != null) {
-      taggedObjects.put(8, encodePADChallenges(challenges));
-    }
-    if (captureDateTimeBlock != null) {
-      taggedObjects.put(9, captureDateTimeBlock.getASN1Object());
-    }
-    return ASN1Util.encodeTaggedObjects(taggedObjects);
-  }
+                }
+                pADCaptureContextCode?.let {
+                    put(3, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+                }
+                pADSupervisionLevelCode?.let {
+                    put(4, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+                }
+                if (riskLevel >= 0) {
+                    put(5, ASN1Util.encodeInt(riskLevel))
+                }
+                pADCriteriaCategoryCode?.let {
+                    put(6, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+                }
+                parameter?.let {
+                    put(7, DEROctetString(it))
+                }
+                challenges?.let {
+                    put(8, encodePADChallenges(it))
+                }
+                captureDateTimeBlock?.let {
+                    put(9, it.aSN1Object)
+                }
+            }
+        )
+    /*get() {
+        if (pADDecisionCode != null) {
+            taggedObjects[0] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(pADDecisionCode.code)
+        }
+        if (padScoreBlocks != null) {
+            taggedObjects[1] = ISO39794Util.encodeBlocks(padScoreBlocks)
+        }
+        if (padExtendedDataBlocks != null) {
+            taggedObjects[2] = ISO39794Util.encodeBlocks(padExtendedDataBlocks)
+        }
+        pADCaptureContextCode != null) {
+            taggedObjects[3] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(pADCaptureContextCode.code)
+        }
+        pADSupervisionLevelCode != null) {
+            taggedObjects[4] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(pADSupervisionLevelCode.code)
+        }
+        if (riskLevel >= 0) {
+            taggedObjects[5] = ASN1Util.encodeInt(riskLevel)
+        }
+        if (this.pADCriteriaCategoryCode != null) {
+            taggedObjects[6] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(pADCriteriaCategoryCode.code)
+        }
+        if (parameter != null) {
+            taggedObjects[7] = DEROctetString(parameter)
+        }
+        if (challenges != null) {
+            taggedObjects[8] = Companion.encodePADChallenges(challenges)
+        }
+        if (captureDateTimeBlock != null) {
+            taggedObjects[9] = captureDateTimeBlock.aSN1Object
+        }
+        return ASN1Util.encodeTaggedObjects(taggedObjects)
+    }*/
 
-  /* PRIVATE */
+    companion object {
+        private const val serialVersionUID = 1498548397505331884L
 
-  private static List<byte[]> decodePADChallenges(ASN1Encodable asn1Encodable) {
-    List<ASN1Encodable> challengeASN1Objects = ASN1Util.list(asn1Encodable);
-    List<byte[]> padChallenges = new ArrayList<byte[]>(challengeASN1Objects.size());
-    for (ASN1Encodable challengeASN1Object: challengeASN1Objects) {
-      padChallenges.add(ASN1OctetString.getInstance(challengeASN1Object).getOctets());
-    }
-    return padChallenges;
-  }
+        /* PACKAGE */
+        @JvmStatic
+        fun decodePADDataBlocks(asn1Encodable: ASN1Encodable?): List<PADDataBlock> =
+            if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+                ASN1Util.list(asn1Encodable).map { from(it) }
+            } else {
+                listOf(from(asn1Encodable))
+            }
 
-  private static ASN1Encodable encodePADChallenges(List<byte[]> padChallenges) {
-    ASN1Encodable[] asn1Encodables = new ASN1Encodable[padChallenges.size()];
-    int i = 0;
-    for (byte[] padChallenge: padChallenges) {
-      asn1Encodables[i++] = new DEROctetString(padChallenge);
-    }
-    return new DERSequence(asn1Encodables);
-  }
+        /*{
+        if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
+            val blockASN1Objects = ASN1Util.list(asn1Encodable)
+            val blocks: MutableList<PADDataBlock?> =
+                ArrayList<PADDataBlock?>(blockASN1Objects.size)
+            for (blockASN1Object in blockASN1Objects) {
+                blocks.add(PADDataBlock(blockASN1Object))
+            }
+            return blocks
+        } else {
+            val block = PADDataBlock(asn1Encodable)
+            return mutableListOf<PADDataBlock?>(block)
+        }*/
+        /*}*/
 
-  private static boolean equalBytes(List<byte[]> challenges1, List<byte[]> challenges2) {
-    if (Objects.equals(challenges1, challenges2)) {
-      return true;
-    }
-    if (challenges1 == null && challenges2 != null) {
-      return false;
-    }
-    if (challenges1 != null && challenges2 == null) {
-      return false;
-    }
-    if (challenges1.size() != challenges2.size()) {
-      return false;
-    }
-    int length = challenges1.size();
-    for (int i = 0; i < length; i++) {
-      if (!(Arrays.equals(challenges1.get(i), challenges2.get(i)))) {
-        return false;
-      }
-    }
-    return true;
-  }
+        /* PRIVATE */
+        private fun decodePADChallenges(asn1Encodable: ASN1Encodable?): List<ByteArray> =
+            ASN1Util.list(asn1Encodable).map { ASN1OctetString.getInstance(it).octets }
 
-  private static String toString(List<byte[]> challenges) {
-    if (challenges == null) {
-      return "null";
+        /*{
+            val challengeASN1Objects = ASN1Util.list(asn1Encodable)
+            val padChallenges: MutableList<ByteArray> =
+                ArrayList<ByteArray>(challengeASN1Objects.size)
+            for (challengeASN1Object in challengeASN1Objects) {
+                padChallenges.add(ASN1OctetString.getInstance(challengeASN1Object).octets)
+            }
+            return padChallenges
+        }*/
+
+        private fun encodePADChallenges(padChallenges: List<ByteArray>): ASN1Encodable {
+            val asn1Encodables = arrayOfNulls<ASN1Encodable>(padChallenges.size)
+            var i = 0
+            for (padChallenge in padChallenges) {
+                asn1Encodables[i++] = DEROctetString(padChallenge)
+            }
+            return DERSequence(asn1Encodables)
+        }
+
+        private fun equalBytes(
+            challenges1: List<ByteArray>?,
+            challenges2: List<ByteArray>?
+        ): Boolean {
+            if (challenges1 == challenges2) {
+                return true
+            }
+            if (challenges1 == null && challenges2 != null) {
+                return false
+            }
+            if (challenges1 != null && challenges2 == null) {
+                return false
+            }
+            if (challenges1!!.size != challenges2!!.size) {
+                return false
+            }
+            val length = challenges1.size
+            for (i in 0..<length) {
+                if (!(challenges1[i].contentEquals(challenges2[i]))) {
+                    return false
+                }
+            }
+            return true
+        }
+
+        // UNUSED
+        /*private fun toString(challenges: MutableList<ByteArray>?): String {
+            if (challenges == null) {
+                return "null"
+            }
+            var isFirst = true
+            val stringBuilder = StringBuilder().append("[")
+            for (challenge in challenges) {
+                if (isFirst) {
+                    isFirst = false
+                } else {
+                    stringBuilder.append(", ")
+                }
+                stringBuilder.append(Hex.bytesToHexString(challenge))
+            }
+            return stringBuilder.append("]").toString()
+        }*/
+
+        /**
+         * Factory method
+         *
+         * PADDataBlock ::= SEQUENCE {
+         *   decision              [0] PADDecision            OPTIONAL,
+         *   scoreBlocks           [1] PADScoreBlocks         OPTIONAL,
+         *   extendedDataBlocks    [2] PADExtendedDataBlocks  OPTIONAL,
+         *   captureContext        [3] PADCaptureContext      OPTIONAL,
+         *   supervisionLevel      [4] PADSupervisionLevel    OPTIONAL,
+         *   riskLevel             [5] PADRiskLevel           OPTIONAL,
+         *   criteriaCategory      [6] PADCriteriaCategory    OPTIONAL,
+         *   parameter             [7] OCTET STRING           OPTIONAL,
+         *   challenges            [8] PADChallenges          OPTIONAL,
+         *   captureDateTimeBlock  [9] CaptureDateTimeBlock   OPTIONAL,
+         *   ...
+         * }
+         */
+        @JvmStatic
+        fun from(asn1Encodable: ASN1Encodable?): PADDataBlock {
+            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+
+            return PADDataBlock(
+                pADDecisionCode = if (taggedObjects.containsKey(0)) PADDecisionCode.fromCode(
+                    ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[0])
+                ) else null,
+                padScoreBlocks = if (taggedObjects.containsKey(1)) decodePADScoreBlocks(
+                    taggedObjects[1]
+                ) else null,
+                padExtendedDataBlocks = if (taggedObjects.containsKey(2)) taggedObjects[2]?.let {
+                    ExtendedDataBlock.decodeExtendedDataBlocks(it)
+                } else null,
+                pADCaptureContextCode = if (taggedObjects.containsKey(3)) PADCaptureContextCode.fromCode(
+                    ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[3])
+                ) else null,
+                pADSupervisionLevelCode = if (taggedObjects.containsKey(4)) PADSupervisionLevelCode.fromCode(
+                    ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[4])
+                ) else null,
+                riskLevel = if (taggedObjects.containsKey(5)) ASN1Util.decodeInt(taggedObjects[5]) else -1,
+                pADCriteriaCategoryCode = if (taggedObjects.containsKey(6)) PADCriteriaCategoryCode.fromCode(
+                    ISO39794Util.decodeCodeFromChoiceExtensionBlockFallback(taggedObjects[6])
+                ) else null,
+                parameter = if (taggedObjects.containsKey(7)) ASN1OctetString.getInstance(
+                    taggedObjects[7]
+                ).octets else null,
+                challenges = if (taggedObjects.containsKey(8)) decodePADChallenges(taggedObjects[8]) else null,
+                captureDateTimeBlock = if (taggedObjects.containsKey(9)) DateTimeBlock.from(
+                    taggedObjects[9]
+                ) else null
+            )
+        }
     }
-    boolean isFirst = true;
-    StringBuilder stringBuilder = new StringBuilder().append("[");
-    for (byte[] challenge: challenges) {
-      if (isFirst) {
-        isFirst = false;
-      } else {
-        stringBuilder.append(", ");
-      }
-      stringBuilder.append(Hex.bytesToHexString(challenge));
-    }
-    return stringBuilder.append("]").toString();
-  }
 }

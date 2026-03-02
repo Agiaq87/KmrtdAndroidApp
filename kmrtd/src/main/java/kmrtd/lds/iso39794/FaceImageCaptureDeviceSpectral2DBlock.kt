@@ -40,10 +40,10 @@
  */
 package kmrtd.lds.iso39794
 
+import kmrtd.ASN1Util
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1TaggedObject
-import kmrtd.ASN1Util
 
 data class FaceImageCaptureDeviceSpectral2DBlock(
     val isWhiteLight: Boolean?,
@@ -147,7 +147,7 @@ data class FaceImageCaptureDeviceSpectral2DBlock(
          *   ...
          * }
          */
-        fun from(asn1Encodable: ASN1Encodable): FaceImageCaptureDeviceSpectral2DBlock {
+        fun from(asn1Encodable: ASN1Encodable?): FaceImageCaptureDeviceSpectral2DBlock {
             require(!(asn1Encodable !is ASN1Sequence && asn1Encodable !is ASN1TaggedObject)) { "Cannot decode!" }
 
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)

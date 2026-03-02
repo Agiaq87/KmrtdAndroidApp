@@ -19,24 +19,28 @@
  *
  * $Id: LDSElement.java 1799 2018-10-30 16:25:48Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.lds
 
-package kmrtd.lds;
-
-import java.io.Serializable;
+import java.io.Serializable
 
 /**
  * Top level interface for all data structures in the LDS.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
- *
+ * 
  * @version $Revision: 1799 $
  */
-public interface LDSElement extends Serializable {
-
-  /**
-   * Returns the encoded contents of this LDS info.
-   *
-   * @return a byte array containing the encoding of this LDS info
-   */
-  byte[] getEncoded();
+interface LDSElement : Serializable {
+    /**
+     * Returns the encoded contents of this LDS info.
+     * 
+     * @return a byte array containing the encoding of this LDS info
+     */
+    val encoded: ByteArray?
 }

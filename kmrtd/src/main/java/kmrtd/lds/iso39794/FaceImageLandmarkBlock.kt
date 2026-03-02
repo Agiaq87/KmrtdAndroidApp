@@ -40,8 +40,8 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class FaceImageLandmarkBlock(
     val landmarkKind: FaceImageLandmarkKind?,
@@ -116,7 +116,7 @@ data class FaceImageLandmarkBlock(
         private const val serialVersionUID = -8008877005187206392L
 
         @JvmStatic
-        fun decodeLandmarkBlocks(asn1Encodable: ASN1Encodable): List<FaceImageLandmarkBlock> =
+        fun decodeLandmarkBlocks(asn1Encodable: ASN1Encodable?): List<FaceImageLandmarkBlock> =
             if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
                 ASN1Util.list(asn1Encodable).map { from(it) }
             } else {
@@ -148,7 +148,7 @@ data class FaceImageLandmarkBlock(
          * }
          */
         @JvmStatic
-        fun from(asn1Encodable: ASN1Encodable): FaceImageLandmarkBlock {
+        fun from(asn1Encodable: ASN1Encodable?): FaceImageLandmarkBlock {
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
 
             return FaceImageLandmarkBlock(

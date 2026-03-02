@@ -46,13 +46,13 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
-import org.bouncycastle.asn1.ASN1Sequence
-import org.bouncycastle.asn1.ASN1TaggedObject
 import kmrtd.ASN1Util
 import kmrtd.lds.iso39794.faceimageidentity.EyeColourCode
 import kmrtd.lds.iso39794.faceimageidentity.GenderCode
 import kmrtd.lds.iso39794.faceimageidentity.HairColourCode
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.ASN1TaggedObject
 
 data class FaceImageIdentityMetadataBlock(
     val genderCode: GenderCode?,
@@ -233,7 +233,7 @@ data class FaceImageIdentityMetadataBlock(
          * }
          */
         @JvmStatic
-        fun from(asn1Encodable: ASN1Encodable): FaceImageIdentityMetadataBlock {
+        fun from(asn1Encodable: ASN1Encodable?): FaceImageIdentityMetadataBlock {
             require(!(asn1Encodable !is ASN1Sequence && asn1Encodable !is ASN1TaggedObject)) { "Cannot decode!" }
 
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)

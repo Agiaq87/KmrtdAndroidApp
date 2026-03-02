@@ -40,8 +40,8 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class FaceImageCaptureDeviceBlock(
     /** Identification of the model capture device.  */
@@ -145,7 +145,7 @@ data class FaceImageCaptureDeviceBlock(
          * }
          */
         @JvmStatic
-        fun from(asn1Encodable: ASN1Encodable): FaceImageCaptureDeviceBlock {
+        fun from(asn1Encodable: ASN1Encodable?): FaceImageCaptureDeviceBlock {
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
 
             return FaceImageCaptureDeviceBlock(
