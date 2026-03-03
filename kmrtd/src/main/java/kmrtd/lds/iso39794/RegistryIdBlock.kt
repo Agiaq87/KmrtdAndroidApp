@@ -40,9 +40,10 @@
  */
 package kmrtd.lds.iso39794
 
+import kmrtd.ASN1Util
+import kmrtd.support.encode
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
-import kmrtd.ASN1Util
 
 data class RegistryIdBlock(
     val organization: Int,
@@ -85,12 +86,10 @@ data class RegistryIdBlock(
     }*/
 
     override val aSN1Object: ASN1Encodable
-        get() = ASN1Util.encodeTaggedObjects(
-            mapOf(
-                0 to ASN1Util.encodeInt(organization),
-                1 to ASN1Util.encodeInt(id)
-            )
-        )
+        get() = mapOf(
+            0 to organization.encode(),
+            1 to id.encode()
+        ).encode()
     /*get() {
         val taggedObjects: MutableMap<Int, ASN1Encodable> =
             HashMap()

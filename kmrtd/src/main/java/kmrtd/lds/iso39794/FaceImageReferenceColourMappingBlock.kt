@@ -46,11 +46,12 @@
  */
 package kmrtd.lds.iso39794
 
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.ReferenceColourDefinitionAndValueBlock.Companion.decodeReferenceColourDefinitionAndValueBlocks
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DEROctetString
-import kmrtd.ASN1Util
-import kmrtd.lds.iso39794.ReferenceColourDefinitionAndValueBlock.Companion.decodeReferenceColourDefinitionAndValueBlocks
 
 data class FaceImageReferenceColourMappingBlock(
     val referenceColourSchema: ByteArray?,
@@ -119,7 +120,7 @@ data class FaceImageReferenceColourMappingBlock(
         return result
     }
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 referenceColourSchema?.let{
@@ -151,7 +152,7 @@ data class FaceImageReferenceColourMappingBlock(
          */
         @JvmStatic
         fun from(asn1Encodable: ASN1Encodable?): FaceImageReferenceColourMappingBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return FaceImageReferenceColourMappingBlock(
                 referenceColourSchema = if (taggedObjects.containsKey(0)) ASN1OctetString.getInstance(taggedObjects[0]).octets else null,

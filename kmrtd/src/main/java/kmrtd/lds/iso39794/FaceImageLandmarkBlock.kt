@@ -41,6 +41,7 @@
 package kmrtd.lds.iso39794
 
 import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 
 data class FaceImageLandmarkBlock(
@@ -89,7 +90,7 @@ data class FaceImageLandmarkBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 put(0, FaceImageLandmarkKind.encodeLandmarkKind(landmarkKind))
@@ -149,7 +150,7 @@ data class FaceImageLandmarkBlock(
          */
         @JvmStatic
         fun from(asn1Encodable: ASN1Encodable?): FaceImageLandmarkBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return FaceImageLandmarkBlock(
                 landmarkKind = FaceImageLandmarkKind.decodeLandmarkKind(taggedObjects[0]),

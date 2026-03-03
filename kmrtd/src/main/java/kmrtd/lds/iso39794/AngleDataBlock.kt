@@ -6,8 +6,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class AngleDataBlock(
     /** INTEGER (-180..180).  */
@@ -63,7 +64,7 @@ data class AngleDataBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 put(0, ASN1Util.encodeInt(angleValue))
@@ -91,7 +92,8 @@ data class AngleDataBlock(
          */
         @JvmStatic
         fun from(asn1Encodable: ASN1Encodable?): AngleDataBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            //val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return AngleDataBlock(
                 angleValue = ASN1Util.decodeInt(taggedObjects[0]),

@@ -92,8 +92,4 @@ data class FeaturePoint
             "(" + x + ", " +
             y + ")" +
             ")"
-
-    companion object {
-        private const val serialVersionUID = -4209679423938065215L
-    }
 }

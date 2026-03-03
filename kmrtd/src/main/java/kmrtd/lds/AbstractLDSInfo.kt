@@ -35,7 +35,7 @@ import java.util.logging.Logger
  * @version $Revision: 1751 $
  */
 abstract class AbstractLDSInfo : LDSElement {
-    val encoded: ByteArray?
+    override val encoded: ByteArray?
         /**
          * Returns an encoding of this LDS info.
          * 
@@ -65,11 +65,9 @@ abstract class AbstractLDSInfo : LDSElement {
      * @throws IOException on error writing to the stream
      */
     @Throws(IOException::class)
-    abstract fun writeObject(outputStream: OutputStream?)
+    abstract fun writeObject(outputStream: OutputStream)
 
     companion object {
-        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
-
-        private val serialVersionUID = -2340098256249194537L
+        private val LOGGER: Logger = Logger.getLogger("kmrtd")
     }
 }

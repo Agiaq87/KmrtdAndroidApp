@@ -22,6 +22,7 @@
 package kmrtd.lds.iso39794
 
 import kmrtd.ASN1Util
+import kmrtd.support.encode
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.DERSequence
 import org.bouncycastle.asn1.DERTaggedObject
@@ -30,19 +31,19 @@ internal object ISO39794Util {
     fun decodeCodeFromChoiceExtensionBlockFallback(asn1Encodable: ASN1Encodable?): Int? {
         val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
         if (taggedObjects.containsKey(0)) {
-            return ASN1Util.decodeInt(taggedObjects.get(0))
+            return ASN1Util.decodeInt(taggedObjects[0])
         }
         if (taggedObjects.containsKey(1)) {
-            val extensionTaggedObjects = ASN1Util.decodeTaggedObjects(taggedObjects.get(1))
+            val extensionTaggedObjects = ASN1Util.decodeTaggedObjects(taggedObjects[1])
             /* Fallback: */
-            return ASN1Util.decodeInt(extensionTaggedObjects.get(0))
+            return ASN1Util.decodeInt(extensionTaggedObjects[0])
         }
 
         return null
     }
 
     fun encodeCodeAsChoiceExtensionBlockFallback(code: Int): ASN1Encodable {
-        return DERSequence(DERTaggedObject(false, 0, ASN1Util.encodeInt(code)))
+        return DERSequence(DERTaggedObject(false, 0, code.encode()))
     }
 
     //  ScoreOrError ::= CHOICE {
@@ -59,24 +60,24 @@ internal object ISO39794Util {
         return -1
     }
 
-    fun encodeScoreOrError(score: Int): ASN1Encodable? {
-        val taggedObjects: MutableMap<Int?, ASN1Encodable?> = HashMap<Int?, ASN1Encodable?>()
+    fun encodeScoreOrError(score: Int): ASN1Encodable {
+        val taggedObjects: MutableMap<Int, ASN1Encodable> = mutableMapOf()
         if (score >= 0) {
-            taggedObjects.put(0, ASN1Util.encodeInt(score))
+            taggedObjects[0] = score.encode()
         }
-        return ASN1Util.encodeTaggedObjects(taggedObjects)
+        return taggedObjects.encode()
     }
 
-    fun encodeBlocks(blocks: MutableList<out Block?>?): ASN1Encodable? {
-        if (blocks == null) {
+    fun encodeBlocks(blocks: MutableList<out Block>): ASN1Encodable {
+        /*if (blocks == null) {
             return null
-        }
-        val asn1Objects: MutableList<ASN1Encodable?> = ArrayList<ASN1Encodable?>(blocks.size)
+        }*/
+        val asn1Objects: MutableList<ASN1Encodable> = ArrayList<ASN1Encodable>(blocks.size)
         for (block in blocks) {
             if (block != null) {
                 asn1Objects.add(block.aSN1Object)
             }
         }
-        return DERSequence(asn1Objects.toTypedArray<ASN1Encodable?>())
+        return DERSequence(asn1Objects.toTypedArray<ASN1Encodable>())
     }
 }

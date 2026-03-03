@@ -27,9 +27,6 @@ import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1TaggedObject
 import org.bouncycastle.asn1.BERTags
-import org.bouncycastle.asn1.DEROctetString
-import org.bouncycastle.asn1.DERSequence
-import org.bouncycastle.asn1.DERTaggedObject
 import java.math.BigInteger
 import java.util.logging.Logger
 
@@ -99,8 +96,8 @@ object ASN1Util {
      * 
      * @return a map
      */
-    fun decodeTaggedObjects(asn1Encodable: ASN1Encodable?): MutableMap<Int?, ASN1Encodable?> {
-        val taggedObjects: MutableMap<Int?, ASN1Encodable?> = HashMap<Int?, ASN1Encodable?>()
+    fun decodeTaggedObjects(asn1Encodable: ASN1Encodable?): MutableMap<Int, ASN1Encodable?> {
+        val taggedObjects: MutableMap<Int, ASN1Encodable?> = HashMap<Int, ASN1Encodable?>()
         if (asn1Encodable == null) {
             return taggedObjects
         }
@@ -128,7 +125,7 @@ object ASN1Util {
         } else if (asn1Encodable is ASN1TaggedObject) {
             val asn1TaggedObject = ASN1TaggedObject.getInstance(asn1Encodable)
             val tagNo = asn1TaggedObject.getTagNo()
-            taggedObjects[tagNo] = asn1TaggedObject.getBaseObject()
+            taggedObjects[tagNo] = asn1TaggedObject.baseObject
         } else {
             throw IllegalArgumentException("Not a sequence and not a tagged object " + asn1Encodable.javaClass)
         }
@@ -197,31 +194,31 @@ object ASN1Util {
         }
     }
 
-    fun encodeBoolean(b: Boolean): ASN1Encodable {
+    /*fun encodeBoolean(b: Boolean): ASN1Encodable {
         return DEROctetString(byteArrayOf((if (b) 0xFF else 0x00).toByte()))
-    }
+    }*/
 
-    fun encodeInt(n: Int): ASN1Encodable {
+    /*fun encodeInt(n: Int): ASN1Encodable {
         return encodeBigInteger(BigInteger.valueOf(n.toLong()))
-    }
+    }*/
 
-    fun encodeBigInteger(n: BigInteger): ASN1Encodable {
+    /*fun encodeBigInteger(n: BigInteger): ASN1Encodable {
         return DEROctetString(n.toByteArray())
-    }
+    }*/
 
-    fun encodeTaggedObjects(taggedObjects: MutableMap<Int?, ASN1Encodable?>?): ASN1Encodable? {
-        if (taggedObjects == null) {
+    /*fun encodeTaggedObjects(taggedObjects: Map<Int, ASN1Encodable>): ASN1Encodable {
+        *//*if (taggedObjects == null) {
             return null
-        }
-        val asn1Objects: MutableList<ASN1Encodable?> = ArrayList<ASN1Encodable?>(taggedObjects.size)
+        }*//*
+        val asn1Objects: MutableList<ASN1Encodable> = ArrayList(taggedObjects.size)
         for (entry in taggedObjects.entries) {
             val `object` = entry.value
             if (`object` != null) {
-                asn1Objects.add(DERTaggedObject(false, entry.key!!, `object`))
+                asn1Objects.add(DERTaggedObject(false, entry.key, `object`))
             }
         }
         return DERSequence(asn1Objects.toTypedArray<ASN1Encodable?>())
-    }
+    }*/
 
     /* PRIVATE. */
     private fun tagClassToString(tagClass: Int): String {

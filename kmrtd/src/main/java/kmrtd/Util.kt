@@ -87,7 +87,6 @@ import java.util.Enumeration
 import java.util.Locale
 import java.util.logging.Level
 import java.util.logging.Logger
-import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
 import javax.crypto.KeyAgreement
 import javax.crypto.Mac
@@ -107,7 +106,7 @@ import kotlin.math.min
  * @version $Revision: 1902 $
  */
 object Util {
-    private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+    private val LOGGER: Logger = Logger.getLogger("kmrtd")
 
     /** Mode for KDF.  */
     const val ENC_MODE: Int = 1
@@ -374,16 +373,8 @@ object Util {
         return outputStream.toByteArray()
     }
 
-    /**
-     * Unpads the input `bytes` according to ISO9797-1 padding method 2.
-     * 
-     * @param bytes the input
-     * 
-     * @return the unpadded bytes
-     * 
-     * @throws BadPaddingException on padding exception
-     */
-    @Throws(BadPaddingException::class)
+
+    /*@Throws(BadPaddingException::class)
     fun unpad(bytes: ByteArray): ByteArray {
         var i = bytes.size - 1
         while (i >= 0 && bytes[i].toInt() == 0x00) {
@@ -395,7 +386,7 @@ object Util {
         val out = ByteArray(i)
         System.arraycopy(bytes, 0, out, 0, i)
         return out
-    }
+    }*/
 
     /**
      * Recovers the M1 part of the message sent back by the AA protocol

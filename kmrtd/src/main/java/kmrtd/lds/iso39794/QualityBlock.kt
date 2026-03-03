@@ -40,8 +40,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.support.encode
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class QualityBlock(
     val algorithmIdBlock: RegistryIdBlock,
@@ -88,14 +89,12 @@ data class QualityBlock(
             }
             return ASN1Util.encodeTaggedObjects(taggedObjects)
         }*/
-        get() = ASN1Util.encodeTaggedObjects(
-            buildMap {
-                put(0, algorithmIdBlock.aSN1Object)
-                if (score >= 0) {
-                    put(1, ISO39794Util.encodeScoreOrError(score))
-                }
+        get() = buildMap {
+            put(0, algorithmIdBlock.aSN1Object)
+            if (score >= 0) {
+                put(1, ISO39794Util.encodeScoreOrError(score))
             }
-        )
+        }.encode()
 
     companion object {
         private const val serialVersionUID = 8529221328304209845L

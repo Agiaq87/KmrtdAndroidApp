@@ -47,31 +47,31 @@ abstract class AbstractImageInfo
  * @param height the height
  * @param mimeType the mime-type string
  */ private constructor(
-    private var type: Int,
-    private var width: Int,
-    private var height: Int,
-    private var mimeType: String?
+    override var type: Int,
+    override var width: Int,
+    override var height: Int,
+    override var mimeType: String
 ) : ImageInfo {
-    private var imageBytes: ByteArray?
+    private var imageBytes: ByteArray? = null
 
     // FIXME: It's not clear how serialization should work if not fully read. (Clients should only serialize if imageBytes != null.)
     @Transient
     private var splittableInputStream: SplittableInputStream? = null
     private var imagePositionInInputStream = 0
-    private var imageLength = 0
+    override var imageLength = 0
 
     /* PACKAGE ONLY VISIBLE CONSTRUCTORS BELOW */
     /**
      * Constructs a default abstract image info.
      */
-    internal constructor() : this(ImageInfo.Companion.TYPE_UNKNOWN, 0, 0, null)
+    internal constructor() : this(ImageInfo.Companion.TYPE_UNKNOWN, 0, 0, "unknown")
 
     /**
      * Constructs an abstract image info with a type.
      * 
      * @param type the type of image
      */
-    protected constructor(type: Int) : this(type, 0, 0, null)
+    protected constructor(type: Int) : this(type, 0, 0, "unknown")
 
     /**
      * Constructs an abstract image info with a type and a mime-type.
@@ -79,7 +79,7 @@ abstract class AbstractImageInfo
      * @param type the type
      * @param mimeType the mime-type string
      */
-    protected constructor(type: Int, mimeType: String?) : this(type, 0, 0, mimeType)
+    protected constructor(type: Int, mimeType: String) : this(type, 0, 0, mimeType)
 
     /* PUBLIC CONSRTUCTOR BELOW */
     /**
@@ -100,7 +100,7 @@ abstract class AbstractImageInfo
         height: Int,
         inputStream: InputStream,
         imageLength: Long,
-        mimeType: String?
+        mimeType: String
     ) : this(type, width, height, mimeType) {
         readImage(inputStream, imageLength)
     }
@@ -117,53 +117,53 @@ abstract class AbstractImageInfo
      * @return content type
      */
 
-    override fun getType(): Int {
+    /*override fun getType(): Int {
         return type
-    }
+    }*/
 
     /**
      * Returns the mime-type of the encoded image.
      * 
      * @return the mime-type of the encoded image
      */
-    override fun getMimeType(): String? {
+    /*override fun getMimeType(): String? {
         return mimeType
-    }
+    }*/
 
     /**
      * Returns the width of the image.
      * 
      * @return the width of the image
      */
-    override fun getWidth(): Int {
+    /*override fun getWidth(): Int {
         return width
-    }
+    }*/
 
     /**
      * Returns the height of the image.
      * 
      * @return the height of the image
      */
-    override fun getHeight(): Int {
+    /*override fun getHeight(): Int {
         return height
-    }
+    }*/
 
     /**
      * Returns the length of the encoded image.
      * 
      * @return the length of the encoded image
      */
-    override fun getImageLength(): Int {
-        /* DEBUG: START */
+    /*override fun getImageLength(): Int {
+        *//* DEBUG: START *//*
         if (splittableInputStream != null) {
             return imageLength
         }
 
-        /* DEBUG: END */
+        *//* DEBUG: END *//*
         checkNotNull(imageBytes) { "Cannot get length of null" }
 
         return imageBytes!!.size
-    }
+    }*/
 
     /**
      * Returns a textual representation of this image info.
@@ -174,7 +174,7 @@ abstract class AbstractImageInfo
         append(this.javaClass.getSimpleName())
         append(" [")
         append("type: ${typeToString(type)}, ")
-        append("size: ${getImageLength()} ]")
+        append("size: ${imageLength} ]")
     } /*{
         return StringBuilder()
             .append(this.javaClass.getSimpleName())
@@ -189,7 +189,7 @@ abstract class AbstractImageInfo
         var result = 1234567891
         result = 3 * result + 5 * type
         result += 5 * (mimeType?.hashCode() ?: 1337) + 7
-        result += 7 * getImageLength() + 11
+        result += 7 * imageLength + 11
         return result
     }
 
@@ -241,17 +241,17 @@ abstract class AbstractImageInfo
      * 
      * @return an input stream containing the encoded image
      */
-    override fun getImageInputStream(): InputStream {
-        /* DEBUG: START */
+    /*override fun getImageInputStream(): InputStream {
+        *//* DEBUG: START *//*
         if (splittableInputStream != null) {
             return splittableInputStream!!.getInputStream(imagePositionInInputStream)
-            /* DEBUG: END */
+            *//* DEBUG: END *//*
         } else if (imageBytes != null) {
             return ByteArrayInputStream(imageBytes)
         } else {
             throw IllegalStateException("Both the byte buffer and the stream are null")
         }
-    }
+    }*/
 
     /**
      * Clients should call this method after positioning the input stream to the
@@ -302,9 +302,9 @@ abstract class AbstractImageInfo
      * 
      * @param mimeType the new mime-type
      */
-    protected fun setMimeType(mimeType: String?) {
+    /*protected fun setMimeType(mimeType: String?) {
         this.mimeType = mimeType
-    }
+    }*/
 
     /**
      * Sets the type.
@@ -339,7 +339,7 @@ abstract class AbstractImageInfo
      * @param imageBytes the image bytes
      */
     protected fun setImageBytes(imageBytes: ByteArray) {
-        requireNotNull(imageBytes) { "Cannot set null image bytes" }
+        //requireNotNull(imageBytes) { "Cannot set null image bytes" }
 
         try {
             readImage(ByteArrayInputStream(imageBytes), imageBytes.size.toLong())
@@ -379,9 +379,9 @@ abstract class AbstractImageInfo
     @Throws(IOException::class)
     private fun getImageBytes(): ByteArray {
         var inputStream: InputStream? = null
-        val length = getImageLength()
+        val length = imageLength
         val imageBytes = ByteArray(length)
-        inputStream = getImageInputStream()
+        inputStream = imageInputStream
         val imageInputStream = DataInputStream(inputStream)
         imageInputStream.readFully(imageBytes)
         return imageBytes
@@ -399,15 +399,14 @@ abstract class AbstractImageInfo
          * 
          * @return a human readable string
          */
-        private fun typeToString(type: Int): String {
+        private fun typeToString(type: Int): String =
             when (type) {
-                ImageInfo.Companion.TYPE_PORTRAIT -> return "Portrait"
-                ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK -> return "Signature or usual mark"
-                ImageInfo.Companion.TYPE_FINGER -> return "Finger"
-                ImageInfo.Companion.TYPE_IRIS -> return "Iris"
-                ImageInfo.Companion.TYPE_UNKNOWN -> return "Unknown"
+                ImageInfo.TYPE_PORTRAIT -> "Portrait"
+                ImageInfo.TYPE_SIGNATURE_OR_MARK -> "Signature or usual mark"
+                ImageInfo.TYPE_FINGER -> "Finger"
+                ImageInfo.TYPE_IRIS -> "Iris"
+                ImageInfo.TYPE_UNKNOWN -> "Unknown"
                 else -> throw NumberFormatException("Unknown type: " + Integer.toHexString(type))
             }
-        }
     }
 }

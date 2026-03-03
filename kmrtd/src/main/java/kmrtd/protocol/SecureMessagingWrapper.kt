@@ -22,6 +22,7 @@
 package kmrtd.protocol
 
 import kmrtd.Util
+import kmrtd.support.unpad
 import net.sf.scuba.smartcards.APDUWrapper
 import net.sf.scuba.smartcards.CommandAPDU
 import net.sf.scuba.smartcards.ISO7816
@@ -474,7 +475,8 @@ abstract class SecureMessagingWrapper protected constructor(
         val ciphertext = ByteArray(length)
         inputStream.readFully(ciphertext)
         val paddedData = cipher.doFinal(ciphertext)
-        return Util.unpad(paddedData)
+        //return Util.unpad(paddedData)
+        return paddedData.unpad()
     }
 
     /**

@@ -45,6 +45,7 @@ import kmrtd.cbeff.BiometricDataBlock
 import kmrtd.cbeff.CBEFFInfo
 import kmrtd.cbeff.ISO781611
 import kmrtd.cbeff.StandardBiometricHeader
+import kmrtd.support.decodeTaggedObjects
 import kmrtd.support.readASN1Object
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
@@ -90,7 +91,8 @@ class FingerImageDataBlock : Block, BiometricDataBlock {
         asn1Encodable = ASN1Util.checkTag(asn1Encodable, BERTags.APPLICATION, 4)
         require(asn1Encodable is ASN1Sequence) { "Cannot decode!" }
 
-        val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        val taggedObjects =
+            asn1Encodable.decodeTaggedObjects()//ASN1Util.decodeTaggedObjects(asn1Encodable)
         versionBlock = VersionBlock.from(taggedObjects[0])
         representationBlocks =
             FingerImageRepresentationBlock.decodeRepresentationBlocks(taggedObjects[1])
@@ -159,7 +161,7 @@ class FingerImageDataBlock : Block, BiometricDataBlock {
                 + "]")
     }
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         /* PACKAGE */
         get() {
             val taggedObjects: MutableMap<Int, ASN1Encodable?> = mutableMapOf()

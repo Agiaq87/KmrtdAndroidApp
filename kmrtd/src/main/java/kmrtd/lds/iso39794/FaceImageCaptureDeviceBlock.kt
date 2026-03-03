@@ -41,6 +41,7 @@
 package kmrtd.lds.iso39794
 
 import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 
 data class FaceImageCaptureDeviceBlock(
@@ -104,7 +105,7 @@ data class FaceImageCaptureDeviceBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 model?.let{ put(0, model.aSN1Object) }
@@ -146,7 +147,8 @@ data class FaceImageCaptureDeviceBlock(
          */
         @JvmStatic
         fun from(asn1Encodable: ASN1Encodable?): FaceImageCaptureDeviceBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects =
+                asn1Encodable.decodeTaggedObjects()//ASN1Util.decodeTaggedObjects(asn1Encodable)
 
             return FaceImageCaptureDeviceBlock(
                 model = taggedObjects[0]?.let { RegistryIdBlock.from(it) },

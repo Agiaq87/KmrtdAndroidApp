@@ -40,8 +40,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class FaceImageExpressionBlock(
     val isNeutral: Boolean,
@@ -147,7 +148,7 @@ data class FaceImageExpressionBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             mapOf(
                 0 to ASN1Util.encodeBoolean(isNeutral),
@@ -204,7 +205,7 @@ data class FaceImageExpressionBlock(
          */
         @JvmStatic
         fun from(asn1Encodable: ASN1Encodable): FaceImageExpressionBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             if (
                 taggedObjects.containsKey(0) &&

@@ -51,7 +51,7 @@ import java.io.InputStream
 import java.util.Objects
 
 class IrisImageRepresentationBlock(asn1Encodable: ASN1Encodable) : Block(), ImageInfo {
-    enum class ImageDataFormatCode(val code: Int, mimeType: String) :
+    enum class ImageDataFormatCode(override val code: Int, val mimeType: String) :
         EncodableEnum<ImageDataFormatCode> {
         PGM(0, "image/pgm"),
         PPM(1, "image/ppm"),
@@ -59,15 +59,9 @@ class IrisImageRepresentationBlock(asn1Encodable: ASN1Encodable) : Block(), Imag
         JPEG2000_LOSSLESS(3, "image/jp2"),
         JPEG2000_LOSSY(4, "image/jp2");
 
-        val mimeType: String?
-
-        init {
-            this.mimeType = mimeType
-        }
-
         companion object {
             fun fromCode(code: Int): ImageDataFormatCode? {
-                return EncodableEnum.fromCode<ImageDataFormatCode?>(
+                return EncodableEnum.fromCode(
                     code,
                     ImageDataFormatCode::class.java
                 )

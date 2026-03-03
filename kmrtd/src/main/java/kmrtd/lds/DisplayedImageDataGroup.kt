@@ -135,7 +135,7 @@ abstract class DisplayedImageDataGroup : DataGroup {
     }
 
     override fun hashCode(): Int {
-        return 1337 + (if (imageInfos == null) 1 else imageInfos.hashCode()) + 31337
+        return 1337 + (imageInfos?.hashCode() ?: 1) + 31337
     }
 
     override fun equals(other: Any?): Boolean {
@@ -180,7 +180,7 @@ abstract class DisplayedImageDataGroup : DataGroup {
     private fun checkTypesConsistentWithTag() {
         for (imageInfo in imageInfos!!) {
             requireNotNull(imageInfo) { "Found a null image info" }
-            when (imageInfo.getType()) {
+            when (imageInfo.type) {
                 ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK -> require(displayedImageTagToUse == DisplayedImageInfo.Companion.DISPLAYED_SIGNATURE_OR_MARK_TAG) { "\'Portrait\' image cannot be part of a \'Signature or usual mark\' displayed image datagroup" }
                 ImageInfo.Companion.TYPE_PORTRAIT -> require(displayedImageTagToUse == DisplayedImageInfo.Companion.DISPLAYED_PORTRAIT_TAG) { "\'Signature or usual mark\' image cannot be part of a \'Portrait\' displayed image datagroup" }
                 else -> LOGGER.warning("Unsupported image type")

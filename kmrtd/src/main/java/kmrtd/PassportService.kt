@@ -69,32 +69,27 @@ import javax.crypto.SecretKey
  * @version $Revision:352 $
  */
 class PassportService(
-    service: CardService,
-    maxTranceiveLengthForPACEProtocol: Int,
+    private val service: CardService,
+    private val maxTranceiveLengthForPACEProtocol: Int,
     maxTranceiveLengthForSecureMessaging: Int,
-    maxBlockSize: Int,
-    isSFIEnabled: Boolean,
-    shouldCheckMAC: Boolean
-) : AbstractMRTDCardService() {
     /**
      * The file read block size, some passports cannot handle large values.
      */
-    private val maxBlockSize: Int
+    private val maxBlockSize: Int,
+    isSFIEnabled: Boolean,
+    private val shouldCheckMAC: Boolean
+) : AbstractMRTDCardService() {
 
     private var isOpen: Boolean
 
-    private var wrapper: SecureMessagingWrapper? = null
+    override var wrapper: SecureMessagingWrapper? = null
 
     /**
      * Returns the maximum tranceive length of (protected) APDUs.
      * 
      * @return the maximum APDU tranceive length
      */
-    val maxTranceiveLength: Int
-
-    private val maxTranceiveLengthForPACEProtocol: Int
-
-    private val shouldCheckMAC: Boolean
+    val maxTranceiveLength: Int = maxTranceiveLengthForSecureMessaging
 
     private var isAppletSelected: Boolean
 
@@ -102,14 +97,12 @@ class PassportService(
 
     private val appletFileSystem: DefaultFileSystem?
 
-    private val bacSender: BACAPDUSender?
-    private val paceSender: PACEAPDUSender?
-    private val aaSender: AAAPDUSender?
-    private val eacCASender: EACCAAPDUSender?
-    private val eacTASender: EACTAAPDUSender?
-    private val readBinarySender: ReadBinaryAPDUSender
-
-    private val service: CardService
+    private val bacSender: BACAPDUSender = BACAPDUSender(service)
+    private val paceSender: PACEAPDUSender = PACEAPDUSender(service)
+    private val aaSender: AAAPDUSender = AAAPDUSender(service)
+    private val eacCASender: EACCAAPDUSender = EACCAAPDUSender(service)
+    private val eacTASender: EACTAAPDUSender = EACTAAPDUSender(service)
+    private val readBinarySender: ReadBinaryAPDUSender = ReadBinaryAPDUSender(service)
 
     /**
      * Creates a new passport service for accessing the passport.
@@ -148,19 +141,6 @@ class PassportService(
      * check MACs on response APDUs
      */
     init {
-        this.service = service
-
-        this.bacSender = BACAPDUSender(service)
-        this.paceSender = PACEAPDUSender(service)
-        this.aaSender = AAAPDUSender(service)
-        this.eacCASender = EACCAAPDUSender(service)
-        this.eacTASender = EACTAAPDUSender(service)
-        this.readBinarySender = ReadBinaryAPDUSender(service)
-
-        this.maxTranceiveLengthForPACEProtocol = maxTranceiveLengthForPACEProtocol
-        this.maxTranceiveLength = maxTranceiveLengthForSecureMessaging
-        this.maxBlockSize = maxBlockSize
-        this.shouldCheckMAC = shouldCheckMAC
         this.isAppletSelected = false
         this.isOpen = false
 
@@ -179,7 +159,7 @@ class PassportService(
      */
     @Throws(CardServiceException::class)
     override fun open() {
-        if (isOpen()) {
+        if (isOpen) {
             return
         }
         synchronized(this) {
@@ -274,11 +254,11 @@ class PassportService(
      */
     @Synchronized
     @Throws(CardServiceException::class, GeneralSecurityException::class)
-    override fun doBAC(kEnc: SecretKey?, kMac: SecretKey?): BACResult {
+    override fun doBAC(kEnc: SecretKey, kMac: SecretKey): BACResult {
         val bacResult =
             (BACProtocol(bacSender, this.maxTranceiveLength, shouldCheckMAC)).doBAC(kEnc, kMac)
         wrapper = bacResult.wrapper
-        appletFileSystem!!.setWrapper(wrapper)
+        appletFileSystem?.setWrapper(wrapper)
         return bacResult
     }
 
@@ -339,7 +319,7 @@ class PassportService(
             eacCASender, getWrapper(),
             this.maxTranceiveLength, shouldCheckMAC
         )).doCA(keyId, oid, publicKeyOID, publicKey)
-        wrapper = caResult.getWrapper()
+        wrapper = caResult.wrapper
         appletFileSystem!!.setWrapper(wrapper)
         return caResult
     }

@@ -36,14 +36,11 @@ abstract class Block : Serializable {
 
     val encoded: ByteArray?
         get() = runCatching {
-            aSN1Object.toASN1Primitive().getEncoded("DER")
+            aSN1Object?.toASN1Primitive()?.getEncoded("DER")
         }.getOrNull()
 
     abstract override fun hashCode(): Int
 
     abstract override fun equals(other: Any?): Boolean
 
-    companion object {
-        private const val serialVersionUID = -8585852930916738115L
-    }
 }

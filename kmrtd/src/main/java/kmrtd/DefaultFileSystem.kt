@@ -425,20 +425,8 @@ class DefaultFileSystem @JvmOverloads constructor(
      * 
      * @version $Revision: 1908 $
      */
-    private class DefaultFileInfo(fid: Short, length: Int) : FileInfo(), Serializable {
-        private val fid: Short
-        private val buffer: FragmentBuffer
-
-        /**
-         * Constructs a file info.
-         * 
-         * @param fid indicates which file
-         * @param length length of the contents of the file
-         */
-        init {
-            this.fid = fid
-            this.buffer = FragmentBuffer(length)
-        }
+    private class DefaultFileInfo(private val fid: Short, length: Int) : FileInfo(), Serializable {
+        private val buffer: FragmentBuffer = FragmentBuffer(length)
 
         /**
          * Returns the buffer.
@@ -494,7 +482,7 @@ class DefaultFileSystem @JvmOverloads constructor(
          * @param offset the offset
          * @param bytes the bytes to be added
          */
-        fun addFragment(offset: Int, bytes: ByteArray?) {
+        fun addFragment(offset: Int, bytes: ByteArray) {
             buffer.addFragment(offset, bytes)
         }
 

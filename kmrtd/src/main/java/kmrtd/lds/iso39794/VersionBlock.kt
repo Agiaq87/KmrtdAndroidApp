@@ -40,15 +40,15 @@
  */
 package kmrtd.lds.iso39794
 
+import kmrtd.ASN1Util
+import kmrtd.support.encode
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
-import kmrtd.ASN1Util
-import java.io.Serializable
 
 data class VersionBlock(
     val generation: Int,
     val year: Int
-) : Block(), Serializable {
+) : Block() {
 
 
     /*constructor(generation: Int, year: Int) {
@@ -90,12 +90,10 @@ data class VersionBlock(
     }*/
 
     override val aSN1Object: ASN1Encodable
-        get() = ASN1Util.encodeTaggedObjects(
-            mapOf(
-                0 to ASN1Util.encodeInt(generation),
-                1 to ASN1Util.encodeInt(year)
-            )
-        )
+        get() = mapOf(
+            0 to generation.encode(),
+            1 to year.encode()
+        ).encode()
         /*get() {
             val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
                 HashMap()
@@ -105,8 +103,6 @@ data class VersionBlock(
         }*/
 
     companion object {
-        private const val serialVersionUID = 8681451530654803679L
-
         /**
          * Factory method
          *

@@ -40,12 +40,13 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
 import kmrtd.lds.iso39794.faceimagelandmark.AnthropometricLandmarkNameCode
 import kmrtd.lds.iso39794.faceimagelandmark.AnthropometricLandmarkPointIdCode
 import kmrtd.lds.iso39794.faceimagelandmark.AnthropometricLandmarkPointNameCode
 import kmrtd.lds.iso39794.faceimagelandmark.MPEGFeaturePointCode
+import kmrtd.support.decodeTaggedObjects
+import org.bouncycastle.asn1.ASN1Encodable
 
 interface FaceImageLandmarkKind {
     override fun hashCode(): Int
@@ -66,11 +67,11 @@ interface FaceImageLandmarkKind {
         //  }
         @JvmStatic
         fun decodeLandmarkKind(asn1Encodable: ASN1Encodable?): FaceImageLandmarkKind? {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             if (taggedObjects.containsKey(0)) {
                 // base case...
-                val baseTaggedObjects = ASN1Util.decodeTaggedObjects(taggedObjects[0])
+                val baseTaggedObjects = taggedObjects[0].decodeTaggedObjects()
                 if (baseTaggedObjects.containsKey(0)) {
                     // MPEG feature point case...
                     return MPEGFeaturePointCode.fromCode(
@@ -91,7 +92,7 @@ interface FaceImageLandmarkKind {
             val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
             if (taggedObjects.containsKey(0)) {
                 // base case...
-                val baseTaggedObjects = ASN1Util.decodeTaggedObjects(taggedObjects[0])
+                val baseTaggedObjects = taggedObjects[0].decodeTaggedObjects()
 
                 when {
                     baseTaggedObjects.containsKey(0) -> AnthropometricLandmarkNameCode.fromCode(

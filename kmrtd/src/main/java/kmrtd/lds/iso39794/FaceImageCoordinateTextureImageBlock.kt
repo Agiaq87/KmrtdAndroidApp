@@ -40,8 +40,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
+import org.bouncycastle.asn1.ASN1Encodable
 import java.math.BigInteger
 
 data class FaceImageCoordinateTextureImageBlock(
@@ -80,7 +81,7 @@ data class FaceImageCoordinateTextureImageBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             mapOf(
                 0 to ASN1Util.encodeBigInteger(uInPixel),
@@ -109,7 +110,8 @@ data class FaceImageCoordinateTextureImageBlock(
          */
         @JvmStatic
         fun from(asn1Encodable: ASN1Encodable?): FaceImageCoordinateTextureImageBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            //val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return FaceImageCoordinateTextureImageBlock(
                 uInPixel = ASN1Util.decodeBigInteger(taggedObjects[0]),

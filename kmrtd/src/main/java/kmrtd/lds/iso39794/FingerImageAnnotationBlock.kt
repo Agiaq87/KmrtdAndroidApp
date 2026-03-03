@@ -91,7 +91,7 @@ data class FingerImageAnnotationBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 positionCode?.let {

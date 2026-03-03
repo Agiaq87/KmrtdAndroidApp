@@ -50,6 +50,7 @@ import kmrtd.ASN1Util
 import kmrtd.lds.iso39794.faceimageidentity.EyeColourCode
 import kmrtd.lds.iso39794.faceimageidentity.GenderCode
 import kmrtd.lds.iso39794.faceimageidentity.HairColourCode
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1TaggedObject
@@ -165,7 +166,7 @@ data class FaceImageIdentityMetadataBlock(
                     + "]")
         }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 genderCode?.let { put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code)) }
@@ -236,7 +237,7 @@ data class FaceImageIdentityMetadataBlock(
         fun from(asn1Encodable: ASN1Encodable?): FaceImageIdentityMetadataBlock {
             require(!(asn1Encodable !is ASN1Sequence && asn1Encodable !is ASN1TaggedObject)) { "Cannot decode!" }
 
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return FaceImageIdentityMetadataBlock(
                 genderCode = if (taggedObjects.containsKey(0)) GenderCode.fromCode(

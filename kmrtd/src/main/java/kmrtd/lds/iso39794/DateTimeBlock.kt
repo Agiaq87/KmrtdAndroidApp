@@ -40,8 +40,10 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
+import kmrtd.support.encode
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class DateTimeBlock(
     val year: Int,
@@ -55,29 +57,27 @@ data class DateTimeBlock(
 
     override val aSN1Object: ASN1Encodable
         /* PACKAGE */
-        get() = ASN1Util.encodeTaggedObjects(
-            buildMap {
-                put(0, ASN1Util.encodeInt(year))
-                if (month >= 0) {
-                    put(1, ASN1Util.encodeInt(month))
-                }
-                if (day >= 0) {
-                    put(2, ASN1Util.encodeInt(day))
-                }
-                if (hour >= 0) {
-                    put(3, ASN1Util.encodeInt(hour))
-                }
-                if (minute >= 0) {
-                    put(4, ASN1Util.encodeInt(minute))
-                }
-                if (second >= 0) {
-                    put(5, ASN1Util.encodeInt(second))
-                }
-                if (millisecond >= 0) {
-                    put(6, ASN1Util.encodeInt(millisecond))
-                }
+        get() = buildMap {
+            put(0, year.encode())
+            if (month >= 0) {
+                put(1, month.encode())
             }
-        )
+            if (day >= 0) {
+                put(2, day.encode())
+            }
+            if (hour >= 0) {
+                put(3, hour.encode())
+            }
+            if (minute >= 0) {
+                put(4, minute.encode())
+            }
+            if (second >= 0) {
+                put(5, second.encode())
+            }
+            if (millisecond >= 0) {
+                put(6, millisecond.encode())
+            }
+        }.encode()
         /*get() {
             val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
                 HashMap<Int?, ASN1Encodable?>()
@@ -128,7 +128,8 @@ data class DateTimeBlock(
          */
         @JvmStatic
         fun from(asn1Encodable: ASN1Encodable?): DateTimeBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            //val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return DateTimeBlock(
                 year = ASN1Util.decodeInt(taggedObjects[0]),

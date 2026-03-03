@@ -163,10 +163,10 @@ class DisplayedImageInfo : AbstractImageInfo {
          * @return the mime-type
          */
         private fun getMimeTypeFromType(type: Int): String {
-            when (type) {
-                ImageInfo.Companion.TYPE_PORTRAIT -> return "image/jpeg"
-                ImageInfo.Companion.TYPE_FINGER -> return "image/x-wsq"
-                ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK -> return "image/jpeg"
+            return when (type) {
+                ImageInfo.Companion.TYPE_PORTRAIT -> "image/jpeg"
+                ImageInfo.Companion.TYPE_FINGER -> "image/x-wsq"
+                ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK -> "image/jpeg"
                 else -> throw NumberFormatException("Unknown type: " + Integer.toHexString(type))
             }
         }
@@ -179,9 +179,9 @@ class DisplayedImageInfo : AbstractImageInfo {
          * @return the corresponding image info tag
          */
         private fun getDisplayedImageTagFromType(type: Int): Int {
-            when (type) {
-                ImageInfo.Companion.TYPE_PORTRAIT -> return DISPLAYED_PORTRAIT_TAG
-                ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK -> return DISPLAYED_SIGNATURE_OR_MARK_TAG
+            return when (type) {
+                ImageInfo.Companion.TYPE_PORTRAIT -> DISPLAYED_PORTRAIT_TAG
+                ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK -> DISPLAYED_SIGNATURE_OR_MARK_TAG
                 else -> throw NumberFormatException("Unknown type: " + Integer.toHexString(type))
             }
         }
@@ -194,9 +194,9 @@ class DisplayedImageInfo : AbstractImageInfo {
          * @return the corresponding image info type
          */
         private fun getTypeFromDisplayedImageTag(tag: Int): Int {
-            when (tag) {
-                DISPLAYED_PORTRAIT_TAG -> return ImageInfo.Companion.TYPE_PORTRAIT
-                DISPLAYED_SIGNATURE_OR_MARK_TAG -> return ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK
+            return when (tag) {
+                DISPLAYED_PORTRAIT_TAG -> ImageInfo.Companion.TYPE_PORTRAIT
+                DISPLAYED_SIGNATURE_OR_MARK_TAG -> ImageInfo.Companion.TYPE_SIGNATURE_OR_MARK
                 else -> throw NumberFormatException("Unknown tag: " + Integer.toHexString(tag))
             }
         }

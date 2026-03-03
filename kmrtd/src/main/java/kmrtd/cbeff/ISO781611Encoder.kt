@@ -36,18 +36,9 @@ import java.util.Arrays
  * 
  * @version $Revision: 1897 $
 </B> */
-class ISO781611Encoder<B : BiometricDataBlock?>(private val bdbEncoder: BiometricDataBlockEncoder<B?>) :
+class ISO781611Encoder<B : BiometricDataBlock>(private val bdbEncoder: BiometricDataBlockEncoder<B>) :
     ISO781611 {
-    private val encodingType: BiometricEncodingType
-
-    /**
-     * Constructs an ISO7816-11 encoder that uses the given BDB encoder.
-     * 
-     * @param bdbEncoder the BDB encoder to use
-     */
-    init {
-        this.encodingType = bdbEncoder.encodingType
-    }
+    private val encodingType: BiometricEncodingType = bdbEncoder.encodingType
 
     /**
      * Writes a BIT group to an output stream.

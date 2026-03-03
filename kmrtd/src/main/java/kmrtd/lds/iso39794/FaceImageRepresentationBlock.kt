@@ -241,7 +241,7 @@ data class FaceImageRepresentationBlock(
         return imageRepresentation2DBlock.representationData2DInputStream
     }
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 put(0, ASN1Util.encodeBigInteger(representationId))

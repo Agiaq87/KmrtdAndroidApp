@@ -40,9 +40,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
 import kmrtd.lds.iso39794.RegistryIdBlock.Companion.from
+import org.bouncycastle.asn1.ASN1Encodable
 import java.util.Objects
 
 class FingerImageSegmentationBlock internal constructor(asn1Encodable: ASN1Encodable?) : Block() {
@@ -88,7 +88,7 @@ class FingerImageSegmentationBlock internal constructor(asn1Encodable: ASN1Encod
                 + "]")
     }
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             mapOf(
                 0 to algorithmIdBlock.aSN1Object,

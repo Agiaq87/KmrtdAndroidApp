@@ -40,8 +40,8 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class FaceImagePropertiesBlock(
     val hasGlasses: Boolean?,
@@ -162,7 +162,7 @@ data class FaceImagePropertiesBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 hasGlasses?.let{

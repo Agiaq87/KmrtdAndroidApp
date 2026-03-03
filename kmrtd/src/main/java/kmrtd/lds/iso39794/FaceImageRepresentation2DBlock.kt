@@ -40,13 +40,14 @@
  */
 package kmrtd.lds.iso39794
 
+import kmrtd.ASN1Util
+import kmrtd.lds.iso39794.faceimage2d.ImageDataFormatCode.Companion.toMimeType
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.ASN1TaggedObject
 import org.bouncycastle.asn1.DEROctetString
-import kmrtd.ASN1Util
-import kmrtd.lds.iso39794.faceimage2d.ImageDataFormatCode.Companion.toMimeType
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
@@ -160,25 +161,27 @@ data class FaceImageRepresentation2DBlock(
         return result
     }
 
-    override val aSN1Object: ASN1Encodable
-        get() = ASN1Util.encodeTaggedObjects(buildMap {
-            put(0, DEROctetString(representationData2DBytes))
-            put(1, imageInformation2DBlock.aSN1Object)
-            captureDevice2DBlock?.let {
-                put(2, it.aSN1Object)
+    override val aSN1Object: ASN1Encodable?
+        get() = ASN1Util.encodeTaggedObjects(
+            buildMap {
+                put(0, DEROctetString(representationData2DBytes))
+                put(1, imageInformation2DBlock.aSN1Object)
+                captureDevice2DBlock?.let {
+                    put(2, it.aSN1Object)
+                }
             }
-        })
-        /* PACKAGE */
-        /*get() {
-            val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
-                HashMap<Int?, ASN1Encodable?>()
-            taggedObjects[0] = DEROctetString(representationData2DBytes)
-            taggedObjects[1] = imageInformation2DBlock.aSN1Object
-            if (captureDevice2DBlock != null) {
-                taggedObjects[2] = captureDevice2DBlock!!.aSN1Object
-            }
-            return ASN1Util.encodeTaggedObjects(taggedObjects)
-        }*/
+        )
+    /* PACKAGE */
+    /*get() {
+        val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
+            HashMap<Int?, ASN1Encodable?>()
+        taggedObjects[0] = DEROctetString(representationData2DBytes)
+        taggedObjects[1] = imageInformation2DBlock.aSN1Object
+        if (captureDevice2DBlock != null) {
+            taggedObjects[2] = captureDevice2DBlock!!.aSN1Object
+        }
+        return ASN1Util.encodeTaggedObjects(taggedObjects)
+    }*/
 
     companion object {
         private const val serialVersionUID = 1942286473160393593L
@@ -197,12 +200,14 @@ data class FaceImageRepresentation2DBlock(
         fun from(asn1Encodable: ASN1Encodable?): FaceImageRepresentation2DBlock {
             require(!(asn1Encodable !is ASN1Sequence && asn1Encodable !is ASN1TaggedObject)) { "Cannot decode!" }
 
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return FaceImageRepresentation2DBlock(
                 representationData2DBytes = ASN1OctetString.getInstance(taggedObjects[0]).octets,
                 imageInformation2DBlock = FaceImageInformation2DBlock.from(taggedObjects[1]),
-                captureDevice2DBlock = if (taggedObjects.containsKey(2)) FaceImageCaptureDevice2DBlock(taggedObjects[2]) else null
+                captureDevice2DBlock = if (taggedObjects.containsKey(2)) FaceImageCaptureDevice2DBlock(
+                    taggedObjects[2]
+                ) else null
             )
         }
     }

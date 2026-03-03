@@ -35,6 +35,7 @@
 package kmrtd.lds.iso39794
 
 import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 import java.io.Serializable
 
@@ -65,7 +66,7 @@ interface FaceImageLandmarkCoordinates : Serializable {
         //  }
         @JvmStatic
         fun decodeLandmarkCoordinates(asn1Encodable: ASN1Encodable?): FaceImageLandmarkCoordinates? {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
             if (taggedObjects.containsKey(0)) {
                 val baseTaggedObjects = ASN1Util.decodeTaggedObjects(taggedObjects[0])
                 if (baseTaggedObjects.containsKey(0)) {

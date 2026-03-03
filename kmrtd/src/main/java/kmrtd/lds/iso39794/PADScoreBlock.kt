@@ -40,8 +40,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.support.encode
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class PADScoreBlock(
     val mechanismIdBlock: RegistryIdBlock,
@@ -85,12 +86,10 @@ data class PADScoreBlock(
 
     override val aSN1Object: ASN1Encodable
         get() =
-            ASN1Util.encodeTaggedObjects(
-                mapOf (
-                    0 to mechanismIdBlock.aSN1Object,
-                    1 to ISO39794Util.encodeScoreOrError(score)
-                )
-            )
+            mapOf(
+                0 to mechanismIdBlock.aSN1Object,
+                1 to ISO39794Util.encodeScoreOrError(score)
+            ).encode()
         /*get() {
             val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
                 HashMap<Int?, ASN1Encodable?>()
@@ -106,7 +105,7 @@ data class PADScoreBlock(
         @JvmStatic
         fun decodePADScoreBlocks(asn1Encodable: ASN1Encodable?): List<PADScoreBlock> /*{*/ =
             if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-                ASN1Util.list(asn1Encodable).map { from(it) }
+                ASN1Util.list(asn1Encodable)?.map { from(it) }
             } else {
                 listOf(from(asn1Encodable))
             }

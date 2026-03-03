@@ -6,8 +6,9 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
 import kmrtd.ASN1Util
+import kmrtd.support.encode
+import org.bouncycastle.asn1.ASN1Encodable
 
 data class RollAngleBlock(
     val angle: Int,
@@ -40,12 +41,10 @@ data class RollAngleBlock(
     }*/
 
     override val aSN1Object: ASN1Encodable
-        get() = ASN1Util.encodeTaggedObjects(
-            mapOf(
-                0 to ASN1Util.encodeInt(angle),
-                1 to ASN1Util.encodeInt(uncertainty)
-            )
-        )
+        get() = mapOf(
+            0 to angle.encode(),
+            1 to uncertainty.encode()
+        ).encode()
 /*        get() {
             val taggedObjects: MutableMap<Int?, ASN1Encodable?> = HashMap<Int?, ASN1Encodable?>()
             taggedObjects.put(0, ASN1Util.encodeInt(angle))

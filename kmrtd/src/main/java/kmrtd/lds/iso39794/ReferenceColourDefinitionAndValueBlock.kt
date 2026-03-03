@@ -6,10 +6,10 @@
  */
 package kmrtd.lds.iso39794
 
+import kmrtd.ASN1Util
+import kmrtd.support.encode
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1OctetString
-import org.bouncycastle.asn1.DEROctetString
-import kmrtd.ASN1Util
 
 data class ReferenceColourDefinitionAndValueBlock(
     val referenceColourDefinition: ByteArray?,
@@ -69,16 +69,14 @@ data class ReferenceColourDefinitionAndValueBlock(
     }
 
     override val aSN1Object: ASN1Encodable
-        get() = ASN1Util.encodeTaggedObjects(
-            buildMap {
-                referenceColourDefinition?.let{
-                    put(0, DEROctetString(it))
-                }
-                referenceColourValue?.let {
-                    put(1, DEROctetString(it))
-                }
+        get() = buildMap {
+            referenceColourDefinition?.let {
+                put(0, it.encode())
             }
-        )
+            referenceColourValue?.let {
+                put(1, it.encode())
+            }
+        }.encode()
         /*get() {
             val taggedObjects: MutableMap<Int?, ASN1Encodable?> = HashMap<Int?, ASN1Encodable?>()
             if (referenceColourDefinition != null) {

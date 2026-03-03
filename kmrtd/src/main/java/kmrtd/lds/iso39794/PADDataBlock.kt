@@ -46,6 +46,7 @@ import kmrtd.lds.iso39794.pad.PADCaptureContextCode
 import kmrtd.lds.iso39794.pad.PADCriteriaCategoryCode
 import kmrtd.lds.iso39794.pad.PADDecisionCode
 import kmrtd.lds.iso39794.pad.PADSupervisionLevelCode
+import kmrtd.support.encode
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DEROctetString
@@ -201,41 +202,39 @@ data class PADDataBlock(
         }*/
 
     override val aSN1Object: ASN1Encodable
-        get() = ASN1Util.encodeTaggedObjects(
-            buildMap {
-                pADDecisionCode?.let {
-                    put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
-                }
-                padScoreBlocks?.let {
-                    put(1, ISO39794Util.encodeBlocks(it))
-                }
-                padExtendedDataBlocks?.let {
-                    put(2, ISO39794Util.encodeBlocks(it))
-
-                }
-                pADCaptureContextCode?.let {
-                    put(3, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
-                }
-                pADSupervisionLevelCode?.let {
-                    put(4, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
-                }
-                if (riskLevel >= 0) {
-                    put(5, ASN1Util.encodeInt(riskLevel))
-                }
-                pADCriteriaCategoryCode?.let {
-                    put(6, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
-                }
-                parameter?.let {
-                    put(7, DEROctetString(it))
-                }
-                challenges?.let {
-                    put(8, encodePADChallenges(it))
-                }
-                captureDateTimeBlock?.let {
-                    put(9, it.aSN1Object)
-                }
+        get() = buildMap {
+            pADDecisionCode?.let {
+                put(0, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
             }
-        )
+            padScoreBlocks?.let {
+                put(1, ISO39794Util.encodeBlocks(it.toMutableList()))
+            }
+            padExtendedDataBlocks?.let {
+                put(2, ISO39794Util.encodeBlocks(it.toMutableList()))
+
+            }
+            pADCaptureContextCode?.let {
+                put(3, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+            }
+            pADSupervisionLevelCode?.let {
+                put(4, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+            }
+            if (riskLevel >= 0) {
+                put(5, riskLevel.encode())
+            }
+            pADCriteriaCategoryCode?.let {
+                put(6, ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(it.code))
+            }
+            parameter?.let {
+                put(7, DEROctetString(it))
+            }
+            challenges?.let {
+                put(8, encodePADChallenges(it))
+            }
+            captureDateTimeBlock?.let {
+                put(9, it.aSN1Object)
+            }
+        }.encode()
     /*get() {
         if (pADDecisionCode != null) {
             taggedObjects[0] = ISO39794Util.encodeCodeAsChoiceExtensionBlockFallback(pADDecisionCode.code)

@@ -78,7 +78,7 @@ abstract class AbstractMRTDCardService : FileSystemCardService() {
      * @throws GeneralSecurityException on security primitives related problems
      */
     @Throws(CardServiceException::class, GeneralSecurityException::class)
-    abstract fun doBAC(kEnc: SecretKey?, kMac: SecretKey?): BACResult?
+    abstract fun doBAC(kEnc: SecretKey, kMac: SecretKey): BACResult
 
     /**
      * Performs the PACE 2.0 / SAC protocol.

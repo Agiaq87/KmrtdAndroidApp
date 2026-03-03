@@ -42,6 +42,7 @@ package kmrtd.lds.iso39794
 
 import kmrtd.ASN1Util
 import kmrtd.lds.iso39794.faceimagecapturedevice2d.CaptureDeviceTechnologyId2DCode
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
 
@@ -111,7 +112,7 @@ data class FaceImageCaptureDevice2DBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 captureDeviceSpectral2DBlock?.let {
@@ -153,8 +154,8 @@ data class FaceImageCaptureDevice2DBlock(
         fun from(asn1Encodable: ASN1Encodable): FaceImageCaptureDevice2DBlock {
             if (asn1Encodable is ASN1Sequence) {
 
-                val taggedObjects =
-                    ASN1Util.decodeTaggedObjects(ASN1Sequence.getInstance(asn1Encodable))
+                val taggedObjects = ASN1Sequence.getInstance(asn1Encodable).decodeTaggedObjects()
+                //ASN1Util.decodeTaggedObjects(ASN1Sequence.getInstance(asn1Encodable))
 
                 return FaceImageCaptureDevice2DBlock(
                     captureDeviceSpectral2DBlock = if (taggedObjects.containsKey(0)) FaceImageCaptureDeviceSpectral2DBlock.from(

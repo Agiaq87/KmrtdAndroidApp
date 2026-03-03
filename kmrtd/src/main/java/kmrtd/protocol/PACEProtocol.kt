@@ -31,6 +31,7 @@ import kmrtd.PassportService
 import kmrtd.Util
 import kmrtd.lds.PACEInfo
 import kmrtd.lds.PACEInfo.DHCParameterSpec
+import kmrtd.support.unpad
 import net.sf.scuba.smartcards.CardServiceException
 import net.sf.scuba.tlv.TLVInputStream
 import net.sf.scuba.tlv.TLVOutputStream
@@ -364,7 +365,8 @@ class PACEProtocol(
                 )
                 val paddedChipAuthenticationData =
                     decryptCipher.doFinal(encryptedChipAuthenticationData)
-                chipAuthenticationData = Util.unpad(paddedChipAuthenticationData)
+                //chipAuthenticationData = Util.unpad(paddedChipAuthenticationData)
+                chipAuthenticationData = paddedChipAuthenticationData.unpad()
             } catch (gse: GeneralSecurityException) {
                 LOGGER.log(Level.WARNING, "Could not decrypt Chip Authentication data", gse)
             }

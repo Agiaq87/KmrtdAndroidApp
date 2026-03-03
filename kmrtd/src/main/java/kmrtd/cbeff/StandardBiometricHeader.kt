@@ -35,25 +35,16 @@ import java.util.TreeMap
  * 
  * @since 0.4.7
  */
-class StandardBiometricHeader(elements: MutableMap<Int?, ByteArray?>?) : Serializable {
-    private val elements: SortedMap<Int?, ByteArray?>?
-
-    /**
-     * Constructs a standard biometric header.
-     * 
-     * @param elements the elements, consisting of a tag and value
-     */
-    init {
-        this.elements = TreeMap<Int?, ByteArray?>(elements)
-    }
+class StandardBiometricHeader(elements: Map<Int, ByteArray?>) : Serializable {
+    private val elements: SortedMap<Int, ByteArray?> = TreeMap<Int, ByteArray?>(elements)
 
     /**
      * Returns the elements of this standard biometric header.
      * 
      * @return the elements, each consisting of a tag and value
      */
-    fun getElements(): SortedMap<Int?, ByteArray?> {
-        return TreeMap<Int?, ByteArray?>(elements)
+    fun getElements(): SortedMap<Int, ByteArray?> {
+        return TreeMap<Int, ByteArray?>(elements)
     }
 
     /**
@@ -64,10 +55,7 @@ class StandardBiometricHeader(elements: MutableMap<Int?, ByteArray?>?) : Seriali
      * @return a boolean indicating the format type is present and equal to the given value
      */
     fun hasFormatType(formatTypeValue: Int): Boolean {
-        val actualFormatTypeValue = elements!!.get(ISO781611.FORMAT_TYPE_TAG)
-        if (actualFormatTypeValue == null) {
-            return false
-        }
+        val actualFormatTypeValue = elements[ISO781611.FORMAT_TYPE_TAG] ?: return false
         if (actualFormatTypeValue.size != 2) {
             return false
         }
@@ -81,13 +69,13 @@ class StandardBiometricHeader(elements: MutableMap<Int?, ByteArray?>?) : Seriali
         val result = StringBuilder()
         result.append("StandardBiometricHeader [")
         var isFirst = true
-        for (entry in elements!!.entries) {
+        for (entry in elements.entries) {
             if (isFirst) {
                 isFirst = false
             } else {
                 result.append(", ")
             }
-            result.append(Integer.toHexString(entry.key!!)).append(" -> ")
+            result.append(Integer.toHexString(entry.key)).append(" -> ")
                 .append(Hex.bytesToHexString(entry.value))
         }
         result.append("]")
@@ -97,28 +85,26 @@ class StandardBiometricHeader(elements: MutableMap<Int?, ByteArray?>?) : Seriali
     override fun hashCode(): Int {
         val prime = 31
         var result = 1
-        result = prime * result + (if (elements == null) 0 else elements.hashCode())
+        result = prime * result + (elements.hashCode())
         return result
     }
 
-    override fun equals(obj: Any?): Boolean {
-        if (this === obj) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) {
             return true
         }
-        if (obj == null) {
+        if (other == null) {
             return false
         }
-        if (javaClass != obj.javaClass) {
+        if (javaClass != other.javaClass) {
             return false
         }
 
-        val other = obj as StandardBiometricHeader
-        return equals(elements, other.elements)
+        val that = other as StandardBiometricHeader
+        return equals(elements, that.elements)
     }
 
     companion object {
-        private const val serialVersionUID = 4113147521594478513L
-
         /**
          * Format owner identifier of ISO/IEC JTC1/SC37. See:
          * https://www.ibia.org/cbeff/iso/bdb-format-identifiers.
@@ -174,28 +160,22 @@ class StandardBiometricHeader(elements: MutableMap<Int?, ByteArray?>?) : Seriali
          * @return a boolean indicating equality
          */
         private fun equals(
-            elements1: MutableMap<Int?, ByteArray?>?,
-            elements2: MutableMap<Int?, ByteArray?>?
+            elements1: MutableMap<Int, ByteArray?>,
+            elements2: MutableMap<Int, ByteArray?>
         ): Boolean {
-            if (elements1 == null && elements2 != null) {
-                return false
-            }
-            if (elements1 != null && elements2 == null) {
-                return false
-            }
 
             if (elements1 === elements2) {
                 return true
             }
 
-            if (elements1!!.keys != elements2!!.keys) {
+            if (elements1.keys != elements2.keys) {
                 return false
             }
 
             for (entry in elements1.entries) {
-                val key: Int = entry.key!!
+                val key: Int = entry.key
                 val bytes = entry.value
-                val otherBytes = elements2.get(key)
+                val otherBytes = elements2[key]
                 if (!bytes.contentEquals(otherBytes)) {
                     return false
                 }

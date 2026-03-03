@@ -147,7 +147,7 @@ abstract class AbstractListInfo<R : Serializable?> : AbstractLDSInfo() {
      * @param outputStream the stream to write to
      */
     @Throws(IOException::class)
-    abstract override fun writeObject(outputStream: OutputStream?)
+    abstract override fun writeObject(outputStream: OutputStream)
 
     /**
      * Reads this value from a stream.
@@ -162,6 +162,6 @@ abstract class AbstractListInfo<R : Serializable?> : AbstractLDSInfo() {
     companion object {
         private const val serialVersionUID = 2970076896364365191L
 
-        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+        private val LOGGER: Logger = Logger.getLogger("kmrtd")
     }
 }

@@ -273,7 +273,7 @@ data class FingerImageRepresentationBlock(
          */
         get() = toBiometricSubtype(position)
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() {
             val taggedObjects: MutableMap<Int?, ASN1Encodable?> =
                 HashMap<Int?, ASN1Encodable?>()

@@ -40,14 +40,15 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
-import org.bouncycastle.asn1.ASN1Sequence
-import org.bouncycastle.asn1.ASN1TaggedObject
 import kmrtd.ASN1Util
 import kmrtd.lds.iso39794.faceimage2d.FaceImageKind2DCode
 import kmrtd.lds.iso39794.faceimage2d.ImageColourSpaceCode
 import kmrtd.lds.iso39794.faceimage2d.ImageDataFormatCode
 import kmrtd.lds.iso39794.faceimage2d.LossyTransformationAttemptsCode
+import kmrtd.support.decodeTaggedObjects
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.ASN1TaggedObject
 
 data class FaceImageInformation2DBlock(
     val imageSizeBlock: ImageSizeBlock?,
@@ -214,7 +215,7 @@ data class FaceImageInformation2DBlock(
                 + "]")
     }*/
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             buildMap {
                 imageDataFormatCode?.let {
@@ -343,7 +344,7 @@ data class FaceImageInformation2DBlock(
         fun from(asn1Encodable: ASN1Encodable?): FaceImageInformation2DBlock {
             require(!(asn1Encodable !is ASN1Sequence && asn1Encodable !is ASN1TaggedObject)) { "Cannot decode!" }
 
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return FaceImageInformation2DBlock(
                 imageDataFormatCode = if (taggedObjects.containsKey(0)) ImageDataFormatCode.fromCode(

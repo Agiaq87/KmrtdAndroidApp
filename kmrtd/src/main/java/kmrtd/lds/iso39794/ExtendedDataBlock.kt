@@ -40,11 +40,11 @@
  */
 package kmrtd.lds.iso39794
 
+import kmrtd.ASN1Util
+import kmrtd.support.decodeTaggedObjects
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1OctetString
 import org.bouncycastle.asn1.DEROctetString
-import kmrtd.ASN1Util
-import kmrtd.lds.iso39794.RegistryIdBlock.Companion.from
 
 data class ExtendedDataBlock(
     val dataTypeIdBlock: RegistryIdBlock,
@@ -106,7 +106,7 @@ data class ExtendedDataBlock(
         return result
     }
 
-    override val aSN1Object: ASN1Encodable
+    override val aSN1Object: ASN1Encodable?
         get() = ASN1Util.encodeTaggedObjects(
             mapOf(
                 0 to dataTypeIdBlock.aSN1Object,
@@ -128,7 +128,7 @@ data class ExtendedDataBlock(
         @JvmStatic
         fun decodeExtendedDataBlocks(asn1Encodable: ASN1Encodable): List<ExtendedDataBlock> =
             if (ASN1Util.isSequenceOfSequences(asn1Encodable)) {
-                ASN1Util.list(asn1Encodable).map { from(it) }
+                ASN1Util.list(asn1Encodable).map { ExtendedDataBlock.from(it) }
             } else {
                 listOf(from(asn1Encodable))
             }
@@ -155,11 +155,12 @@ data class ExtendedDataBlock(
          * }
          */
         @JvmStatic
-        fun from(asn1Encodable: ASN1Encodable): ExtendedDataBlock {
-            val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+        fun from(asn1Encodable: ASN1Encodable?): ExtendedDataBlock {
+            //val taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable)
+            val taggedObjects = asn1Encodable.decodeTaggedObjects()
 
             return ExtendedDataBlock(
-                dataTypeIdBlock = from(taggedObjects[0]),
+                dataTypeIdBlock = RegistryIdBlock.from(taggedObjects[0]),
                 data = ASN1OctetString.getInstance(taggedObjects[1]).octets
             )
         }
