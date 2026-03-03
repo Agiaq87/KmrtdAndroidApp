@@ -68,7 +68,7 @@ import java.util.logging.Logger
  * @version $Revision: 1808 $
  */
 class FaceImageInfo : AbstractImageInfo {
-    private var recordLength: Long = 0
+    override var recordLength: Long = 0
 
     /**
      * Returns the gender
@@ -205,7 +205,7 @@ class FaceImageInfo : AbstractImageInfo {
     }
 
     @Throws(IOException::class)
-    override fun readObject(inputStream: InputStream) {
+    override fun readObject(inputStream: InputStream?) {
         val dataIn =
             if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
 

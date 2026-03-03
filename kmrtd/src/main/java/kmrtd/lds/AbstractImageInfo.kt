@@ -116,6 +116,7 @@ abstract class AbstractImageInfo
      * 
      * @return content type
      */
+
     override fun getType(): Int {
         return type
     }
@@ -169,7 +170,12 @@ abstract class AbstractImageInfo
      * 
      * @return a textual representation of this image info
      */
-    override fun toString(): String {
+    override fun toString(): String = buildString {
+        append(this.javaClass.getSimpleName())
+        append(" [")
+        append("type: ${typeToString(type)}, ")
+        append("size: ${getImageLength()} ]")
+    } /*{
         return StringBuilder()
             .append(this.javaClass.getSimpleName())
             .append(" [")
@@ -177,7 +183,7 @@ abstract class AbstractImageInfo
             .append("size: ").append(getImageLength())
             .append("]")
             .toString()
-    }
+    }*/
 
     override fun hashCode(): Int {
         var result = 1234567891

@@ -263,14 +263,14 @@ object Util {
                     System.arraycopy(hashResult, 0, keyBytes, 0, 32)
                 }
 
-                else -> throw IllegalArgumentException("KDF can only use AES with 128-bit, 192-bit key or 256-bit length, found: " + keyLength + "-bit key length")
+                else -> throw IllegalArgumentException("KDF can only use AES with 128-bit, 192-bit key or 256-bit length, found: $keyLength-bit key length")
             }
         }
 
-        if (paceKeyReference == PassportService.Companion.NO_PACE_KEY_REFERENCE) {
-            return SecretKeySpec(keyBytes, cipherAlg)
+        return if (paceKeyReference == PassportService.Companion.NO_PACE_KEY_REFERENCE) {
+            SecretKeySpec(keyBytes, cipherAlg)
         } else {
-            return PACESecretKeySpec(keyBytes, cipherAlg, paceKeyReference)
+            PACESecretKeySpec(keyBytes, cipherAlg, paceKeyReference)
         }
     }
 

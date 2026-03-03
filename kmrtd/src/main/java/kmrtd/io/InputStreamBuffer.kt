@@ -35,9 +35,11 @@ import kotlin.math.min
  * @author The JMRTD team (info@jmrtd.org)
  */
 class InputStreamBuffer(inputStream: InputStream, length: Int) {
-    private val carrier: PositionInputStream
+    private val carrier: PositionInputStream = PositionInputStream(inputStream).also {
+        it.mark(length)
+    }
 
-    private val buffer: FragmentBuffer
+    private val buffer: FragmentBuffer = FragmentBuffer(length)
 
     /**
      * Creates an input stream buffer.
@@ -45,11 +47,10 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
      * @param inputStream the input stream
      * @param length the length of the input stream
      */
-    init {
-        this.carrier = PositionInputStream(inputStream)
+    /*init {
         this.carrier.mark(length)
         this.buffer = FragmentBuffer(length)
-    }
+    }*/
 
     /**
      * Updates this buffer based on some other buffer.
@@ -79,7 +80,7 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
          * 
          * @return the position in the buffer
          */
-        get() = buffer.getPosition()
+        get() = buffer.position
 
     @get:Synchronized
     val bytesBuffered: Int
@@ -88,7 +89,7 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
          * 
          * @return the number of bytes buffered so far
          */
-        get() = buffer.getBytesBuffered()
+        get() = buffer.bytesBuffered
 
     val length: Int
         /**
@@ -96,10 +97,10 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
          * 
          * @return the size of the buffer
          */
-        get() = buffer.getLength()
+        get() = buffer.length
 
     override fun toString(): String {
-        return "InputStreamBuffer [" + buffer + "]"
+        return "InputStreamBuffer [$buffer]"
     }
 
     /**
@@ -139,12 +140,12 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
         @Throws(IOException::class)
         override fun read(): Int {
             synchronized(syncObject) {
-                if (position >= buffer.getLength()) {
+                if (position >= buffer.length) {
                     /* FIXME: Is this correct? Isn't buffer capable of growing dynamically? -- MO */
                     return -1
                 } else if (buffer.isCoveredByFragment(position)) {
                     /* Serve the byte from the buffer */
-                    return buffer.getBuffer()[position++].toInt() and 0xFF
+                    return buffer.buffer[position++].toInt() and 0xFF
                 } else {
                     /* Get it from the carrier */
                     if (carrier.markSupported()) {
@@ -188,11 +189,11 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
                 } else if (len == 0) {
                     return 0
                 }
-                if (len > buffer.getLength() - position) {
-                    len = buffer.getLength() - position
+                if (len > buffer.length - position) {
+                    len = buffer.length - position
                 }
 
-                if (position >= buffer.getLength()) {
+                if (position >= buffer.length) {
                     /* FIXME: is this correct? See FIXME in read(). */
                     return -1
                 }
@@ -207,7 +208,7 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
                     val alreadyBufferedPrefixLength = fragment.offset - position
                     val unbufferedPostfixLength = fragment.length
                     System.arraycopy(
-                        buffer.getBuffer(),
+                        buffer.buffer,
                         position,
                         b,
                         off,
@@ -233,8 +234,8 @@ class InputStreamBuffer(inputStream: InputStream, length: Int) {
                     return alreadyBufferedPrefixLength + bytesReadFromCarrier
                 } else {
                     /* No unbuffered fragment. */
-                    val length = min(len, buffer.getLength() - position)
-                    System.arraycopy(buffer.getBuffer(), position, b, off, length)
+                    val length = min(len, buffer.length - position)
+                    System.arraycopy(buffer.buffer, position, b, off, length)
                     position += length
                     return length
                 }
