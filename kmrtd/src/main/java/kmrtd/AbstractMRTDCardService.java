@@ -20,18 +20,18 @@
  * $Id: AbstractMRTDCardService.java 1850 2021-05-21 06:25:03Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.CardServiceException;
 
-import org.jmrtd.cert.CVCPrincipal;
-import org.jmrtd.cert.CardVerifiableCertificate;
-import org.jmrtd.protocol.AAResult;
-import org.jmrtd.protocol.BACResult;
-import org.jmrtd.protocol.EACCAResult;
-import org.jmrtd.protocol.EACTAResult;
-import org.jmrtd.protocol.PACEResult;
-import org.jmrtd.protocol.SecureMessagingWrapper;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
+import kmrtd.protocol.AAResult;
+import kmrtd.protocol.BACResult;
+import kmrtd.protocol.EACCAResult;
+import kmrtd.protocol.EACTAResult;
+import kmrtd.protocol.PACEResult;
+import kmrtd.protocol.SecureMessagingWrapper;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;

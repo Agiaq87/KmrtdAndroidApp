@@ -20,7 +20,7 @@
  * $Id: ASN1Util.java 1905 2025-09-25 08:49:09Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1Encodable;

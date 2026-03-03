@@ -20,7 +20,7 @@
  * $Id: BACKey.java 1808 2019-03-07 21:32:19Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;

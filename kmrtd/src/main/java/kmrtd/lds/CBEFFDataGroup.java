@@ -20,18 +20,18 @@
  * $Id: CBEFFDataGroup.java 1896 2025-04-18 21:39:56Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import net.sf.scuba.tlv.TLVOutputStream;
 
-import org.jmrtd.cbeff.BiometricDataBlock;
-import org.jmrtd.cbeff.BiometricEncodingType;
-import org.jmrtd.cbeff.CBEFFInfo;
-import org.jmrtd.cbeff.ComplexCBEFFInfo;
-import org.jmrtd.cbeff.ISO781611;
-import org.jmrtd.cbeff.ISO781611Decoder;
-import org.jmrtd.cbeff.ISO781611Encoder;
-import org.jmrtd.cbeff.SimpleCBEFFInfo;
+import kmrtd.cbeff.BiometricDataBlock;
+import kmrtd.cbeff.BiometricEncodingType;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.cbeff.ComplexCBEFFInfo;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.ISO781611Decoder;
+import kmrtd.cbeff.ISO781611Encoder;
+import kmrtd.cbeff.SimpleCBEFFInfo;
 
 import java.io.IOException;
 import java.io.InputStream;

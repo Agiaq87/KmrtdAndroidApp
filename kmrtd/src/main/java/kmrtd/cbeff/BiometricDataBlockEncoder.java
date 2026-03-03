@@ -20,7 +20,7 @@
  * $Id: BiometricDataBlockEncoder.java 1897 2025-05-27 12:34:36Z martijno $
  */
 
-package org.jmrtd.cbeff;
+package kmrtd.cbeff;
 
 import java.io.IOException;
 import java.io.OutputStream;

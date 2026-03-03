@@ -20,7 +20,7 @@
  * $Id: FragmentBuffer.java 1839 2020-08-27 06:28:31Z martijno $
  */
 
-package org.jmrtd.io;
+package kmrtd.io;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -20,11 +20,11 @@
  * $Id: PACEKeySpec.java 1816 2019-07-15 13:02:26Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.protocol.PACEProtocol;
+import kmrtd.protocol.PACEProtocol;
 
 import java.security.GeneralSecurityException;
 import java.util.Arrays;

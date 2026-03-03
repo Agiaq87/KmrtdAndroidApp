@@ -20,17 +20,17 @@
  * $Id: FaceInfo.java 1896 2025-04-18 21:39:56Z martijno $
  */
 
-package org.jmrtd.lds.iso19794;
+package kmrtd.lds.iso19794;
 
 import net.sf.scuba.data.Gender;
 
-import org.jmrtd.cbeff.BiometricDataBlock;
-import org.jmrtd.cbeff.CBEFFInfo;
-import org.jmrtd.cbeff.ISO781611;
-import org.jmrtd.cbeff.StandardBiometricHeader;
-import org.jmrtd.lds.AbstractListInfo;
-import org.jmrtd.lds.iso19794.FaceImageInfo.EyeColor;
-import org.jmrtd.lds.iso19794.FaceImageInfo.FeaturePoint;
+import kmrtd.cbeff.BiometricDataBlock;
+import kmrtd.cbeff.CBEFFInfo;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
+import kmrtd.lds.AbstractListInfo;
+import kmrtd.lds.iso19794.FaceImageInfo.EyeColor;
+import kmrtd.lds.iso19794.FaceImageInfo.FeaturePoint;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

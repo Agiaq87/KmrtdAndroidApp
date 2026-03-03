@@ -20,13 +20,13 @@
  * $Id: EACTAResult.java 1799 2018-10-30 16:25:48Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.Util;
-import org.jmrtd.cert.CVCPrincipal;
-import org.jmrtd.cert.CardVerifiableCertificate;
+import kmrtd.Util;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
 
 import java.io.Serializable;
 import java.security.PrivateKey;

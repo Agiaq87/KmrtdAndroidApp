@@ -1,4 +1,4 @@
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
@@ -7,9 +7,9 @@ import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 
-import org.jmrtd.APDULevelBACCapable;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.Util;
+import kmrtd.APDULevelBACCapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
 
 import java.security.GeneralSecurityException;
 import java.security.Provider;

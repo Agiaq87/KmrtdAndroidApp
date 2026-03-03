@@ -20,7 +20,7 @@
  * $Id: CVCAuthorizationTemplate.java 1853 2021-06-26 18:13:26Z martijno $
  */
 
-package org.jmrtd.cert;
+package kmrtd.cert;
 
 import org.ejbca.cvc.AccessRightEnum;
 import org.ejbca.cvc.AuthorizationRoleEnum;

@@ -20,7 +20,7 @@
  * $Id: PACEAPDUSender.java 1850 2021-05-21 06:25:03Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
@@ -30,8 +30,8 @@ import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 import net.sf.scuba.tlv.TLVUtil;
 
-import org.jmrtd.APDULevelPACECapable;
-import org.jmrtd.Util;
+import kmrtd.APDULevelPACECapable;
+import kmrtd.Util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

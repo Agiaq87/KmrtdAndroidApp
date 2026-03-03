@@ -20,7 +20,7 @@
  * $Id: SODFile.java 1861 2021-10-26 09:12:59Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1Encoding;
 import org.bouncycastle.asn1.ASN1InputStream;

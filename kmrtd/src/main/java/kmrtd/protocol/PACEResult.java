@@ -20,11 +20,11 @@
  * $Id: PACEResult.java 1763 2018-02-18 07:41:30Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
-import org.jmrtd.AccessKeySpec;
-import org.jmrtd.Util;
-import org.jmrtd.lds.PACEInfo.MappingType;
+import kmrtd.AccessKeySpec;
+import kmrtd.Util;
+import kmrtd.lds.PACEInfo.MappingType;
 
 import java.io.Serializable;
 import java.security.KeyPair;

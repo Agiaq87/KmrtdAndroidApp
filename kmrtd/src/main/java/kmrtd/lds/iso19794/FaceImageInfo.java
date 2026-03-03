@@ -20,11 +20,11 @@
  * $Id: FaceImageInfo.java 1808 2019-03-07 21:32:19Z martijno $
  */
 
-package org.jmrtd.lds.iso19794;
+package kmrtd.lds.iso19794;
 
 import net.sf.scuba.data.Gender;
 
-import org.jmrtd.lds.AbstractImageInfo;
+import kmrtd.lds.AbstractImageInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

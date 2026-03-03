@@ -20,7 +20,7 @@
  * $Id: DisplayedImageInfo.java 1766 2018-02-20 11:33:20Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;

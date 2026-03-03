@@ -20,9 +20,9 @@
  * $Id: IrisImageInfo.java 1799 2018-10-30 16:25:48Z martijno $
  */
 
-package org.jmrtd.lds.iso19794;
+package kmrtd.lds.iso19794;
 
-import org.jmrtd.lds.AbstractImageInfo;
+import kmrtd.lds.AbstractImageInfo;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

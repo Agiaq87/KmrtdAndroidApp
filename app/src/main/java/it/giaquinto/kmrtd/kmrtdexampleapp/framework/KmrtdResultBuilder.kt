@@ -4,14 +4,7 @@ import android.graphics.Bitmap
 import net.sf.scuba.data.Gender
 import kmrtd.lds.DataGroup
 import kmrtd.lds.iso19794.FaceImageInfo
-import kmrtd.lds.iso19794.support.Expression
-import kmrtd.lds.iso19794.support.EyeColor
-import kmrtd.lds.iso19794.support.FaceImageType
-import kmrtd.lds.iso19794.support.Feature
-import kmrtd.lds.iso19794.support.HairColor
-import kmrtd.lds.iso19794.support.ImageColorSpace
-import kmrtd.lds.iso19794.support.ImageDataType
-import kmrtd.lds.iso19794.support.SourceType
+
 import java.util.Date
 
 class KmrtdResultBuilder {
@@ -30,14 +23,14 @@ class KmrtdResultBuilder {
     var emitter: String? = null
     var expirationDate: Date? = null
     var expirationDateString: String? = null
-    var eyeColor: EyeColor? = null
-    var hairColor: HairColor? = null
-    var imageColorSpace: ImageColorSpace? = null
-    var imageDataType: ImageDataType? = null
-    var faceImageDataType: FaceImageType? = null
-    var sourceType: SourceType? = null
-    var expression: Expression? = null
-    var feature: Set<Feature>? = null
+    var eyeColor: FaceImageInfo.EyeColor? = null
+    var hairColor: FaceImageInfo.HairColor? = null
+    var imageColorSpace: FaceImageInfo.ImageColorSpace? = null
+    var imageDataType: FaceImageInfo.ImageDataType? = null
+    var faceImageDataType: FaceImageInfo.FaceImageType? = null
+    var sourceType: FaceImageInfo.SourceType? = null
+    var expression: FaceImageInfo.Expression? = null
+    var feature: Set<FaceImageInfo.Features>? = null
     var firstName: String? = null
     var gender: Gender? = null
     var holder: String? = null

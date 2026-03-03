@@ -20,7 +20,7 @@
  * $Id: DESedeSecureMessagingWrapper.java 1805 2018-11-26 21:39:46Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

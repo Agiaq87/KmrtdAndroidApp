@@ -20,15 +20,15 @@
  * $Id: BACProtocol.java 1853 2021-06-26 18:13:26Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.CardServiceException;
 
-import org.jmrtd.APDULevelBACCapable;
-import org.jmrtd.AccessKeySpec;
-import org.jmrtd.BACKeySpec;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.Util;
+import kmrtd.APDULevelBACCapable;
+import kmrtd.AccessKeySpec;
+import kmrtd.BACKeySpec;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
 
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;

@@ -20,7 +20,7 @@
  * $Id: SignedDataUtil.java 1889 2025-03-15 21:09:22Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -49,7 +49,8 @@ import org.bouncycastle.asn1.pkcs.RSASSAPSSparams;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
-import org.jmrtd.Util;
+
+import kmrtd.Util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

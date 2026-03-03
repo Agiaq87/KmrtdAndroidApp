@@ -33,7 +33,7 @@
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jmrtd.lds.iso39794;
+package kmrtd.lds.iso39794;
 
 public enum FingerImagePositionCode implements EncodableEnum<FingerImagePositionCode> {
     UNKNOWN_POSITION(0),

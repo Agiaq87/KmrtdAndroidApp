@@ -20,7 +20,7 @@
  * $Id: EncodableEnum.java 1892 2025-03-18 15:15:52Z martijno $
  */
 
-package org.jmrtd.lds.iso39794;
+package kmrtd.lds.iso39794;
 
 interface EncodableEnum<T extends Enum<T>> {
 

@@ -20,7 +20,7 @@
  * $Id: LDSElement.java 1799 2018-10-30 16:25:48Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import java.io.Serializable;
 

@@ -20,7 +20,7 @@
  * $Id: AbstractListInfo.java 1765 2018-02-19 21:49:52Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import java.io.IOException;
 import java.io.InputStream;

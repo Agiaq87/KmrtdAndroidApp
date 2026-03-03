@@ -20,7 +20,7 @@
  * $Id: EACTAAPDUSender.java 1799 2018-10-30 16:25:48Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
@@ -29,7 +29,7 @@ import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 
-import org.jmrtd.APDULevelEACTACapable;
+import kmrtd.APDULevelEACTACapable;
 
 /**
  * A low-level APDU sender to support the (EAC) Terminal Authentication protocol.

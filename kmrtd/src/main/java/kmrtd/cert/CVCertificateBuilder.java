@@ -20,13 +20,14 @@
  * $Id: CVCertificateBuilder.java 1767 2018-02-20 12:54:49Z martijno $
  */
 
-package org.jmrtd.cert;
+package kmrtd.cert;
 
 import org.ejbca.cvc.CAReferenceField;
 import org.ejbca.cvc.HolderReferenceField;
 import org.ejbca.cvc.exception.ConstructionException;
-import org.jmrtd.cert.CVCAuthorizationTemplate.Permission;
-import org.jmrtd.cert.CVCAuthorizationTemplate.Role;
+
+import kmrtd.cert.CVCAuthorizationTemplate.Permission;
+import kmrtd.cert.CVCAuthorizationTemplate.Role;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

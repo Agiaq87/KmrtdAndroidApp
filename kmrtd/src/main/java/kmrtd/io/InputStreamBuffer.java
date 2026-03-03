@@ -20,9 +20,9 @@
  * $Id: InputStreamBuffer.java 1799 2018-10-30 16:25:48Z martijno $
  */
 
-package org.jmrtd.io;
+package kmrtd.io;
 
-import org.jmrtd.io.FragmentBuffer.Fragment;
+import kmrtd.io.FragmentBuffer.Fragment;
 
 import java.io.IOException;
 import java.io.InputStream;

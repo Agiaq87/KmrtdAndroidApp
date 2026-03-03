@@ -20,7 +20,7 @@
  * $Id: ISO781611Decoder.java 1892 2025-03-18 15:15:52Z martijno $
  */
 
-package org.jmrtd.cbeff;
+package kmrtd.cbeff;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVUtil;

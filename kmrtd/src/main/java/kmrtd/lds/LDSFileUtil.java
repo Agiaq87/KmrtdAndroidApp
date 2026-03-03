@@ -20,21 +20,21 @@
  * $Id: LDSFileUtil.java 1885 2024-11-07 09:17:29Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
-import org.jmrtd.PassportService;
-import org.jmrtd.lds.icao.COMFile;
-import org.jmrtd.lds.icao.DG11File;
-import org.jmrtd.lds.icao.DG12File;
-import org.jmrtd.lds.icao.DG14File;
-import org.jmrtd.lds.icao.DG15File;
-import org.jmrtd.lds.icao.DG1File;
-import org.jmrtd.lds.icao.DG2File;
-import org.jmrtd.lds.icao.DG3File;
-import org.jmrtd.lds.icao.DG4File;
-import org.jmrtd.lds.icao.DG5File;
-import org.jmrtd.lds.icao.DG6File;
-import org.jmrtd.lds.icao.DG7File;
+import kmrtd.PassportService;
+import kmrtd.lds.icao.COMFile;
+import kmrtd.lds.icao.DG11File;
+import kmrtd.lds.icao.DG12File;
+import kmrtd.lds.icao.DG14File;
+import kmrtd.lds.icao.DG15File;
+import kmrtd.lds.icao.DG1File;
+import kmrtd.lds.icao.DG2File;
+import kmrtd.lds.icao.DG3File;
+import kmrtd.lds.icao.DG4File;
+import kmrtd.lds.icao.DG5File;
+import kmrtd.lds.icao.DG6File;
+import kmrtd.lds.icao.DG7File;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

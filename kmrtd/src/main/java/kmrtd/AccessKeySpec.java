@@ -20,7 +20,7 @@
  * $Id: AccessKeySpec.java 1799 2018-10-30 16:25:48Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import java.io.Serializable;
 import java.security.spec.KeySpec;

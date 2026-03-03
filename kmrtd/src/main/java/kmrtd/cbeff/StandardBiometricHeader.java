@@ -20,7 +20,7 @@
  * $Id: StandardBiometricHeader.java 1905 2025-09-25 08:49:09Z martijno $
  */
 
-package org.jmrtd.cbeff;
+package kmrtd.cbeff;
 
 import net.sf.scuba.util.Hex;
 

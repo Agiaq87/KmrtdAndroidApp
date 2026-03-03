@@ -20,7 +20,7 @@
  * $Id: CBEFFInfo.java 1885 2024-11-07 09:17:29Z martijno $
  */
 
-package org.jmrtd.cbeff;
+package kmrtd.cbeff;
 
 /**
  * CBEFF according to ISO 19785-1 (version 2.0) and NISTIR 6529-A (version 1.1).

@@ -20,7 +20,7 @@
  * $Id: AbstractLDSInfo.java 1751 2018-01-15 15:35:45Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

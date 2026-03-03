@@ -20,7 +20,7 @@
  * $Id: ISO781611.java 1901 2025-07-15 12:31:11Z martijno $
  */
 
-package org.jmrtd.cbeff;
+package kmrtd.cbeff;
 
 /**
  * Constants interface representing ISO7816-11.

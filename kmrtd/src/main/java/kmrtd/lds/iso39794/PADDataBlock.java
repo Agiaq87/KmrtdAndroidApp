@@ -33,7 +33,7 @@
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jmrtd.lds.iso39794;
+package kmrtd.lds.iso39794;
 
 import net.sf.scuba.util.Hex;
 
@@ -41,7 +41,8 @@ import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
-import org.jmrtd.ASN1Util;
+
+import kmrtd.ASN1Util;
 
 import java.util.ArrayList;
 import java.util.Arrays;

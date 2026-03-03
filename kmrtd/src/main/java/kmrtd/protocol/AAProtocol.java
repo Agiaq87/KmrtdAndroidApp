@@ -20,13 +20,13 @@
  * $Id: AAProtocol.java 1878 2023-07-31 13:19:51Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.CardServiceException;
 
-import org.jmrtd.APDULevelAACapable;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.Util;
+import kmrtd.APDULevelAACapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
 
 import java.security.PublicKey;
 

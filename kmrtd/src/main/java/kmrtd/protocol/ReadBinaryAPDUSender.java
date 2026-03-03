@@ -1,4 +1,4 @@
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
@@ -8,7 +8,7 @@ import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.APDULevelReadBinaryCapable;
+import kmrtd.APDULevelReadBinaryCapable;
 
 import java.util.Arrays;
 import java.util.logging.Level;

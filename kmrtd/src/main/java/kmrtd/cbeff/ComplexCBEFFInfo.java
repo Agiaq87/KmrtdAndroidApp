@@ -20,7 +20,7 @@
  * $Id: ComplexCBEFFInfo.java 1885 2024-11-07 09:17:29Z martijno $
  */
 
-package org.jmrtd.cbeff;
+package kmrtd.cbeff;
 
 import java.util.ArrayList;
 import java.util.List;

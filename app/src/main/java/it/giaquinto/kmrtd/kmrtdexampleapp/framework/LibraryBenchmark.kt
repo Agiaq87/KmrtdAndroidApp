@@ -264,7 +264,7 @@ class LibraryBenchmark {
     /**
      * Parsing con JMRTD originale (Java).
      *
-     * NOTA: Importa dal package org.jmrtd.lds.*
+     * NOTA: Importa dal package kmrtd.lds.*
      * Adatta gli import se i package sono diversi nel tuo progetto.
      */
     private fun parseWithJmrtd(name: String, inputStream: InputStream): Any? {

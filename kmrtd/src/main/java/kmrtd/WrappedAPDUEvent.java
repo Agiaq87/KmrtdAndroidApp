@@ -19,7 +19,7 @@
  * $Id: WrappedAPDUEvent.java 1763 2018-02-18 07:41:30Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.APDUEvent;
 import net.sf.scuba.smartcards.CommandAPDU;

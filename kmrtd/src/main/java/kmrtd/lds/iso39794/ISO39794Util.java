@@ -20,12 +20,13 @@
  * $Id: ISO39794Util.java 1905 2025-09-25 08:49:09Z martijno $
  */
 
-package org.jmrtd.lds.iso39794;
+package kmrtd.lds.iso39794;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
-import org.jmrtd.ASN1Util;
+
+import kmrtd.ASN1Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;

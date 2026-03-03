@@ -20,7 +20,7 @@
  * $Id: PACEInfo.java 1850 2021-05-21 06:25:03Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
@@ -29,7 +29,8 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.jce.ECNamedCurveTable;
-import org.jmrtd.Util;
+
+import kmrtd.Util;
 
 import java.math.BigInteger;
 import java.security.spec.AlgorithmParameterSpec;

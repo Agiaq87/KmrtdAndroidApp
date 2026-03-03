@@ -20,10 +20,10 @@
  * $Id: DG5File.java 1751 2018-01-15 15:35:45Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
-import org.jmrtd.lds.DisplayedImageDataGroup;
-import org.jmrtd.lds.DisplayedImageInfo;
+import kmrtd.lds.DisplayedImageDataGroup;
+import kmrtd.lds.DisplayedImageInfo;
 
 import java.io.IOException;
 import java.io.InputStream;

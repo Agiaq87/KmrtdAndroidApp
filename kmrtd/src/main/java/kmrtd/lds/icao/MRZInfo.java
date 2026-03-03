@@ -20,11 +20,11 @@
  * $Id: MRZInfo.java 1898 2025-06-04 12:05:45Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
 import net.sf.scuba.data.Gender;
 
-import org.jmrtd.lds.AbstractLDSInfo;
+import kmrtd.lds.AbstractLDSInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;

@@ -20,12 +20,12 @@
  * $Id: DG1File.java 1808 2019-03-07 21:32:19Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;
 
-import org.jmrtd.lds.DataGroup;
+import kmrtd.lds.DataGroup;
 
 import java.io.IOException;
 import java.io.InputStream;

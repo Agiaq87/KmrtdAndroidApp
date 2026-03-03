@@ -20,7 +20,7 @@
  * $Id: PACEException.java 1851 2021-05-27 20:56:53Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 /**
  * An exception to signal errors during execution of the PACE protocol.

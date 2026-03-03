@@ -20,10 +20,10 @@
  * $Id: CVCAFile.java 1824 2019-11-06 08:25:39Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
-import org.jmrtd.PassportService;
-import org.jmrtd.cert.CVCPrincipal;
+import kmrtd.PassportService;
+import kmrtd.cert.CVCPrincipal;
 
 import java.io.DataInputStream;
 import java.io.IOException;

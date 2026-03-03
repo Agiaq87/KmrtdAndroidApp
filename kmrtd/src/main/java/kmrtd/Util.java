@@ -20,7 +20,7 @@
  * $Id: Util.java 1902 2025-07-31 07:40:22Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVUtil;
@@ -47,9 +47,10 @@ import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
-import org.jmrtd.lds.PACEInfo;
-import org.jmrtd.lds.SecurityInfo;
-import org.jmrtd.lds.icao.MRZInfo;
+
+import kmrtd.lds.PACEInfo;
+import kmrtd.lds.SecurityInfo;
+import kmrtd.lds.icao.MRZInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

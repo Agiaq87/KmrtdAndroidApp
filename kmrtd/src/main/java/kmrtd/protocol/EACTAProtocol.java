@@ -20,19 +20,19 @@
  * $Id: EACTAProtocol.java 1853 2021-06-26 18:13:26Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.tlv.TLVOutputStream;
 import net.sf.scuba.tlv.TLVUtil;
 
-import org.jmrtd.APDULevelEACTACapable;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.Util;
-import org.jmrtd.cert.CVCAuthorizationTemplate.Role;
-import org.jmrtd.cert.CVCPrincipal;
-import org.jmrtd.cert.CardVerifiableCertificate;
-import org.jmrtd.lds.icao.MRZInfo;
+import kmrtd.APDULevelEACTACapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
+import kmrtd.cert.CVCAuthorizationTemplate.Role;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
+import kmrtd.lds.icao.MRZInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;

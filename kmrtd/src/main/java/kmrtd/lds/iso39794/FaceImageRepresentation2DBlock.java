@@ -33,15 +33,16 @@
  * THE CODE COMPONENTS, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.jmrtd.lds.iso39794;
+package kmrtd.lds.iso39794;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.DEROctetString;
-import org.jmrtd.ASN1Util;
-import org.jmrtd.lds.iso39794.FaceImageInformation2DBlock.ImageDataFormatCode;
+
+import kmrtd.ASN1Util;
+import kmrtd.lds.iso39794.FaceImageInformation2DBlock.ImageDataFormatCode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

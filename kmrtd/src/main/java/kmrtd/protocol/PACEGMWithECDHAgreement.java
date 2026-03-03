@@ -20,10 +20,11 @@
  * $Id: PACEGMWithECDHAgreement.java 1827 2019-11-21 11:31:13Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
-import org.jmrtd.Util;
+
+import kmrtd.Util;
 
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;

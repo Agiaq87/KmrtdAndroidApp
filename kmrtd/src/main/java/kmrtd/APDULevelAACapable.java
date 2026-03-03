@@ -20,7 +20,7 @@
  * $Id: APDULevelAACapable.java 1878 2023-07-31 13:19:51Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardServiceException;

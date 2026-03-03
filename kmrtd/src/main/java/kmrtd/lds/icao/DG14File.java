@@ -20,7 +20,7 @@
  * $Id: DG14File.java 1885 2024-11-07 09:17:29Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Encoding;
@@ -28,12 +28,13 @@ import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.DLSet;
-import org.jmrtd.lds.ActiveAuthenticationInfo;
-import org.jmrtd.lds.ChipAuthenticationInfo;
-import org.jmrtd.lds.ChipAuthenticationPublicKeyInfo;
-import org.jmrtd.lds.DataGroup;
-import org.jmrtd.lds.SecurityInfo;
-import org.jmrtd.lds.TerminalAuthenticationInfo;
+
+import kmrtd.lds.ActiveAuthenticationInfo;
+import kmrtd.lds.ChipAuthenticationInfo;
+import kmrtd.lds.ChipAuthenticationPublicKeyInfo;
+import kmrtd.lds.DataGroup;
+import kmrtd.lds.SecurityInfo;
+import kmrtd.lds.TerminalAuthenticationInfo;
 
 import java.io.IOException;
 import java.io.InputStream;

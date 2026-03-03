@@ -20,7 +20,7 @@
  * $Id: PACEMappingResult.java 1757 2018-02-05 12:01:00Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import java.io.Serializable;
 import java.security.spec.AlgorithmParameterSpec;

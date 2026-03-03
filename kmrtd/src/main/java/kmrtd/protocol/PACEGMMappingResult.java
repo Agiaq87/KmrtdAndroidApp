@@ -20,7 +20,7 @@
  * $Id: PACEGMMappingResult.java 1763 2018-02-18 07:41:30Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import java.security.KeyPair;
 import java.security.PublicKey;

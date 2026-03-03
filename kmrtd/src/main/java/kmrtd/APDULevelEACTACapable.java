@@ -20,7 +20,7 @@
  * $Id: APDULevelEACTACapable.java 1781 2018-05-25 11:41:48Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardServiceException;

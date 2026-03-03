@@ -20,7 +20,7 @@
  * $Id: DataGroup.java 1808 2019-03-07 21:32:19Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import java.io.IOException;
 import java.io.InputStream;

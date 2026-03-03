@@ -20,7 +20,7 @@
  * $Id: BiometricEncodingType.java 1897 2025-05-27 12:34:36Z martijno $
  */
 
-package org.jmrtd.cbeff;
+package kmrtd.cbeff;
 
 /**
  * Specifies what encoding (ISO/IEC-19794 or ISO/IEC-39794)

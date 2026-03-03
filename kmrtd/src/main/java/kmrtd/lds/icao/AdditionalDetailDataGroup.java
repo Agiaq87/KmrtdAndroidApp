@@ -20,14 +20,14 @@
  * $Id: AdditionalDetailDataGroup.java 1907 2026-02-06 09:24:02Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;
 import net.sf.scuba.tlv.TLVUtil;
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.lds.DataGroup;
+import kmrtd.lds.DataGroup;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

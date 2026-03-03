@@ -20,9 +20,9 @@
  * $Id: BACResult.java 1781 2018-05-25 11:41:48Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
-import org.jmrtd.AccessKeySpec;
+import kmrtd.AccessKeySpec;
 
 import java.io.Serializable;
 

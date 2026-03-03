@@ -20,7 +20,7 @@
  * $Id: PositionInputStream.java 1817 2019-08-02 12:09:17Z martijno $
  */
 
-package org.jmrtd.io;
+package kmrtd.io;
 
 import java.io.IOException;
 import java.io.InputStream;

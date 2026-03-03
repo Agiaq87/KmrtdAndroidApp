@@ -20,7 +20,7 @@
  * $Id: FileSystemCardService.java 1839 2020-08-27 06:28:31Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.CardFileInputStream;
 import net.sf.scuba.smartcards.CardService;

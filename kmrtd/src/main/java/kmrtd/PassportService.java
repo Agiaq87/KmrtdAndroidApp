@@ -20,7 +20,7 @@
  * $Id: PassportService.java 1850 2021-05-21 06:25:03Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.APDUEvent;
 import net.sf.scuba.smartcards.APDUListener;
@@ -30,25 +30,25 @@ import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ResponseAPDU;
 
-import org.jmrtd.cert.CVCPrincipal;
-import org.jmrtd.cert.CardVerifiableCertificate;
-import org.jmrtd.protocol.AAAPDUSender;
-import org.jmrtd.protocol.AAProtocol;
-import org.jmrtd.protocol.AAResult;
-import org.jmrtd.protocol.BACAPDUSender;
-import org.jmrtd.protocol.BACProtocol;
-import org.jmrtd.protocol.BACResult;
-import org.jmrtd.protocol.EACCAAPDUSender;
-import org.jmrtd.protocol.EACCAProtocol;
-import org.jmrtd.protocol.EACCAResult;
-import org.jmrtd.protocol.EACTAAPDUSender;
-import org.jmrtd.protocol.EACTAProtocol;
-import org.jmrtd.protocol.EACTAResult;
-import org.jmrtd.protocol.PACEAPDUSender;
-import org.jmrtd.protocol.PACEProtocol;
-import org.jmrtd.protocol.PACEResult;
-import org.jmrtd.protocol.ReadBinaryAPDUSender;
-import org.jmrtd.protocol.SecureMessagingWrapper;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
+import kmrtd.protocol.AAAPDUSender;
+import kmrtd.protocol.AAProtocol;
+import kmrtd.protocol.AAResult;
+import kmrtd.protocol.BACAPDUSender;
+import kmrtd.protocol.BACProtocol;
+import kmrtd.protocol.BACResult;
+import kmrtd.protocol.EACCAAPDUSender;
+import kmrtd.protocol.EACCAProtocol;
+import kmrtd.protocol.EACCAResult;
+import kmrtd.protocol.EACTAAPDUSender;
+import kmrtd.protocol.EACTAProtocol;
+import kmrtd.protocol.EACTAResult;
+import kmrtd.protocol.PACEAPDUSender;
+import kmrtd.protocol.PACEProtocol;
+import kmrtd.protocol.PACEResult;
+import kmrtd.protocol.ReadBinaryAPDUSender;
+import kmrtd.protocol.SecureMessagingWrapper;
 
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;

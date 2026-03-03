@@ -20,7 +20,7 @@
  * $Id: LDSFile.java 1751 2018-01-15 15:35:45Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 /**
  * LDS element at file level.

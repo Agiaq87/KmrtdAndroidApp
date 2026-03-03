@@ -20,7 +20,7 @@
  * $Id: CardVerifiableCertificate.java 1808 2019-03-07 21:32:19Z martijno $
  */
 
-package org.jmrtd.cert;
+package kmrtd.cert;
 
 import net.sf.scuba.data.Country;
 

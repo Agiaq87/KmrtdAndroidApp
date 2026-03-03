@@ -20,7 +20,7 @@
  * $Id: ActiveAuthenticationInfo.java 1858 2021-07-19 07:10:20Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;

@@ -20,7 +20,7 @@
  * $Id: $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;

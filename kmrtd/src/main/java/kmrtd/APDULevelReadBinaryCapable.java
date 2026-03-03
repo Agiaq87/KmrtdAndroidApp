@@ -20,7 +20,7 @@
  * $Id: APDULevelReadBinaryCapable.java 1850 2021-05-21 06:25:03Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardServiceException;

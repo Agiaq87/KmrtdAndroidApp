@@ -20,11 +20,11 @@
  * $Id: AAResult.java 1763 2018-02-18 07:41:30Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.Util;
+import kmrtd.Util;
 
 import java.io.Serializable;
 import java.security.PublicKey;

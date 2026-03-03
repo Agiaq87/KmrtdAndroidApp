@@ -20,9 +20,9 @@
  * $Id: AESSecureMessagingWrapper.java 1805 2018-11-26 21:39:46Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
-import org.jmrtd.Util;
+import kmrtd.Util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

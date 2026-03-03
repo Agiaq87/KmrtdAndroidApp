@@ -20,9 +20,9 @@
  * $Id: DG6File.java 1751 2018-01-15 15:35:45Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
-import org.jmrtd.lds.DisplayedImageDataGroup;
+import kmrtd.lds.DisplayedImageDataGroup;
 
 import java.io.IOException;
 import java.io.InputStream;

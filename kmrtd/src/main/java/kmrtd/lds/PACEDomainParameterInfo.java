@@ -20,7 +20,7 @@
  * $Id: PACEDomainParameterInfo.java 1829 2019-11-27 09:26:16Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
@@ -36,7 +36,8 @@ import org.bouncycastle.asn1.x9.X962NamedCurves;
 import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.jmrtd.Util;
+
+import kmrtd.Util;
 
 import java.math.BigInteger;
 import java.security.spec.AlgorithmParameterSpec;

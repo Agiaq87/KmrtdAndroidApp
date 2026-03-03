@@ -20,7 +20,7 @@
  * $Id: CardServiceProtocolException.java 1892 2025-03-18 15:15:52Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.CardServiceException;
 

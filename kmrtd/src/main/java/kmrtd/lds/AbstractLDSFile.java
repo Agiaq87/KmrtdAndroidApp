@@ -20,7 +20,7 @@
  * $Id: AbstractLDSFile.java 1775 2018-04-09 10:13:04Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

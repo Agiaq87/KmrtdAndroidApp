@@ -20,7 +20,7 @@
  * $Id: CardSecurityFile.java 1894 2025-03-19 20:00:46Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;

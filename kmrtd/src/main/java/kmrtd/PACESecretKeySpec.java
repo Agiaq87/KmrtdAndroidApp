@@ -20,7 +20,7 @@
  * $Id: PACESecretKeySpec.java 1786 2018-07-08 21:06:32Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import javax.crypto.spec.SecretKeySpec;
 

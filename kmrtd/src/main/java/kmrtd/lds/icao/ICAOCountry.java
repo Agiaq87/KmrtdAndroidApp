@@ -20,7 +20,7 @@
  * $Id: ICAOCountry.java 1872 2023-03-10 21:52:01Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
 import net.sf.scuba.data.Country;
 

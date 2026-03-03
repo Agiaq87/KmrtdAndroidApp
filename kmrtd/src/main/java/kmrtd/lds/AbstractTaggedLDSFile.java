@@ -20,7 +20,7 @@
  * $Id: AbstractTaggedLDSFile.java 1811 2019-05-27 14:08:20Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;

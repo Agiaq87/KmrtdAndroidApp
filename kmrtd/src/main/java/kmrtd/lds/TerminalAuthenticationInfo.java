@@ -20,7 +20,7 @@
  * $Id: TerminalAuthenticationInfo.java 1850 2021-05-21 06:25:03Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;

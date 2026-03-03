@@ -20,7 +20,7 @@
  * $Id: PACEProtocol.java 1906 2025-12-08 11:42:17Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.tlv.TLVInputStream;
@@ -29,17 +29,18 @@ import net.sf.scuba.tlv.TLVUtil;
 import net.sf.scuba.util.Hex;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.jmrtd.APDULevelPACECapable;
-import org.jmrtd.AccessKeySpec;
-import org.jmrtd.BACKeySpec;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.PACEKeySpec;
-import org.jmrtd.PACESecretKeySpec;
-import org.jmrtd.PassportService;
-import org.jmrtd.Util;
-import org.jmrtd.lds.PACEInfo;
-import org.jmrtd.lds.PACEInfo.DHCParameterSpec;
-import org.jmrtd.lds.PACEInfo.MappingType;
+
+import kmrtd.APDULevelPACECapable;
+import kmrtd.AccessKeySpec;
+import kmrtd.BACKeySpec;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.PACEKeySpec;
+import kmrtd.PACESecretKeySpec;
+import kmrtd.PassportService;
+import kmrtd.Util;
+import kmrtd.lds.PACEInfo;
+import kmrtd.lds.PACEInfo.DHCParameterSpec;
+import kmrtd.lds.PACEInfo.MappingType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

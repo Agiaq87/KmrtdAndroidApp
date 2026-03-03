@@ -20,7 +20,7 @@
  * $Id: DefaultFileSystem.java 1908 2026-02-20 07:45:56Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardServiceException;
@@ -30,11 +30,11 @@ import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.io.FragmentBuffer;
-import org.jmrtd.io.FragmentBuffer.Fragment;
-import org.jmrtd.lds.CVCAFile;
-import org.jmrtd.lds.LDSFileUtil;
-import org.jmrtd.protocol.SecureMessagingWrapper;
+import kmrtd.io.FragmentBuffer;
+import kmrtd.io.FragmentBuffer.Fragment;
+import kmrtd.lds.CVCAFile;
+import kmrtd.lds.LDSFileUtil;
+import kmrtd.protocol.SecureMessagingWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

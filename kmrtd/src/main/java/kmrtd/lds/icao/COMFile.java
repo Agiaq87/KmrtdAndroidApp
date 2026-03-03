@@ -20,13 +20,13 @@
  * $Id: COMFile.java 1808 2019-03-07 21:32:19Z martijno $
  */
 
-package org.jmrtd.lds.icao;
+package kmrtd.lds.icao;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;
 
-import org.jmrtd.lds.AbstractTaggedLDSFile;
-import org.jmrtd.lds.LDSFileUtil;
+import kmrtd.lds.AbstractTaggedLDSFile;
+import kmrtd.lds.LDSFileUtil;
 
 import java.io.IOException;
 import java.io.InputStream;

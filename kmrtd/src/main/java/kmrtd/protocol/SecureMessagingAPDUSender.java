@@ -20,7 +20,7 @@
  * $Id: SecureMessagingAPDUSender.java 1841 2020-09-18 19:11:27Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.APDUEvent;
 import net.sf.scuba.smartcards.APDUListener;
@@ -32,8 +32,8 @@ import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.Util;
-import org.jmrtd.WrappedAPDUEvent;
+import kmrtd.Util;
+import kmrtd.WrappedAPDUEvent;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

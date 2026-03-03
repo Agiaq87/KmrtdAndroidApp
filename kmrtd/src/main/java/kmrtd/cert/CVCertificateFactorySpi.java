@@ -20,7 +20,7 @@
  * $Id: CVCertificateFactorySpi.java 1751 2018-01-15 15:35:45Z martijno $
  */
 
-package org.jmrtd.cert;
+package kmrtd.cert;
 
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.tlv.TLVOutputStream;

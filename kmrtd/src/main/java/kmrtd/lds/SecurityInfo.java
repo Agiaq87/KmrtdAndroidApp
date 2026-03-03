@@ -20,7 +20,7 @@
  * $Id: SecurityInfo.java 1894 2025-03-19 20:00:46Z martijno $
  */
 
-package org.jmrtd.lds;
+package kmrtd.lds;
 
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Encoding;
@@ -32,8 +32,9 @@ import org.bouncycastle.asn1.eac.EACObjectIdentifiers;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.asn1.x9.X9ObjectIdentifiers;
-import org.jmrtd.ASN1Util;
-import org.jmrtd.Util;
+
+import kmrtd.ASN1Util;
+import kmrtd.Util;
 
 import java.io.IOException;
 import java.io.OutputStream;

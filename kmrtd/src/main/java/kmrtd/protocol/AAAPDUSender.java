@@ -20,7 +20,7 @@
  * $Id: AAAPDUSender.java 1878 2023-07-31 13:19:51Z martijno $
  */
 
-package org.jmrtd.protocol;
+package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
@@ -30,7 +30,7 @@ import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 import net.sf.scuba.util.Hex;
 
-import org.jmrtd.APDULevelAACapable;
+import kmrtd.APDULevelAACapable;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

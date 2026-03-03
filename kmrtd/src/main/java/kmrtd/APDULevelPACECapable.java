@@ -20,7 +20,7 @@
  * $Id: APDULevelPACECapable.java 1818 2019-08-02 12:59:22Z martijno $
  */
 
-package org.jmrtd;
+package kmrtd;
 
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardServiceException;
