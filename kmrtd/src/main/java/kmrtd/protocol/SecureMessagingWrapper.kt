@@ -40,6 +40,7 @@ import java.util.logging.Logger
 import javax.crypto.Cipher
 import javax.crypto.Mac
 import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
 
 /**
  * Secure messaging wrapper base class.
@@ -49,23 +50,20 @@ import javax.crypto.SecretKey
  * @version $Revision: 1807 $
  */
 abstract class SecureMessagingWrapper protected constructor(
-    ksEnc: SecretKey?,
-    ksMac: SecretKey?,
-    cipherAlg: String?,
-    macAlg: String?,
-    maxTranceiveLength: Int,
-    shouldCheckMAC: Boolean,
-    ssc: Long
-) : Serializable, APDUWrapper {
+    val encryptionKey: SecretKey,
+    val mACKey: SecretKey,
+    cipherAlg: String,
+    macAlg: String,
     /**
      * Returns the maximum tranceive length of wrapped command and response APDUs,
      * typical values are 256 and 65536.
-     * 
+     *
      * @return the maximum tranceive length of wrapped command and response APDUs
      */
-    val maxTranceiveLength: Int
-
-    private val shouldCheckMAC: Boolean
+    val maxTranceiveLength: Int,
+    private val shouldCheckMAC: Boolean,
+    ssc: Long
+) : Serializable, APDUWrapper {
 
     /**
      * Returns the current value of the send sequence counter.
@@ -86,14 +84,14 @@ abstract class SecureMessagingWrapper protected constructor(
      * 
      * @return the encryption key
      */
-    val encryptionKey: SecretKey?
+    //val encryptionKey: SecretKey = ksEnc
 
     /**
      * Returns the shared key for computing message authentication codes over APDU payloads.
      * 
      * @return the MAC key
      */
-    val mACKey: SecretKey?
+    //val mACKey: SecretKey = ksMac
 
     /**
      * Constructs a secure messaging wrapper based on the secure messaging
@@ -110,13 +108,7 @@ abstract class SecureMessagingWrapper protected constructor(
      * @throws GeneralSecurityException when the available JCE providers cannot provide the necessary cryptographic primitives
      */
     init {
-        this.maxTranceiveLength = maxTranceiveLength
-        this.shouldCheckMAC = shouldCheckMAC
-
-        this.encryptionKey = ksEnc
-        this.mACKey = ksMac
         this.sendSequenceCounter = ssc
-
         this.cipher = Util.getCipher(cipherAlg)
         this.mac = Util.getMac(macAlg)
     }
@@ -161,9 +153,9 @@ abstract class SecureMessagingWrapper protected constructor(
         this.sendSequenceCounter++
         try {
             val data = responseAPDU.getData()
-            check(!(data == null || data.size <= 0)) {
+            check(!(data == null || data.isEmpty())) {
                 "Card indicates SM error, SW = " + Integer.toHexString(
-                    responseAPDU.getSW() and 0xFFFF
+                    responseAPDU.sw and 0xFFFF
                 )
             }
             return unwrapResponseAPDU(responseAPDU)
@@ -248,12 +240,12 @@ abstract class SecureMessagingWrapper protected constructor(
      */
     @Throws(GeneralSecurityException::class, IOException::class)
     private fun wrapCommandAPDU(commandAPDU: CommandAPDU): CommandAPDU {
-        val cla = commandAPDU.getCLA()
-        val ins = commandAPDU.getINS()
-        val p1 = commandAPDU.getP1()
-        val p2 = commandAPDU.getP2()
-        val lc = commandAPDU.getNc()
-        val le = commandAPDU.getNe()
+        val cla = commandAPDU.cla
+        val ins = commandAPDU.ins
+        val p1 = commandAPDU.p1
+        val p2 = commandAPDU.p2
+        val lc = commandAPDU.nc
+        val le = commandAPDU.ne
 
         val maskedHeader = byteArrayOf(
             (cla or 0x0C.toByte().toInt()).toByte(),
@@ -263,7 +255,7 @@ abstract class SecureMessagingWrapper protected constructor(
         )
         val paddedMaskedHeader = Util.pad(maskedHeader, this.padLength)
 
-        val hasDO85 = (commandAPDU.getINS().toByte() == ISO7816.INS_READ_BINARY2)
+        val hasDO85 = (commandAPDU.ins.toByte() == ISO7816.INS_READ_BINARY2)
 
         var do8587 = ByteArray(0)
         var do97 = ByteArray(0)
@@ -381,7 +373,7 @@ abstract class SecureMessagingWrapper protected constructor(
      */
     @Throws(GeneralSecurityException::class, IOException::class)
     private fun unwrapResponseAPDU(responseAPDU: ResponseAPDU): ResponseAPDU {
-        val rapdu = responseAPDU.getBytes()
+        val rapdu = responseAPDU.bytes
         require(!(rapdu == null || rapdu.size < 2)) { "Invalid response APDU" }
         cipher.init(Cipher.DECRYPT_MODE, this.encryptionKey, this.iV)
 
@@ -392,8 +384,7 @@ abstract class SecureMessagingWrapper protected constructor(
         try {
             var isFinished = false
             while (!isFinished) {
-                val tag = inputStream.readByte().toInt()
-                when (tag) {
+                when (val tag = inputStream.readByte().toInt()) {
                     0x87.toByte() -> data = readDO87(inputStream, false)
                     0x85.toByte() -> data = readDO87(inputStream, true)
                     0x99.toByte() -> sw = readDO99(inputStream)
@@ -425,7 +416,7 @@ abstract class SecureMessagingWrapper protected constructor(
      * @return a byte array with the encoded expected length
      */
     private fun encodeLe(le: Int): ByteArray {
-        if (0 <= le && le <= 256) {
+        if (le in 0..256) {
             /* NOTE: Both 0x00 and 0x100 are mapped to 0x00. */
             return byteArrayOf(le.toByte())
         } else {
@@ -511,7 +502,7 @@ abstract class SecureMessagingWrapper protected constructor(
     @Throws(IOException::class)
     private fun readDO8E(inputStream: DataInputStream): ByteArray {
         val length = inputStream.readUnsignedByte()
-        check(!(length != 8 && length != 16)) { "DO'8E wrong length for MAC: " + length }
+        check(!(length != 8 && length != 16)) { "DO'8E wrong length for MAC: $length" }
         val cc = ByteArray(length)
         inputStream.readFully(cc)
         return cc
@@ -578,9 +569,7 @@ abstract class SecureMessagingWrapper protected constructor(
     }
 
     companion object {
-        private val LOGGER: Logger = Logger.getLogger("org.jmrtd.protocol")
-
-        private const val serialVersionUID = 4709645514566992414L
+        private val LOGGER: Logger = Logger.getLogger("kmrtd.protocol")
 
         /**
          * Returns a copy of the given wrapper, with an identical (but perhaps independent)
@@ -594,11 +583,9 @@ abstract class SecureMessagingWrapper protected constructor(
         fun getInstance(wrapper: SecureMessagingWrapper?): SecureMessagingWrapper? {
             try {
                 if (wrapper is DESedeSecureMessagingWrapper) {
-                    val desEDESecureMessagingWrapper = wrapper
-                    return DESedeSecureMessagingWrapper(desEDESecureMessagingWrapper)
+                    return DESedeSecureMessagingWrapper(wrapper)
                 } else if (wrapper is AESSecureMessagingWrapper) {
-                    val aesSecureMessagingWrapper = wrapper
-                    return AESSecureMessagingWrapper(aesSecureMessagingWrapper)
+                    return AESSecureMessagingWrapper(wrapper)
                 }
             } catch (gse: GeneralSecurityException) {
                 LOGGER.log(Level.WARNING, "Could not copy wrapper", gse)

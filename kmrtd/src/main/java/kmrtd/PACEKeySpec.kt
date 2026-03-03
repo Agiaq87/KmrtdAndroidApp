@@ -34,22 +34,22 @@ import java.security.GeneralSecurityException
  * 
  * (Contributions by g.giorkhelidze.)
  */
-class PACEKeySpec(key: ByteArray, keyReference: Byte) : AccessKeySpec {
+class PACEKeySpec(
     /**
      * Returns the key bytes.
-     * 
+     *
      * @return the key bytes
      */
-    val key: ByteArray
-
+    override val key: ByteArray,
     /**
      * Returns the type of key, valid values are
      * `MRZ_PACE_KEY_REFERENCE`, `CAN_PACE_KEY_REFERENCE`,
      * `PIN_PACE_KEY_REFERENCE`, `PUK_PACE_KEY_REFERENCE`.
-     * 
+     *
      * @return the type of key
      */
     val keyReference: Byte
+) : AccessKeySpec {
 
     /**
      * Constructs a PACE key from a string value.
@@ -61,20 +61,7 @@ class PACEKeySpec(key: ByteArray, keyReference: Byte) : AccessKeySpec {
      */
     constructor(key: String, keyReference: Byte) : this(Util.getBytes(key), keyReference)
 
-    /**
-     * Constructs a key.
-     * 
-     * @param key CAN, MRZ, PIN, PUK password bytes
-     * @param keyReference indicates the type of key, valid values are
-     * `MRZ_PACE_KEY_REFERENCE`, `CAN_PACE_KEY_REFERENCE`,
-     * `PIN_PACE_KEY_REFERENCE`, `PUK_PACE_KEY_REFERENCE`
-     */
-    init {
-        this.keyReference = keyReference
-        this.key = key
-    }
-
-    val algorithm: String
+    override val algorithm: String
         /**
          * Returns the algorithm.
          * 
@@ -118,7 +105,6 @@ class PACEKeySpec(key: ByteArray, keyReference: Byte) : AccessKeySpec {
     }
 
     companion object {
-        private val serialVersionUID = -7113246293247012560L
 
         /**
          * Creates a PACE key from relevant details from a Machine Readable Zone.
@@ -130,7 +116,7 @@ class PACEKeySpec(key: ByteArray, keyReference: Byte) : AccessKeySpec {
          * @throws GeneralSecurityException on error
          */
         @Throws(GeneralSecurityException::class)
-        fun createMRZKey(mrz: BACKeySpec?): PACEKeySpec {
+        fun createMRZKey(mrz: BACKeySpec): PACEKeySpec {
             return PACEKeySpec(
                 PACEProtocol.Companion.computeKeySeedForPACE(mrz),
                 PassportService.Companion.MRZ_PACE_KEY_REFERENCE
