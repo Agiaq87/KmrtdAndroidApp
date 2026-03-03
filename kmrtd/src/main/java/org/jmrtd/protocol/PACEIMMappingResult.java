@@ -35,7 +35,7 @@ public class PACEIMMappingResult extends PACEMappingResult {
 
     private static final long serialVersionUID = -6415752866407346050L;
 
-    private byte[] pcdNonce;
+    private final byte[] pcdNonce;
 
     /**
      * Constructs a result.

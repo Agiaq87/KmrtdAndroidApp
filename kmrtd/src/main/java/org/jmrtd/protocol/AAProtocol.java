@@ -22,13 +22,13 @@
 
 package org.jmrtd.protocol;
 
-import java.security.PublicKey;
+import net.sf.scuba.smartcards.CardServiceException;
 
 import org.jmrtd.APDULevelAACapable;
 import org.jmrtd.CardServiceProtocolException;
 import org.jmrtd.Util;
 
-import net.sf.scuba.smartcards.CardServiceException;
+import java.security.PublicKey;
 
 /**
  * The Active Authentication protocol.
@@ -39,9 +39,9 @@ import net.sf.scuba.smartcards.CardServiceException;
  */
 public class AAProtocol {
 
-    private APDULevelAACapable service;
+    private final APDULevelAACapable service;
 
-    private SecureMessagingWrapper wrapper;
+    private final SecureMessagingWrapper wrapper;
 
     /**
      * Creates a protocol instance.

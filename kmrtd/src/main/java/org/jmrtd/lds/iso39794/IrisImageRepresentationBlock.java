@@ -35,6 +35,12 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEROctetString;
+import org.jmrtd.ASN1Util;
+import org.jmrtd.lds.ImageInfo;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -44,29 +50,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.jmrtd.ASN1Util;
-import org.jmrtd.lds.ImageInfo;
-
 public class IrisImageRepresentationBlock extends Block implements ImageInfo {
 
     private static final long serialVersionUID = -982987535985932641L;
-    private EyeLabelCode eyeLabelCode;
-    private IrisImageKindCode irisImageKind;
-    private int bitDepth;
-    private ImageDataFormatCode imageDataFormatCode;
-    private HorizontalOrientationCode horizontalOrientationCode;
-    private VerticalOrientationCode verticalOrientationCode;
-    private CompressionHistoryCode compressionHistoryCode;
-    private byte[] imageData;
+    private final EyeLabelCode eyeLabelCode;
+    private final IrisImageKindCode irisImageKind;
+    private final int bitDepth;
+    private final ImageDataFormatCode imageDataFormatCode;
+    private final HorizontalOrientationCode horizontalOrientationCode;
+    private final VerticalOrientationCode verticalOrientationCode;
+    private final CompressionHistoryCode compressionHistoryCode;
+    private final byte[] imageData;
     /**
      * INTEGER (2..65533), is null iff rangingErrorCode is not null.
      */
     private Integer range;
     private RangingErrorCode rangingErrorCode;
-    private DateTimeBlock captureDateTimeBlock;
+    private final DateTimeBlock captureDateTimeBlock;
     private IrisImageCaptureDeviceBlock captureDeviceBlock;
     private List<QualityBlock> qualityBlocks;
     private RollAngleBlock rollAngleBlock;

@@ -35,8 +35,8 @@ import java.io.InputStream;
  */
 public class SplittableInputStream extends InputStream {
 
-    private InputStreamBuffer inputStreamBuffer;
-    private InputStreamBuffer.SubInputStream carrier;
+    private final InputStreamBuffer inputStreamBuffer;
+    private final InputStreamBuffer.SubInputStream carrier;
 
     /**
      * Wraps an input stream so that copy streams can be split off.

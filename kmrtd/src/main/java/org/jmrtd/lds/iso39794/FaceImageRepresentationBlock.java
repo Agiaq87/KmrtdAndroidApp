@@ -35,6 +35,10 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.jmrtd.ASN1Util;
+import org.jmrtd.lds.ImageInfo;
+
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -43,17 +47,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.jmrtd.ASN1Util;
-import org.jmrtd.lds.ImageInfo;
-
 public class FaceImageRepresentationBlock extends Block implements ImageInfo {
 
     private static final long serialVersionUID = -8372278398595506771L;
 
-    private BigInteger representationId;
+    private final BigInteger representationId;
 
-    private FaceImageRepresentation2DBlock imageRepresentation2DBlock;
+    private final FaceImageRepresentation2DBlock imageRepresentation2DBlock;
 
     private DateTimeBlock captureDateTimeBlock;
 

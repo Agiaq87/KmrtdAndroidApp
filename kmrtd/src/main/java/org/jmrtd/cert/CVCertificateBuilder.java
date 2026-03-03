@@ -22,6 +22,12 @@
 
 package org.jmrtd.cert;
 
+import org.ejbca.cvc.CAReferenceField;
+import org.ejbca.cvc.HolderReferenceField;
+import org.ejbca.cvc.exception.ConstructionException;
+import org.jmrtd.cert.CVCAuthorizationTemplate.Permission;
+import org.jmrtd.cert.CVCAuthorizationTemplate.Role;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -30,12 +36,6 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.Date;
-
-import org.ejbca.cvc.CAReferenceField;
-import org.ejbca.cvc.HolderReferenceField;
-import org.ejbca.cvc.exception.ConstructionException;
-import org.jmrtd.cert.CVCAuthorizationTemplate.Permission;
-import org.jmrtd.cert.CVCAuthorizationTemplate.Role;
 
 /**
  * Card verifiable certificate builder.
@@ -94,18 +94,13 @@ public class CVCertificateBuilder {
      * @return the role as an EJBCA typed object
      */
     private static org.ejbca.cvc.AuthorizationRoleEnum getRole(Role role) {
-        switch (role) {
-            case CVCA:
-                return org.ejbca.cvc.AuthorizationRoleEnum.CVCA;
-            case DV_D:
-                return org.ejbca.cvc.AuthorizationRoleEnum.DV_D;
-            case DV_F:
-                return org.ejbca.cvc.AuthorizationRoleEnum.DV_F;
-            case IS:
-                return org.ejbca.cvc.AuthorizationRoleEnum.IS;
-            default:
-                throw new NumberFormatException("Cannot decode role " + role);
-        }
+        return switch (role) {
+            case CVCA -> org.ejbca.cvc.AuthorizationRoleEnum.CVCA;
+            case DV_D -> org.ejbca.cvc.AuthorizationRoleEnum.DV_D;
+            case DV_F -> org.ejbca.cvc.AuthorizationRoleEnum.DV_F;
+            case IS -> org.ejbca.cvc.AuthorizationRoleEnum.IS;
+            default -> throw new NumberFormatException("Cannot decode role " + role);
+        };
     }
 
     /**
@@ -115,17 +110,12 @@ public class CVCertificateBuilder {
      * @return the access right as an EJBCA typed object
      */
     private static org.ejbca.cvc.AccessRightEnum getAccessRight(Permission accessRight) {
-        switch (accessRight) {
-            case READ_ACCESS_NONE:
-                return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_NONE;
-            case READ_ACCESS_DG3:
-                return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3;
-            case READ_ACCESS_DG4:
-                return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG4;
-            case READ_ACCESS_DG3_AND_DG4:
-                return org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3_AND_DG4;
-            default:
-                throw new NumberFormatException("Cannot decode access right " + accessRight);
-        }
+        return switch (accessRight) {
+            case READ_ACCESS_NONE -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_NONE;
+            case READ_ACCESS_DG3 -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3;
+            case READ_ACCESS_DG4 -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG4;
+            case READ_ACCESS_DG3_AND_DG4 -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3_AND_DG4;
+            default -> throw new NumberFormatException("Cannot decode access right " + accessRight);
+        };
     }
 }

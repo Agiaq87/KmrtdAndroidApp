@@ -33,8 +33,8 @@ import org.ejbca.cvc.AuthorizationRoleEnum;
  */
 public class CVCAuthorizationTemplate {
 
-    private Role role;
-    private Permission accessRight;
+    private final Role role;
+    private final Permission accessRight;
 
     /**
      * Constructs an authorization template based on an EJBCA authorization template.

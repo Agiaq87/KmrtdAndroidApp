@@ -22,14 +22,14 @@
 
 package org.jmrtd.lds.iso19794;
 
+import org.jmrtd.lds.AbstractListInfo;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-
-import org.jmrtd.lds.AbstractListInfo;
 
 /**
  * Iris biometric subtype data block (containing iris image data blocks)
@@ -54,7 +54,7 @@ public class IrisBiometricSubtypeInfo extends AbstractListInfo<IrisImageInfo> {
      */
     public static final int EYE_LEFT = 2;
     private static final long serialVersionUID = -6588640634764878039L;
-    private int imageFormat;
+    private final int imageFormat;
     private int biometricSubtype;
 
     /**

@@ -22,13 +22,13 @@
 
 package org.jmrtd.protocol;
 
-import java.io.Serializable;
-import java.security.KeyPair;
-import java.security.PublicKey;
-
 import org.jmrtd.AccessKeySpec;
 import org.jmrtd.Util;
 import org.jmrtd.lds.PACEInfo.MappingType;
+
+import java.io.Serializable;
+import java.security.KeyPair;
+import java.security.PublicKey;
 
 /**
  * Result of PACE protocol.
@@ -40,21 +40,16 @@ public class PACEResult implements Serializable {
 
     private static final long serialVersionUID = -6819675856205885052L;
 
-    private MappingType mappingType;
-    private String agreementAlg;
-    private String cipherAlg;
-    private String digestAlg;
-    private int keyLength;
-
-    private AccessKeySpec paceKey;
-
-    private PACEMappingResult mappingResult;
-
-    private PublicKey piccPublicKey;
-
-    private KeyPair pcdKeyPair;
-
-    private SecureMessagingWrapper wrapper;
+    private final MappingType mappingType;
+    private final String agreementAlg;
+    private final String cipherAlg;
+    private final String digestAlg;
+    private final int keyLength;
+    private final AccessKeySpec paceKey;
+    private final PACEMappingResult mappingResult;
+    private final PublicKey piccPublicKey;
+    private final KeyPair pcdKeyPair;
+    private final SecureMessagingWrapper wrapper;
 
     /**
      * The result of a PACE protocol run.

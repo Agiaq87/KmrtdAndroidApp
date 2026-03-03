@@ -22,15 +22,15 @@
 
 package org.jmrtd.protocol;
 
+import net.sf.scuba.util.Hex;
+
+import org.jmrtd.Util;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Arrays;
-
-import org.jmrtd.Util;
-
-import net.sf.scuba.util.Hex;
 
 /**
  * Result of EAC Chip Authentication protocol.
@@ -42,12 +42,12 @@ public class EACCAResult implements Serializable {
 
     private static final long serialVersionUID = 4431711176589761513L;
 
-    private BigInteger keyId;
-    private PublicKey piccPublicKey;
-    private SecureMessagingWrapper wrapper;
-    private byte[] keyHash;
-    private PublicKey pcdPublicKey;
-    private PrivateKey pcdPrivateKey;
+    private final BigInteger keyId;
+    private final PublicKey piccPublicKey;
+    private final SecureMessagingWrapper wrapper;
+    private final byte[] keyHash;
+    private final PublicKey pcdPublicKey;
+    private final PrivateKey pcdPrivateKey;
 
     /**
      * Creates a result.

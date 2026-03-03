@@ -21,11 +21,11 @@
 
 package org.jmrtd;
 
-import java.io.Serializable;
-
 import net.sf.scuba.smartcards.APDUEvent;
 import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ResponseAPDU;
+
+import java.io.Serializable;
 
 /**
  * An event signifying an exchange of wrapped (protected) command and response APDUs.
@@ -39,9 +39,9 @@ public class WrappedAPDUEvent extends APDUEvent {
 
     private static final long serialVersionUID = 5958662425525890224L;
 
-    private CommandAPDU plainTextCommandAPDU;
+    private final CommandAPDU plainTextCommandAPDU;
 
-    private ResponseAPDU plainTextResponseAPDU;
+    private final ResponseAPDU plainTextResponseAPDU;
 
     /**
      * Creates an APDU exchange event.

@@ -22,17 +22,6 @@
 
 package org.jmrtd.lds;
 
-import java.math.BigInteger;
-import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.ECFieldFp;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
@@ -48,6 +37,17 @@ import org.bouncycastle.asn1.x9.X962Parameters;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.jmrtd.Util;
+
+import java.math.BigInteger;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.ECFieldFp;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.EllipticCurve;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * PACE Domain Parameter Info object as per SAC TR 1.01, November 11, 2010.
@@ -92,7 +92,7 @@ public class PACEDomainParameterInfo extends SecurityInfo {
     public static final String ID_DH_PUBLIC_NUMBER = "1.2.840.10046.2.1";
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
     private static final long serialVersionUID = -5851251908152594728L;
-    private String oid;
+    private final String oid;
 
     /*
      * FIXME: This field is now transient, but should not be.
@@ -101,9 +101,9 @@ public class PACEDomainParameterInfo extends SecurityInfo {
      * Possibly by first defining PACEECDomainParameters and PACEDHDomainParameters subclasses
      * first (yet, ECParameterSpec and DHParameterSpec are also not Serializable).
      */
-    private transient AlgorithmIdentifier domainParameter;
+    private final transient AlgorithmIdentifier domainParameter;
 
-    private BigInteger parameterId;
+    private final BigInteger parameterId;
 
     /**
      * Constructs a PACE domain parameter info structure.

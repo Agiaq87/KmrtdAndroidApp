@@ -35,16 +35,16 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Sequence;
+import org.jmrtd.ASN1Util;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Sequence;
-import org.jmrtd.ASN1Util;
 
 public class RegistryIdBlock extends Block {
 
@@ -57,12 +57,12 @@ public class RegistryIdBlock extends Block {
     //    id                      [1] RegistryId
     //  }
 
-    private int organization;
+    private final int organization;
 
-    private int id;
+    private final int id;
 
-    public RegistryIdBlock(int organzation, int id) {
-        this.organization = organzation;
+    public RegistryIdBlock(int organization, int id) {
+        this.organization = organization;
         this.id = id;
     }
 

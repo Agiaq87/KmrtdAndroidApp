@@ -22,15 +22,15 @@
 
 package org.jmrtd.cbeff;
 
+import net.sf.scuba.tlv.TLVInputStream;
+import net.sf.scuba.tlv.TLVUtil;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVUtil;
 
 /**
  * ISO 7816-11 decoder for BIR.
@@ -43,7 +43,7 @@ public class ISO781611Decoder<B extends BiometricDataBlock> implements ISO781611
 
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd.cbeff");
 
-    private Map<Integer, BiometricDataBlockDecoder<B>> bdbDecoders;
+    private final Map<Integer, BiometricDataBlockDecoder<B>> bdbDecoders;
 
     private BiometricEncodingType encodingType;
 

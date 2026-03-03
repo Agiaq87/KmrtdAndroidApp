@@ -36,7 +36,7 @@ package org.jmrtd.cbeff;
  */
 public class SimpleCBEFFInfo<B extends BiometricDataBlock> implements CBEFFInfo<B> {
 
-    private B bdb;
+    private final B bdb;
 
     /**
      * Constructs a simple CBEFF info from the given BDB.

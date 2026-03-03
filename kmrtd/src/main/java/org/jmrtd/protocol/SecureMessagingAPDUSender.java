@@ -22,17 +22,6 @@
 
 package org.jmrtd.protocol;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.jmrtd.Util;
-import org.jmrtd.WrappedAPDUEvent;
-
 import net.sf.scuba.smartcards.APDUEvent;
 import net.sf.scuba.smartcards.APDUListener;
 import net.sf.scuba.smartcards.APDUWrapper;
@@ -42,6 +31,17 @@ import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 import net.sf.scuba.util.Hex;
+
+import org.jmrtd.Util;
+import org.jmrtd.WrappedAPDUEvent;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An APDU sender for tranceiving wrapped APDUs.
@@ -54,7 +54,7 @@ public class SecureMessagingAPDUSender {
 
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd.protocol");
 
-    private CardService service;
+    private final CardService service;
 
     private int apduCount;
 

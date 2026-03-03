@@ -38,7 +38,7 @@ public class CardServiceProtocolException extends CardServiceException {
     /**
      * Identifies the protocol step that failed.
      */
-    private int step;
+    private final int step;
 
     /**
      * Creates a {@code CardServiceProtocolException}.

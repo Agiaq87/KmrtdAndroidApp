@@ -22,11 +22,7 @@
 
 package org.jmrtd.protocol;
 
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
-import java.util.Random;
-
-import javax.crypto.SecretKey;
+import net.sf.scuba.smartcards.CardServiceException;
 
 import org.jmrtd.APDULevelBACCapable;
 import org.jmrtd.AccessKeySpec;
@@ -34,7 +30,11 @@ import org.jmrtd.BACKeySpec;
 import org.jmrtd.CardServiceProtocolException;
 import org.jmrtd.Util;
 
-import net.sf.scuba.smartcards.CardServiceException;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.util.Random;
+
+import javax.crypto.SecretKey;
 
 /**
  * The Basic Access Control protocol.
@@ -45,13 +45,13 @@ import net.sf.scuba.smartcards.CardServiceException;
  */
 public class BACProtocol {
 
-    private APDULevelBACCapable service;
+    private final APDULevelBACCapable service;
 
-    private Random random;
+    private final Random random;
 
-    private int maxTranceiveLength;
+    private final int maxTranceiveLength;
 
-    private boolean shouldCheckMAC;
+    private final boolean shouldCheckMAC;
 
     /**
      * Constructs a BAC protocol instance.

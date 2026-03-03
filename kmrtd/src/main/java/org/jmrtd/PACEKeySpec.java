@@ -22,12 +22,12 @@
 
 package org.jmrtd;
 
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
+import net.sf.scuba.util.Hex;
 
 import org.jmrtd.protocol.PACEProtocol;
 
-import net.sf.scuba.util.Hex;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 /**
  * A key for PACE, can be CAN, MRZ, PIN, or PUK.
@@ -41,9 +41,9 @@ public class PACEKeySpec implements AccessKeySpec {
 
     private static final long serialVersionUID = -7113246293247012560L;
 
-    private byte[] key;
+    private final byte[] key;
 
-    private byte keyReference;
+    private final byte keyReference;
 
     /**
      * Constructs a PACE key from a string value.

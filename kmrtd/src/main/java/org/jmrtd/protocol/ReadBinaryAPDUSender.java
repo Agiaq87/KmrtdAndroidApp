@@ -1,11 +1,5 @@
 package org.jmrtd.protocol;
 
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.jmrtd.APDULevelReadBinaryCapable;
-
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
 import net.sf.scuba.smartcards.CardServiceException;
@@ -13,6 +7,12 @@ import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 import net.sf.scuba.util.Hex;
+
+import org.jmrtd.APDULevelReadBinaryCapable;
+
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An APDU sender to support reading binaries. both selection and short file identifier based.
@@ -25,9 +25,9 @@ public class ReadBinaryAPDUSender implements APDULevelReadBinaryCapable {
 
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd.protocol");
 
-    private SecureMessagingAPDUSender secureMessagingSender;
+    private final SecureMessagingAPDUSender secureMessagingSender;
 
-    private CardService service;
+    private final CardService service;
 
     /**
      * Creates an APDU sender.

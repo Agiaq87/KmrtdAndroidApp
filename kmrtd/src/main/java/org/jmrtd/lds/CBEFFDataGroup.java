@@ -22,15 +22,7 @@
 
 package org.jmrtd.lds;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import net.sf.scuba.tlv.TLVOutputStream;
 
 import org.jmrtd.cbeff.BiometricDataBlock;
 import org.jmrtd.cbeff.BiometricEncodingType;
@@ -41,7 +33,15 @@ import org.jmrtd.cbeff.ISO781611Decoder;
 import org.jmrtd.cbeff.ISO781611Encoder;
 import org.jmrtd.cbeff.SimpleCBEFFInfo;
 
-import net.sf.scuba.tlv.TLVOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Datagroup containing a list of biometric information templates (BITs).
@@ -60,7 +60,7 @@ public abstract class CBEFFDataGroup extends DataGroup {
     /**
      * For writing the optional random data block.
      */
-    private Random random;
+    private final Random random;
     /**
      * Records in the BIT group. Each record represents a single BIT.
      */

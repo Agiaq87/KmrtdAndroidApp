@@ -22,6 +22,13 @@
 
 package org.jmrtd.lds.icao;
 
+import net.sf.scuba.tlv.TLVInputStream;
+import net.sf.scuba.tlv.TLVOutputStream;
+import net.sf.scuba.tlv.TLVUtil;
+import net.sf.scuba.util.Hex;
+
+import org.jmrtd.lds.DataGroup;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,13 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.jmrtd.lds.DataGroup;
-
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.tlv.TLVOutputStream;
-import net.sf.scuba.tlv.TLVUtil;
-import net.sf.scuba.util.Hex;
 
 /**
  * Abstract superclass for DG11 and DG12.
@@ -80,8 +80,7 @@ abstract class AdditionalDetailDataGroup extends DataGroup {
         int tagListBytesRead = 0;
 
         byte[] tagListBytes = tlvInputStream.readValue();
-        ByteArrayInputStream tagListBytesInputStream = new ByteArrayInputStream(tagListBytes);
-        try {
+        try (ByteArrayInputStream tagListBytesInputStream = new ByteArrayInputStream(tagListBytes)) {
             /* Find out which tags are present. */
             List<Integer> tagList = new ArrayList<Integer>();
             while (tagListBytesRead < tagListLength) {
@@ -92,8 +91,6 @@ abstract class AdditionalDetailDataGroup extends DataGroup {
                 tagList.add(tag);
             }
             return tagList;
-        } finally {
-            tagListBytesInputStream.close();
         }
     }
 

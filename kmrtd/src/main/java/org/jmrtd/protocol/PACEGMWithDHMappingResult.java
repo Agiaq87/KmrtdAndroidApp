@@ -37,7 +37,7 @@ public class PACEGMWithDHMappingResult extends PACEGMMappingResult {
 
     private static final long serialVersionUID = -2829641255641406199L;
 
-    private byte[] sharedSecret;
+    private final byte[] sharedSecret;
 
     /**
      * Constructs a result.

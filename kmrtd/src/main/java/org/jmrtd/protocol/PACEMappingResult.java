@@ -39,10 +39,10 @@ public abstract class PACEMappingResult implements Serializable {
     private static final long serialVersionUID = 2773111318950631118L;
 
     // FIXME: Should be serializable instead of transient.
-    private transient AlgorithmParameterSpec staticParameters;
+    private final transient AlgorithmParameterSpec staticParameters;
 
     // FIXME: Should be serializable instead of transient.
-    private transient AlgorithmParameterSpec ephemeralParameters;
+    private final transient AlgorithmParameterSpec ephemeralParameters;
 
     private byte[] piccNonce;
 

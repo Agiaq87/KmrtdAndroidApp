@@ -22,6 +22,18 @@
 
 package org.jmrtd.protocol;
 
+import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.tlv.TLVOutputStream;
+import net.sf.scuba.tlv.TLVUtil;
+
+import org.jmrtd.APDULevelEACTACapable;
+import org.jmrtd.CardServiceProtocolException;
+import org.jmrtd.Util;
+import org.jmrtd.cert.CVCAuthorizationTemplate.Role;
+import org.jmrtd.cert.CVCPrincipal;
+import org.jmrtd.cert.CardVerifiableCertificate;
+import org.jmrtd.lds.icao.MRZInfo;
+
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -36,18 +48,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.crypto.interfaces.DHPublicKey;
-
-import org.jmrtd.APDULevelEACTACapable;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.Util;
-import org.jmrtd.cert.CVCAuthorizationTemplate.Role;
-import org.jmrtd.cert.CVCPrincipal;
-import org.jmrtd.cert.CardVerifiableCertificate;
-import org.jmrtd.lds.icao.MRZInfo;
-
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.tlv.TLVOutputStream;
-import net.sf.scuba.tlv.TLVUtil;
 
 /**
  * The EAC Terminal Authentication protocol.
@@ -64,9 +64,8 @@ public class EACTAProtocol {
 
     private static final Provider BC_PROVIDER = Util.getBouncyCastleProvider();
 
-    private APDULevelEACTACapable service;
-
-    private SecureMessagingWrapper wrapper;
+    private final APDULevelEACTACapable service;
+    private final SecureMessagingWrapper wrapper;
 
     /**
      * Creates a protocol instance.

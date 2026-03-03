@@ -22,6 +22,12 @@
 
 package org.jmrtd.protocol;
 
+import net.sf.scuba.util.Hex;
+
+import org.jmrtd.Util;
+import org.jmrtd.cert.CVCPrincipal;
+import org.jmrtd.cert.CardVerifiableCertificate;
+
 import java.io.Serializable;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
@@ -30,12 +36,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.jmrtd.Util;
-import org.jmrtd.cert.CVCPrincipal;
-import org.jmrtd.cert.CardVerifiableCertificate;
-
-import net.sf.scuba.util.Hex;
 
 /**
  * Result of EAC Terminal Authentication protocol.
@@ -49,12 +49,12 @@ public class EACTAResult implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
 
-    private EACCAResult chipAuthenticationResult;
-    private CVCPrincipal caReference;
-    private List<CardVerifiableCertificate> terminalCertificates = new ArrayList<CardVerifiableCertificate>();
-    private PrivateKey terminalKey;
-    private String documentNumber;
-    private byte[] cardChallenge;
+    private final EACCAResult chipAuthenticationResult;
+    private final CVCPrincipal caReference;
+    private final List<CardVerifiableCertificate> terminalCertificates = new ArrayList<CardVerifiableCertificate>();
+    private final PrivateKey terminalKey;
+    private final String documentNumber;
+    private final byte[] cardChallenge;
 
     /**
      * Constructs a new terminal authentication result.

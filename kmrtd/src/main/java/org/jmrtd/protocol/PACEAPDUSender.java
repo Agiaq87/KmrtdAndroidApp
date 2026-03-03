@@ -22,14 +22,6 @@
 
 package org.jmrtd.protocol;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import org.jmrtd.APDULevelPACECapable;
-import org.jmrtd.Util;
-
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
 import net.sf.scuba.smartcards.CardServiceException;
@@ -37,6 +29,14 @@ import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
 import net.sf.scuba.tlv.TLVUtil;
+
+import org.jmrtd.APDULevelPACECapable;
+import org.jmrtd.Util;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A low-level APDU sender to support the PACE protocol.
@@ -79,7 +79,7 @@ public class PACEAPDUSender implements APDULevelPACECapable {
 
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd.protocol");
 
-    private SecureMessagingAPDUSender secureMessagingSender;
+    private final SecureMessagingAPDUSender secureMessagingSender;
 
     /**
      * Creates an APDU sender to support the PACE protocol.

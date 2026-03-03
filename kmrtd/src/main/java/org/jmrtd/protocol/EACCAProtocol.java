@@ -22,6 +22,15 @@
 
 package org.jmrtd.protocol;
 
+import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.tlv.TLVUtil;
+
+import org.jmrtd.APDULevelEACCACapable;
+import org.jmrtd.CardServiceProtocolException;
+import org.jmrtd.Util;
+import org.jmrtd.lds.ChipAuthenticationInfo;
+import org.jmrtd.lds.SecurityInfo;
+
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
@@ -42,15 +51,6 @@ import javax.crypto.KeyAgreement;
 import javax.crypto.SecretKey;
 import javax.crypto.interfaces.DHPublicKey;
 
-import org.jmrtd.APDULevelEACCACapable;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.Util;
-import org.jmrtd.lds.ChipAuthenticationInfo;
-import org.jmrtd.lds.SecurityInfo;
-
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.tlv.TLVUtil;
-
 /**
  * The EAC Chip Authentication protocol (version 1).
  *
@@ -66,13 +66,13 @@ public class EACCAProtocol {
 
     private static final int COMMAND_CHAINING_CHUNK_SIZE = 223;
 
-    private APDULevelEACCACapable service;
+    private final APDULevelEACCACapable service;
 
     private SecureMessagingWrapper wrapper;
 
-    private int maxTranceiveLength;
+    private final int maxTranceiveLength;
 
-    private boolean shouldCheckMAC;
+    private final boolean shouldCheckMAC;
 
     /**
      * Constructs a protocol instance.

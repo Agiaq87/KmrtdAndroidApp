@@ -35,13 +35,13 @@
 
 package org.jmrtd.lds.iso39794;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.jmrtd.ASN1Util;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class FaceImageCaptureDevice2DBlock extends Block {
 
@@ -139,7 +139,7 @@ public class FaceImageCaptureDevice2DBlock extends Block {
         VIDEO_FRAME_FROM_ANALOGUE_VIDEO_CAMERA(5),
         VIDEO_FRAME_FROM_DIGITAL_VIDEO_CAMERA(6);
 
-        private int code;
+        private final int code;
 
         private CaptureDeviceTechnologyId2DCode(int code) {
             this.code = code;

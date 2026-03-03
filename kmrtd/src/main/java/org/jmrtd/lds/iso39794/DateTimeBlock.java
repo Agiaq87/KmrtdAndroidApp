@@ -35,24 +35,24 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.jmrtd.ASN1Util;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.jmrtd.ASN1Util;
 
 public class DateTimeBlock extends Block {
 
     private static final long serialVersionUID = 2053705457048769663L;
 
-    private int year;
-    private int month;
-    private int day;
-    private int hour;
-    private int minute;
-    private int second;
-    private int millisecond;
+    private final int year;
+    private final int month;
+    private final int day;
+    private final int hour;
+    private final int minute;
+    private final int second;
+    private final int millisecond;
 
     public DateTimeBlock(int year, int month, int day, int hour, int minute, int second, int millisecond) {
         this.year = year;

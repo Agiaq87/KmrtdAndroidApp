@@ -35,15 +35,15 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.jmrtd.ASN1Util;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.jmrtd.ASN1Util;
 
 public class FingerImageSegmentationBlock extends Block {
 
@@ -55,9 +55,9 @@ public class FingerImageSegmentationBlock extends Block {
     //    ...
     //  }
 
-    private RegistryIdBlock algorithmIdBlock;
+    private final RegistryIdBlock algorithmIdBlock;
 
-    private List<FingerImageSegmentBlock> segmentBlocks;
+    private final List<FingerImageSegmentBlock> segmentBlocks;
 
     FingerImageSegmentationBlock(ASN1Encodable asn1Encodable) {
         Map<Integer, ASN1Encodable> taggedObjects = ASN1Util.decodeTaggedObjects(asn1Encodable);

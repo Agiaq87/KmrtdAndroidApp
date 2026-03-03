@@ -22,13 +22,13 @@
 
 package org.jmrtd.lds;
 
-import java.util.Arrays;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DLSequence;
+
+import java.util.Arrays;
 
 /*
  * EFDIRInfo ::= SEQUENCE {
@@ -54,7 +54,7 @@ public class EFDIRInfo extends SecurityInfo {
 
     private static final String EF_DIR_PROTOCOL_OID = "2.23.136.1.1.13";
 
-    private byte[] efDIR;
+    private final byte[] efDIR;
 
     public EFDIRInfo(byte[] efDIR) {
         if (efDIR == null) {

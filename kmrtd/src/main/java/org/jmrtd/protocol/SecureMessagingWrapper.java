@@ -22,6 +22,14 @@
 
 package org.jmrtd.protocol;
 
+import net.sf.scuba.smartcards.APDUWrapper;
+import net.sf.scuba.smartcards.CommandAPDU;
+import net.sf.scuba.smartcards.ISO7816;
+import net.sf.scuba.smartcards.ResponseAPDU;
+import net.sf.scuba.tlv.TLVUtil;
+
+import org.jmrtd.Util;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -38,14 +46,6 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
-import org.jmrtd.Util;
-
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CommandAPDU;
-import net.sf.scuba.smartcards.ISO7816;
-import net.sf.scuba.smartcards.ResponseAPDU;
-import net.sf.scuba.tlv.TLVUtil;
-
 /**
  * Secure messaging wrapper base class.
  *
@@ -57,18 +57,14 @@ public abstract class SecureMessagingWrapper implements Serializable, APDUWrappe
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd.protocol");
 
     private static final long serialVersionUID = 4709645514566992414L;
-
-    private int maxTranceiveLength;
-
-    private boolean shouldCheckMAC;
-
+    private final int maxTranceiveLength;
+    private final boolean shouldCheckMAC;
     private long ssc;
 
-    private transient Cipher cipher;
-    private transient Mac mac;
-
-    private SecretKey ksEnc;
-    private SecretKey ksMac;
+    private final transient Cipher cipher;
+    private final transient Mac mac;
+    private final SecretKey ksEnc;
+    private final SecretKey ksMac;
 
     /**
      * Constructs a secure messaging wrapper based on the secure messaging

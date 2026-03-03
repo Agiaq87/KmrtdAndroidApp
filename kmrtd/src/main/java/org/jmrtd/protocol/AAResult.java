@@ -22,13 +22,13 @@
 
 package org.jmrtd.protocol;
 
-import java.io.Serializable;
-import java.security.PublicKey;
-import java.util.Arrays;
+import net.sf.scuba.util.Hex;
 
 import org.jmrtd.Util;
 
-import net.sf.scuba.util.Hex;
+import java.io.Serializable;
+import java.security.PublicKey;
+import java.util.Arrays;
 
 /**
  * Result from Active Authentication protocol.
@@ -40,11 +40,11 @@ public class AAResult implements Serializable {
 
     private static final long serialVersionUID = 8800803919646625713L;
 
-    private PublicKey publicKey;
-    private String digestAlgorithm;
-    private String signatureAlgorithm;
-    private byte[] challenge;
-    private byte[] response;
+    private final PublicKey publicKey;
+    private final String digestAlgorithm;
+    private final String signatureAlgorithm;
+    private final byte[] challenge;
+    private final byte[] response;
 
     /**
      * The result of an Active Authentication protocol run.

@@ -22,8 +22,6 @@
 
 package org.jmrtd.lds;
 
-import java.util.logging.Logger;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
@@ -33,6 +31,8 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DLSequence;
+
+import java.util.logging.Logger;
 
 /**
  * A concrete SecurityInfo structure that stores terminal authentication
@@ -59,8 +59,8 @@ public class TerminalAuthenticationInfo extends SecurityInfo {
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd.lds");
     private static final int VERSION_2 = 2;
 
-    private String oid;
-    private int version;
+    private final String oid;
+    private final int version;
 
     /*
      * FIXME: This shouldn't be transient, as we want this part of the state to be (de)serialized.
@@ -71,7 +71,7 @@ public class TerminalAuthenticationInfo extends SecurityInfo {
      * Alternatively we could explicitly (de)serialize this in readObject/writeObject
      * (using BC's getEncoded()).
      */
-    private transient ASN1Sequence efCVCA;
+    private final transient ASN1Sequence efCVCA;
 
     /**
      * Constructs a new object.

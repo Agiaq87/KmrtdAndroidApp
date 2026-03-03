@@ -35,15 +35,6 @@
 
 package org.jmrtd.lds.iso39794;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERTags;
@@ -54,12 +45,21 @@ import org.jmrtd.cbeff.CBEFFInfo;
 import org.jmrtd.cbeff.ISO781611;
 import org.jmrtd.cbeff.StandardBiometricHeader;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 public class FaceImageDataBlock extends Block implements BiometricDataBlock {
 
     private static final long serialVersionUID = -7831183488053975281L;
 
-    private VersionBlock versionBlock;
-    private List<FaceImageRepresentationBlock> representationBlocks;
+    private final VersionBlock versionBlock;
+    private final List<FaceImageRepresentationBlock> representationBlocks;
 
     private StandardBiometricHeader sbh;
 

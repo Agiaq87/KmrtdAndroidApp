@@ -22,13 +22,13 @@
 
 package org.jmrtd.cbeff;
 
+import net.sf.scuba.tlv.TLVOutputStream;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
-
-import net.sf.scuba.tlv.TLVOutputStream;
 
 /**
  * ISO 7816-11 encoder for BIR.
@@ -39,9 +39,9 @@ import net.sf.scuba.tlv.TLVOutputStream;
  */
 public class ISO781611Encoder<B extends BiometricDataBlock> implements ISO781611 {
 
-    private BiometricDataBlockEncoder<B> bdbEncoder;
+    private final BiometricDataBlockEncoder<B> bdbEncoder;
 
-    private BiometricEncodingType encodingType;
+    private final BiometricEncodingType encodingType;
 
     /**
      * Constructs an ISO7816-11 encoder that uses the given BDB encoder.

@@ -22,16 +22,13 @@
 
 package org.jmrtd;
 
-import java.math.BigInteger;
-import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.AlgorithmParameterSpec;
-import java.util.Collection;
-import java.util.List;
-import java.util.logging.Logger;
-
-import javax.crypto.SecretKey;
+import net.sf.scuba.smartcards.APDUEvent;
+import net.sf.scuba.smartcards.APDUListener;
+import net.sf.scuba.smartcards.CardFileInputStream;
+import net.sf.scuba.smartcards.CardService;
+import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.CommandAPDU;
+import net.sf.scuba.smartcards.ResponseAPDU;
 
 import org.jmrtd.cert.CVCPrincipal;
 import org.jmrtd.cert.CardVerifiableCertificate;
@@ -53,13 +50,16 @@ import org.jmrtd.protocol.PACEResult;
 import org.jmrtd.protocol.ReadBinaryAPDUSender;
 import org.jmrtd.protocol.SecureMessagingWrapper;
 
-import net.sf.scuba.smartcards.APDUEvent;
-import net.sf.scuba.smartcards.APDUListener;
-import net.sf.scuba.smartcards.CardFileInputStream;
-import net.sf.scuba.smartcards.CardService;
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.smartcards.CommandAPDU;
-import net.sf.scuba.smartcards.ResponseAPDU;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.AlgorithmParameterSpec;
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
+
+import javax.crypto.SecretKey;
 
 /**
  * Card service for reading files (such as data groups) and using the various
@@ -289,32 +289,26 @@ public class PassportService extends AbstractMRTDCardService {
     /**
      * The file read block size, some passports cannot handle large values.
      */
-    private int maxBlockSize;
+    private final int maxBlockSize;
 
     private boolean isOpen;
 
     private SecureMessagingWrapper wrapper;
 
-    private int maxTranceiveLengthForSecureMessaging;
-
-    private int maxTranceiveLengthForPACEProtocol;
-
-    private boolean shouldCheckMAC;
-
+    private final int maxTranceiveLengthForSecureMessaging;
+    private final int maxTranceiveLengthForPACEProtocol;
+    private final boolean shouldCheckMAC;
     private boolean isAppletSelected;
 
-    private DefaultFileSystem rootFileSystem;
-
-    private DefaultFileSystem appletFileSystem;
-
-    private BACAPDUSender bacSender;
-    private PACEAPDUSender paceSender;
-    private AAAPDUSender aaSender;
-    private EACCAAPDUSender eacCASender;
-    private EACTAAPDUSender eacTASender;
-    private ReadBinaryAPDUSender readBinarySender;
-
-    private CardService service;
+    private final DefaultFileSystem rootFileSystem;
+    private final DefaultFileSystem appletFileSystem;
+    private final BACAPDUSender bacSender;
+    private final PACEAPDUSender paceSender;
+    private final AAAPDUSender aaSender;
+    private final EACCAAPDUSender eacCASender;
+    private final EACTAAPDUSender eacTASender;
+    private final ReadBinaryAPDUSender readBinarySender;
+    private final CardService service;
 
     /**
      * Creates a new passport service for accessing the passport.

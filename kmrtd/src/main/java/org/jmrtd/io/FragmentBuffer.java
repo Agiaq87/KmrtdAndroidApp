@@ -48,7 +48,7 @@ public class FragmentBuffer implements Serializable {
     /**
      * Administration of which parts of buffer are filled.
      */
-    private Collection<Fragment> fragments;
+    private final Collection<Fragment> fragments;
 
     /**
      * Creates a fragment buffer with default size.
@@ -64,7 +64,7 @@ public class FragmentBuffer implements Serializable {
      */
     public FragmentBuffer(int length) {
         this.buffer = new byte[length];
-        this.fragments = new HashSet<Fragment>();
+        this.fragments = new HashSet<>();
     }
 
     /**

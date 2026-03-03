@@ -1,5 +1,16 @@
 package org.jmrtd.protocol;
 
+import net.sf.scuba.smartcards.APDUWrapper;
+import net.sf.scuba.smartcards.CardService;
+import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.CommandAPDU;
+import net.sf.scuba.smartcards.ISO7816;
+import net.sf.scuba.smartcards.ResponseAPDU;
+
+import org.jmrtd.APDULevelBACCapable;
+import org.jmrtd.CardServiceProtocolException;
+import org.jmrtd.Util;
+
 import java.security.GeneralSecurityException;
 import java.security.Provider;
 
@@ -7,17 +18,6 @@ import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-
-import org.jmrtd.APDULevelBACCapable;
-import org.jmrtd.CardServiceProtocolException;
-import org.jmrtd.Util;
-
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CardService;
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.smartcards.CommandAPDU;
-import net.sf.scuba.smartcards.ISO7816;
-import net.sf.scuba.smartcards.ResponseAPDU;
 
 /**
  * A low-level APDU sender to support the BAC protocol.
@@ -35,12 +35,12 @@ public class BACAPDUSender implements APDULevelBACCapable {
      */
     private static final IvParameterSpec ZERO_IV_PARAM_SPEC = new IvParameterSpec(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
 
-    private CardService service;
+    private final CardService service;
 
     /**
      * DESede encryption/decryption cipher.
      */
-    private Cipher cipher;
+    private final Cipher cipher;
 
     /**
      * ISO9797Alg3Mac.

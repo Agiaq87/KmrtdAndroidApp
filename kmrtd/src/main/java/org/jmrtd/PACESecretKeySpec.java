@@ -36,7 +36,7 @@ public class PACESecretKeySpec extends SecretKeySpec implements AccessKeySpec {
 
     private static final long serialVersionUID = -5181060361947453857L;
 
-    private byte keyReference;
+    private final byte keyReference;
 
     /**
      * Constructs a secret key from the given byte array, using the first {@code len}

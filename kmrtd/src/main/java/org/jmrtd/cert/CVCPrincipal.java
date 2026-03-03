@@ -22,12 +22,12 @@
 
 package org.jmrtd.cert;
 
+import net.sf.scuba.data.Country;
+
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import net.sf.scuba.data.Country;
 
 /**
  * Card verifiable certificate principal.
@@ -43,8 +43,8 @@ public class CVCPrincipal implements Principal, Serializable {
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
 
     private Country country;
-    private String mnemonic;
-    private String seqNumber;
+    private final String mnemonic;
+    private final String seqNumber;
 
     /**
      * Constructs a principal.

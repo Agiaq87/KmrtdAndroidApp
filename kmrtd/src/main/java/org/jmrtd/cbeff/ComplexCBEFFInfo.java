@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class ComplexCBEFFInfo<R extends BiometricDataBlock> implements CBEFFInfo<R> {
 
-    private List<CBEFFInfo<R>> subRecords;
+    private final List<CBEFFInfo<R>> subRecords;
 
     /**
      * Constructs a default complex info, with an empty list of sub-records.

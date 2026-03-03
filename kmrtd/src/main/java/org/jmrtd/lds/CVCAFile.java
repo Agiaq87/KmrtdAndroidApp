@@ -22,13 +22,13 @@
 
 package org.jmrtd.lds;
 
+import org.jmrtd.PassportService;
+import org.jmrtd.cert.CVCPrincipal;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.jmrtd.PassportService;
-import org.jmrtd.cert.CVCPrincipal;
 
 /* TODO: Use CVCPrincipal instead of String for references? */
 
@@ -43,7 +43,7 @@ public class CVCAFile extends AbstractLDSFile {
     public static final byte CAR_TAG = 0x42;
     public static final int LENGTH = 36;
     private static final long serialVersionUID = -1100904058684365703L;
-    private short fid;
+    private final short fid;
 
     private String caReference = null;
 

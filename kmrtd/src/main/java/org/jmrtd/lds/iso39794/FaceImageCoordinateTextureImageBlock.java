@@ -35,21 +35,21 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.jmrtd.ASN1Util;
+
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.jmrtd.ASN1Util;
-
 public class FaceImageCoordinateTextureImageBlock extends Block implements FaceImageLandmarkCoordinates {
 
     private static final long serialVersionUID = -563037651358748573L;
 
-    private BigInteger uInPixel;
+    private final BigInteger uInPixel;
 
-    private BigInteger vInPixel;
+    private final BigInteger vInPixel;
 
     public FaceImageCoordinateTextureImageBlock(BigInteger uInPixel, BigInteger vInPixel) {
         this.uInPixel = uInPixel;

@@ -22,9 +22,9 @@
 
 package org.jmrtd.protocol;
 
-import java.io.Serializable;
-
 import org.jmrtd.AccessKeySpec;
+
+import java.io.Serializable;
 
 /**
  * Result of a Basic Access Control protocol run.
@@ -36,8 +36,8 @@ public class BACResult implements Serializable {
 
     private static final long serialVersionUID = -7114911372181772099L;
 
-    private AccessKeySpec bacKey;
-    private SecureMessagingWrapper wrapper;
+    private final AccessKeySpec bacKey;
+    private final SecureMessagingWrapper wrapper;
 
     /**
      * Creates a BAC result without specifying the initial access key.

@@ -35,15 +35,6 @@
 
 package org.jmrtd.lds.iso39794;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERTags;
@@ -54,15 +45,24 @@ import org.jmrtd.cbeff.CBEFFInfo;
 import org.jmrtd.cbeff.ISO781611;
 import org.jmrtd.cbeff.StandardBiometricHeader;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 public class IrisImageDataBlock extends Block implements BiometricDataBlock {
 
     private static final long serialVersionUID = 5915816895542698638L;
 
     private StandardBiometricHeader sbh;
 
-    private VersionBlock versionBlock;
+    private final VersionBlock versionBlock;
 
-    private List<IrisImageRepresentationBlock> representationBlocks;
+    private final List<IrisImageRepresentationBlock> representationBlocks;
 
     public IrisImageDataBlock(InputStream inputStream) throws IOException {
         this(null, inputStream);

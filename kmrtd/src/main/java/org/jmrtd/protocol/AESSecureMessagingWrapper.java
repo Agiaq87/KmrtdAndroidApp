@@ -22,6 +22,8 @@
 
 package org.jmrtd.protocol;
 
+import org.jmrtd.Util;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -33,8 +35,6 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
-
-import org.jmrtd.Util;
 
 /**
  * An AES secure messaging wrapper for APDUs. Based on TR-SAC.
@@ -48,7 +48,7 @@ public class AESSecureMessagingWrapper extends SecureMessagingWrapper implements
 
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
 
-    private transient Cipher sscIVCipher;
+    private final transient Cipher sscIVCipher;
 
     /**
      * Constructs a secure messaging wrapper based on the secure messaging

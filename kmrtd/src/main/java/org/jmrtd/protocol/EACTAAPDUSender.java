@@ -22,14 +22,14 @@
 
 package org.jmrtd.protocol;
 
-import org.jmrtd.APDULevelEACTACapable;
-
 import net.sf.scuba.smartcards.APDUWrapper;
 import net.sf.scuba.smartcards.CardService;
 import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.smartcards.CommandAPDU;
 import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.smartcards.ResponseAPDU;
+
+import org.jmrtd.APDULevelEACTACapable;
 
 /**
  * A low-level APDU sender to support the (EAC) Terminal Authentication protocol.
@@ -40,7 +40,7 @@ import net.sf.scuba.smartcards.ResponseAPDU;
  */
 public class EACTAAPDUSender implements APDULevelEACTACapable {
 
-    private SecureMessagingAPDUSender secureMessagingSender;
+    private final SecureMessagingAPDUSender secureMessagingSender;
 
     /**
      * Creates an APDU sender.

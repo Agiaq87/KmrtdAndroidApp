@@ -22,15 +22,15 @@
 
 package org.jmrtd.lds;
 
-import java.math.BigInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DLSequence;
+
+import java.math.BigInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A concrete SecurityInfo structure that stores chip authentication info,
@@ -63,9 +63,9 @@ public class ChipAuthenticationInfo extends SecurityInfo {
     public static final int VERSION_2 = 2;
     private static final long serialVersionUID = 5591988305059068535L;
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-    private String oid;
-    private int version;
-    private BigInteger keyId;
+    private final String oid;
+    private final int version;
+    private final BigInteger keyId;
 
     /**
      * Constructs a new object.

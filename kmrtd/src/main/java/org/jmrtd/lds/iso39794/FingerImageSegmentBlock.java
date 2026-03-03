@@ -35,6 +35,9 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.jmrtd.ASN1Util;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,15 +45,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.jmrtd.ASN1Util;
-
 public class FingerImageSegmentBlock extends Block {
 
     private static final long serialVersionUID = -374626239054691564L;
 
-    private FingerImagePositionCode positionCode;
-    private List<CoordinateCartesian2DUnsignedShortBlock> enclosingCoordinatesBlock; // SIZE(2..MAX)
+    private final FingerImagePositionCode positionCode;
+    private final List<CoordinateCartesian2DUnsignedShortBlock> enclosingCoordinatesBlock; // SIZE(2..MAX)
     private Integer orientation;
     private List<QualityBlock> qualityBlocks;
     private int confidence;

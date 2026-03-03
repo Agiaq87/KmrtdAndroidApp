@@ -22,10 +22,10 @@
 
 package org.jmrtd.io;
 
+import org.jmrtd.io.FragmentBuffer.Fragment;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.jmrtd.io.FragmentBuffer.Fragment;
 
 /**
  * Buffers an inputstream (whose length is known in advance) and can supply clients with fresh
@@ -38,9 +38,9 @@ import org.jmrtd.io.FragmentBuffer.Fragment;
  */
 public class InputStreamBuffer {
 
-    private PositionInputStream carrier;
+    private final PositionInputStream carrier;
 
-    private FragmentBuffer buffer;
+    private final FragmentBuffer buffer;
 
     /**
      * Creates an input stream buffer.

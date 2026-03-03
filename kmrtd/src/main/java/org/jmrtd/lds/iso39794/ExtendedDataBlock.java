@@ -35,6 +35,11 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1OctetString;
+import org.bouncycastle.asn1.DEROctetString;
+import org.jmrtd.ASN1Util;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,18 +48,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1OctetString;
-import org.bouncycastle.asn1.DEROctetString;
-import org.jmrtd.ASN1Util;
-
 public class ExtendedDataBlock extends Block {
 
     private static final long serialVersionUID = -1557206933986460059L;
 
-    private RegistryIdBlock dataTypeIdBlock;
+    private final RegistryIdBlock dataTypeIdBlock;
 
-    private byte[] data;
+    private final byte[] data;
 
     public ExtendedDataBlock(RegistryIdBlock dataTypeIdBlock, byte[] data) {
         this.dataTypeIdBlock = dataTypeIdBlock;

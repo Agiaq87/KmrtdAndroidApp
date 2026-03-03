@@ -35,12 +35,12 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.jmrtd.ASN1Util;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.jmrtd.ASN1Util;
 
 public class FingerImageSpatialSamplingRateBlock extends Block {
 
@@ -50,8 +50,8 @@ public class FingerImageSpatialSamplingRateBlock extends Block {
     //    inch(0),
     //    cm(1)
     //  }
-    private int samplesPerUnit;
-    private UnitDimensionCode unitDimension;
+    private final int samplesPerUnit;
+    private final UnitDimensionCode unitDimension;
 
     public FingerImageSpatialSamplingRateBlock(int samplesPerUnit, UnitDimensionCode unitDimension) {
         this.samplesPerUnit = samplesPerUnit;

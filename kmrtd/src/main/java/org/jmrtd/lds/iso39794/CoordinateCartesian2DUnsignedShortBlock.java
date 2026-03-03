@@ -35,6 +35,9 @@
 
 package org.jmrtd.lds.iso39794;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.jmrtd.ASN1Util;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,15 +45,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.jmrtd.ASN1Util;
-
 public class CoordinateCartesian2DUnsignedShortBlock extends Block implements FaceImageLandmarkCoordinates {
 
     private static final long serialVersionUID = -3221155578581711766L;
 
-    private int x;
-    private int y;
+    private final int x;
+    private final int y;
 
     public CoordinateCartesian2DUnsignedShortBlock(int x, int y) {
         this.x = x;

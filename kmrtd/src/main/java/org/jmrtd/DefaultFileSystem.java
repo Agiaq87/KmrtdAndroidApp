@@ -22,6 +22,20 @@
 
 package org.jmrtd;
 
+import net.sf.scuba.smartcards.APDUWrapper;
+import net.sf.scuba.smartcards.CardServiceException;
+import net.sf.scuba.smartcards.FileInfo;
+import net.sf.scuba.smartcards.FileSystemStructured;
+import net.sf.scuba.smartcards.ISO7816;
+import net.sf.scuba.tlv.TLVInputStream;
+import net.sf.scuba.util.Hex;
+
+import org.jmrtd.io.FragmentBuffer;
+import org.jmrtd.io.FragmentBuffer.Fragment;
+import org.jmrtd.lds.CVCAFile;
+import org.jmrtd.lds.LDSFileUtil;
+import org.jmrtd.protocol.SecureMessagingWrapper;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -30,20 +44,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.jmrtd.io.FragmentBuffer;
-import org.jmrtd.io.FragmentBuffer.Fragment;
-import org.jmrtd.lds.CVCAFile;
-import org.jmrtd.lds.LDSFileUtil;
-import org.jmrtd.protocol.SecureMessagingWrapper;
-
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.smartcards.FileInfo;
-import net.sf.scuba.smartcards.FileSystemStructured;
-import net.sf.scuba.smartcards.ISO7816;
-import net.sf.scuba.tlv.TLVInputStream;
-import net.sf.scuba.util.Hex;
 
 /**
  * A file system for ICAO MRTDs (and similar file systems).
@@ -74,7 +74,7 @@ public class DefaultFileSystem implements FileSystemStructured {
      */
     private short selectedFID;
 
-    private boolean isSFIEnabled;
+    private final boolean isSFIEnabled;
 
     private int maxReadBinaryLength;
 
@@ -84,11 +84,11 @@ public class DefaultFileSystem implements FileSystemStructured {
      */
     private boolean isSelected;
 
-    private APDULevelReadBinaryCapable service;
+    private final APDULevelReadBinaryCapable service;
 
-    private Map<Short, DefaultFileInfo> fileInfos;
+    private final Map<Short, DefaultFileInfo> fileInfos;
 
-    private Map<Short, Byte> fidToSFI;
+    private final Map<Short, Byte> fidToSFI;
 
     private APDUWrapper wrapper;
 

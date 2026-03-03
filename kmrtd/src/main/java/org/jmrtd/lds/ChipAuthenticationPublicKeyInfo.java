@@ -22,11 +22,6 @@
 
 package org.jmrtd.lds;
 
-import java.math.BigInteger;
-import java.security.PublicKey;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -34,6 +29,11 @@ import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DLSequence;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.jmrtd.Util;
+
+import java.math.BigInteger;
+import java.security.PublicKey;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A concrete SecurityInfo structure that stores chip authentication public
@@ -59,12 +59,12 @@ public class ChipAuthenticationPublicKeyInfo extends SecurityInfo {
 
     private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
 
-    private String oid;
+    private final String oid;
 
     /* Optional, use null if implicit. */
-    private BigInteger keyId;
+    private final BigInteger keyId;
 
-    private PublicKey publicKey;
+    private final PublicKey publicKey;
 
     /**
      * Creates a public key info structure with implicit key identifier.
