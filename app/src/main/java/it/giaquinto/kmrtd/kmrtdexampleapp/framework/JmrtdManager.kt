@@ -4,36 +4,36 @@ import android.graphics.BitmapFactory
 import android.nfc.tech.IsoDep
 import com.gemalto.jp2.JP2Decoder
 import it.giaquinto.kmrtd.kmrtdexampleapp.model.MRZInput
-import kmrtd.BACKey
-import kmrtd.PACEKeySpec
-import kmrtd.PassportService
-import kmrtd.lds.CardAccessFile
-import kmrtd.lds.DataGroup
-import kmrtd.lds.PACEInfo
-import kmrtd.lds.SODFile
-import kmrtd.lds.SecurityInfo
-import kmrtd.lds.icao.COMFile
-import kmrtd.lds.icao.DG11File
-import kmrtd.lds.icao.DG12File
-import kmrtd.lds.icao.DG14File
-import kmrtd.lds.icao.DG15File
-import kmrtd.lds.icao.DG1File
-import kmrtd.lds.icao.DG2File
-import kmrtd.lds.icao.DG3File
-import kmrtd.lds.icao.DG4File
-import kmrtd.lds.icao.DG5File
-import kmrtd.lds.icao.DG6File
-import kmrtd.lds.icao.DG7File
-import kmrtd.lds.icao.MRZInfo
-import kmrtd.lds.iso19794.FaceInfo
-import kmrtd.protocol.BACResult
-import kmrtd.protocol.PACEResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import net.sf.scuba.smartcards.CardService
+import org.jmrtd.BACKey
+import org.jmrtd.PACEKeySpec
+import org.jmrtd.PassportService
+import org.jmrtd.lds.CardAccessFile
+import org.jmrtd.lds.DataGroup
+import org.jmrtd.lds.PACEInfo
+import org.jmrtd.lds.SODFile
+import org.jmrtd.lds.SecurityInfo
+import org.jmrtd.lds.icao.COMFile
+import org.jmrtd.lds.icao.DG11File
+import org.jmrtd.lds.icao.DG12File
+import org.jmrtd.lds.icao.DG14File
+import org.jmrtd.lds.icao.DG15File
+import org.jmrtd.lds.icao.DG1File
+import org.jmrtd.lds.icao.DG2File
+import org.jmrtd.lds.icao.DG3File
+import org.jmrtd.lds.icao.DG4File
+import org.jmrtd.lds.icao.DG5File
+import org.jmrtd.lds.icao.DG6File
+import org.jmrtd.lds.icao.DG7File
+import org.jmrtd.lds.icao.MRZInfo
+import org.jmrtd.lds.iso19794.FaceInfo
+import org.jmrtd.protocol.BACResult
+import org.jmrtd.protocol.PACEResult
 import java.io.ByteArrayInputStream
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -298,7 +298,8 @@ class JmrtdManager {
             kmrtdResultBuilder.isSuccess = true
             _state.value = KmrtdState.Success(
                 paceResult != null,
-                kmrtdResultBuilder
+                kmrtdResultBuilder,
+                mrzInput
             )
 
             kmrtdResultBuilder.elapsedTimeStamp = elapsed(initialTimeStamp)
@@ -495,7 +496,7 @@ class JmrtdManager {
                     }
                 }
 
-                eyeColor = it.eyeColor
+                //eyeColor = it.eyeColor
                 // Added from KMRTD
                 /*imageColorSpace = it.colorSpace
                 imageDataType = it.imageDataType

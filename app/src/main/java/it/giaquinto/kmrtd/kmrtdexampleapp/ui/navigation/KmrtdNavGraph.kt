@@ -7,18 +7,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import it.giaquinto.kmrtd.kmrtdexampleapp.model.MRZInput
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.route.KmrtdScreenRoutes
+import it.giaquinto.kmrtd.kmrtdexampleapp.ui.screen.ComparisonScreen
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.screen.HomeScreen
-import it.giaquinto.kmrtd.kmrtdexampleapp.ui.screen.ResultScreen
+import it.giaquinto.kmrtd.kmrtdexampleapp.ui.viewmodel.SharedViewModel
 
 @Composable
 fun KmrtdNavGraph(
     padding: PaddingValues,
     showGithub : () -> Unit,
     showLinkedin : () -> Unit,
-    jmrtd : (MRZInput) -> Unit,
-    kmrtd : (MRZInput) -> Unit
+    readNfc: (MRZInput, Boolean) -> Unit,
+    sharedViewModel: SharedViewModel,
 ) {
     val navController = rememberNavController()
+
 
     NavHost(
         navController = navController,
@@ -29,13 +31,22 @@ fun KmrtdNavGraph(
                 padding = padding,
                 showGithub = showGithub,
                 showLinkedin = showLinkedin,
-                jmrtd = jmrtd,
-                kmrtd = kmrtd,
-            )
+                readJmrtd = readNfc,
+                sharedViewModel = sharedViewModel
+            ) {
+                navController.navigate(KmrtdScreenRoutes.ResultScreen.route)
+            }
         }
 
         composable(KmrtdScreenRoutes.ResultScreen.route) {
-            ResultScreen()
+            sharedViewModel.kmrtdResultBuilder?.let { kmrtd ->
+                sharedViewModel.jmrtdResultBuilder?.let { jmrtd ->
+                    ComparisonScreen(
+                        kmrtdResult = kmrtd,
+                        jmrtdResult = jmrtd
+                    )
+                }
+            }
         }
     }
 }

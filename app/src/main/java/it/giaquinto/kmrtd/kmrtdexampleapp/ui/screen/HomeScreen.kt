@@ -19,12 +19,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import it.giaquinto.kmrtd.kmrtdexampleapp.R
-import kmrtd.support.DocumentNumber
-import kmrtd.support.ICAODate
 import it.giaquinto.kmrtd.kmrtdexampleapp.model.MRZInput
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.viewmodel.HomeViewModel
+import it.giaquinto.kmrtd.kmrtdexampleapp.ui.viewmodel.SharedViewModel
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.widget.DateCheckerWidget
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.widget.DocumentNumberCheckerWidget
+import kmrtd.support.DocumentNumber
+import kmrtd.support.ICAODate
 
 @Composable
 fun HomeScreen(
@@ -32,10 +33,12 @@ fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
     showGithub : () -> Unit,
     showLinkedin : () -> Unit,
-    jmrtd : (MRZInput) -> Unit,
-    kmrtd : (MRZInput) -> Unit,
+    readJmrtd: (MRZInput, Boolean) -> Unit,
+    sharedViewModel: SharedViewModel,
+    onNext: () -> Unit
 ) {
     val state = viewModel.uiState
+    val goToNext = sharedViewModel.resultsState
 
     Column(
         modifier = Modifier
@@ -86,12 +89,12 @@ fun HomeScreen(
             Button(
                 onClick = {
                     //baseViewModel.acquireMrzData(MrzData(documentNumber, birthDate, expirationDate))
-                    jmrtd(
+                    readJmrtd(
                         MRZInput(
                             DocumentNumber(viewModel.uiState.documentNumber),
                             ICAODate(viewModel.uiState.birthDate),
                             ICAODate(viewModel.uiState.expireDate)
-                        )
+                        ), true
                     )
                 },
                 //enabled = isValid,
@@ -101,6 +104,40 @@ fun HomeScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
 
+        if (state.kmrtdButtonEnabled) {
+            Button(
+                onClick = {
+                    //baseViewModel.acquireMrzData(MrzData(documentNumber, birthDate, expirationDate))
+                    readJmrtd(
+                        MRZInput(
+                            DocumentNumber(viewModel.uiState.documentNumber),
+                            ICAODate(viewModel.uiState.birthDate),
+                            ICAODate(viewModel.uiState.expireDate)
+                        ),
+                        false
+                    )
+                },
+                //enabled = isValid,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.home_screen_read_button_kmrtd))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (goToNext) {
+            Button(
+                onClick = {
+                    onNext()
+                },
+                //enabled = isValid,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.home_screen_read_button))
+            }
+        }
     }
 }

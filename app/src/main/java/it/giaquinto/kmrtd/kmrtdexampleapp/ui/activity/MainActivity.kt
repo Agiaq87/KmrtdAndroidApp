@@ -17,11 +17,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import it.giaquinto.kmrtd.kmrtdexampleapp.framework.JmrtdManager
 import it.giaquinto.kmrtd.kmrtdexampleapp.framework.KmrtdManager
 import it.giaquinto.kmrtd.kmrtdexampleapp.framework.KmrtdState
 import it.giaquinto.kmrtd.kmrtdexampleapp.model.MRZInput
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.navigation.KmrtdNavGraph
 import it.giaquinto.kmrtd.kmrtdexampleapp.ui.theme.KmrtdExampleAppTheme
+import it.giaquinto.kmrtd.kmrtdexampleapp.ui.viewmodel.SharedViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +35,10 @@ class MainActivity : ComponentActivity() {
     private var nfcAdapter: NfcAdapter? = null
     private val kmrtdManager: KmrtdManager = KmrtdManager()
 
+    private val jmrtdManager: JmrtdManager = JmrtdManager()
+
+    private val sharedViewModel: SharedViewModel = SharedViewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -43,12 +49,10 @@ class MainActivity : ComponentActivity() {
                         padding = innerPadding,
                         showGithub = { openUrl("https://github.com/giaquinto/kmrtd-example-app".toUri()) },
                         showLinkedin = { openUrl("https://www.linkedin.com/in/giaquale/".toUri()) },
-                        jmrtd = {
-                            readNfc(it)
+                        readNfc = { mrzInput, useJmrtd ->
+                            readNfc(mrzInput, useJmrtd)
                         },
-                        kmrtd = {
-                            readNfc(it)
-                        }
+                        sharedViewModel = sharedViewModel
                     )
                 }
             }
@@ -71,6 +75,7 @@ class MainActivity : ComponentActivity() {
                     is KmrtdState.Success -> {
                         Toast.makeText(this@MainActivity, "Success", Toast.LENGTH_LONG).show()
                         Log.d(TAG, "Success: ${it.kmrtdResultBuilder}")
+                        sharedViewModel.updateKmrtd(it.kmrtdResultBuilder)
                         nfcAdapter?.disableReaderMode(this@MainActivity)
                     }
                     is KmrtdState.Error -> {
@@ -82,15 +87,41 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        lifecycleScope.launch {
+            jmrtdManager.state.collect {
+                when (it) {
+                    is KmrtdState.Success -> {
+                        Toast.makeText(this@MainActivity, "Success", Toast.LENGTH_LONG).show()
+                        Log.d(TAG, "Success: ${it.kmrtdResultBuilder}")
+                        sharedViewModel.updateJmrtd(it.kmrtdResultBuilder)
+                        nfcAdapter?.disableReaderMode(this@MainActivity)
+                    }
+
+                    is KmrtdState.Error -> {
+                        Toast.makeText(this@MainActivity, "Error", Toast.LENGTH_LONG).show()
+                        Log.e(TAG, "Error: ${it.error}, Cause: ${it.cause}")
+                        nfcAdapter?.disableReaderMode(this@MainActivity)
+                    }
+
+                    else -> Log.d(TAG, "State: $it")
+                }
+            }
+        }
     }
 
-    fun readNfc(mrzInput: MRZInput) {
+    fun readNfc(mrzInput: MRZInput, useJmrtd: Boolean = true) {
         nfcAdapter?.enableReaderMode(
             this@MainActivity,
             { tag ->
                 IsoDep.get(tag)?.let {
-                    lifecycleScope.launch {
-                        kmrtdManager.start(it, mrzInput, false)
+                    if (useJmrtd) {
+                        lifecycleScope.launch {
+                            jmrtdManager.start(it, mrzInput, true)
+                        }
+                    } else {
+                        lifecycleScope.launch {
+                            kmrtdManager.start(it, mrzInput, true)
+                        }
                     }
                 }
             },

@@ -16,7 +16,7 @@ composeBom = "2026.02.00"
 materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.7"
 navigationUi = "2.9.7"
-jmrtd = "0.8.3"
+jmrtd = "0.8.5"
 scubaScAndroid = "0.0.26"
 jp2Android = "1.0.5"
 

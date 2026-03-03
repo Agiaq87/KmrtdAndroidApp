@@ -1,5 +1,7 @@
 package it.giaquinto.kmrtd.kmrtdexampleapp.framework
 
+import it.giaquinto.kmrtd.kmrtdexampleapp.model.MRZInput
+
 sealed class KmrtdState {
     object Idle : KmrtdState()
     object CardService : KmrtdState()
@@ -19,7 +21,8 @@ sealed class KmrtdState {
 
     data class Success(
         val withPACE: Boolean,
-        val kmrtdResultBuilder: KmrtdResultBuilder
+        val kmrtdResultBuilder: KmrtdResultBuilder,
+        val mrzInput: MRZInput
     ) : KmrtdState()
 
     data class Error(

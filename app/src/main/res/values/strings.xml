@@ -11,7 +11,9 @@
     <string name="home_screen_document_number">Numero di documento</string>
     <string name="home_screen_birthdate">Data di nascita</string>
     <string name="home_screen_expire_date">Data di scadenza</string>
-    <string name="home_screen_read_button">Leggi documento NFC con JMRTD</string>
+    <string name="home_screen_read_button">JMRTD</string>
+    <string name="home_screen_read_button_kmrtd">KMRTD</string>
+    <string name="home_screen_next_button">Vedi i risultati</string>
 
     <!-- Common -->
     <string name="ok">OK</string>

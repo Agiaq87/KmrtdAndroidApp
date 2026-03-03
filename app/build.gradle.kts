@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.ui)
+    implementation(libs.jmrtd)
     /*implementation(libs.scuba.sc.android)
     implementation(libs.jp2.android)*/
 

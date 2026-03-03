@@ -44,8 +44,6 @@ import java.text.SimpleDateFormat
 import java.util.Base64
 import java.util.Date
 import java.util.Locale
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 class KmrtdManager {
     // Update UI
@@ -300,7 +298,8 @@ class KmrtdManager {
             kmrtdResultBuilder.isSuccess = true
             _state.value = KmrtdState.Success(
                 paceResult != null,
-                kmrtdResultBuilder
+                kmrtdResultBuilder,
+                mrzInput
             )
 
             kmrtdResultBuilder.elapsedTimeStamp =  elapsed(initialTimeStamp)
