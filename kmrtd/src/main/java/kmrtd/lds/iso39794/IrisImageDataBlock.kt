@@ -39,6 +39,7 @@ import kmrtd.cbeff.BiometricDataBlock
 import kmrtd.cbeff.CBEFFInfo
 import kmrtd.cbeff.ISO781611
 import kmrtd.cbeff.StandardBiometricHeader
+import kmrtd.support.readASN1Object
 import org.bouncycastle.asn1.ASN1Encodable
 import org.bouncycastle.asn1.ASN1Sequence
 import org.bouncycastle.asn1.BERTags
@@ -62,7 +63,8 @@ class IrisImageDataBlock internal constructor(
 
     constructor(sbh: StandardBiometricHeader?, inputStream: InputStream?) : this(
         sbh,
-        ASN1Util.readASN1Object(inputStream)
+        //ASN1Util.readASN1Object(inputStream)
+        inputStream.readASN1Object()
     )
 
     //  IrisImageDataBlock ::= [APPLICATION 6] SEQUENCE {

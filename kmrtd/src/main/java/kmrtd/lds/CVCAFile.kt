@@ -54,7 +54,7 @@ class CVCAFile : AbstractLDSFile {
      * 
      * @throws IOException on error reading from the stream
      */
-    constructor(inputStream: InputStream) : this(PassportService.Companion.EF_CVCA, inputStream)
+    constructor(inputStream: InputStream?) : this(PassportService.Companion.EF_CVCA, inputStream)
 
     /**
      * Constructs a new CVCA file from the data contained in an input stream.
@@ -64,7 +64,7 @@ class CVCAFile : AbstractLDSFile {
      * 
      * @throws IOException on error reading from input stream
      */
-    constructor(fid: Short, inputStream: InputStream) {
+    constructor(fid: Short, inputStream: InputStream?) {
         this.fID = fid
         readObject(inputStream)
     }

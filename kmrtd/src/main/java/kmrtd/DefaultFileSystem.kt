@@ -53,7 +53,7 @@ import kotlin.math.min
  * @since 0.7.0
  */
 class DefaultFileSystem @JvmOverloads constructor(
-    service: APDULevelReadBinaryCapable,
+    private val service: APDULevelReadBinaryCapable,
     isSFIEnabled: Boolean,
     fidToSFI: MutableMap<Short?, Byte> = LDSFileUtil.FID_TO_SFI
 ) : FileSystemStructured {
@@ -75,8 +75,6 @@ class DefaultFileSystem @JvmOverloads constructor(
      * sent the SELECT command to select {@ code selectedFID}.
      */
     private var isSelected: Boolean
-
-    private val service: APDULevelReadBinaryCapable
 
     private val fileInfos: MutableMap<Short?, DefaultFileInfo?>
 
@@ -100,7 +98,6 @@ class DefaultFileSystem @JvmOverloads constructor(
      * @param isSFIEnabled whether the file system should use short file identifiers in `READ BINARY` commands
      */
     init {
-        this.service = service
         this.fileInfos = HashMap<Short?, DefaultFileInfo?>()
         this.selectedFID = 0
         this.isSelected = false
@@ -138,7 +135,7 @@ class DefaultFileSystem @JvmOverloads constructor(
      */
     @Synchronized
     @Throws(CardServiceException::class)
-    override fun getSelectedPath(): Array<FileInfo?>? {
+    override fun getSelectedPath(): Array<FileInfo>? {
         try {
             val fileInfo = this.fileInfo
             if (fileInfo == null) {
@@ -205,7 +202,7 @@ class DefaultFileSystem @JvmOverloads constructor(
             var bytes: ByteArray? = null
             if (fragment.length > 0) {
                 if (isSFIEnabled && offset < 256) {
-                    val sfi: Byte = fidToSFI.get(selectedFID)!!
+                    val sfi: Byte = fidToSFI[selectedFID]!!
                     if (sfi == null) {
                         throw NumberFormatException("Unknown FID " + Integer.toHexString(selectedFID.toInt()))
                     }
@@ -449,7 +446,7 @@ class DefaultFileSystem @JvmOverloads constructor(
          * @return the buffer
          */
         fun getBuffer(): ByteArray {
-            return buffer.getBuffer()
+            return buffer.buffer
         }
 
         /**
@@ -467,7 +464,7 @@ class DefaultFileSystem @JvmOverloads constructor(
          * @return the length of the file
          */
         override fun getFileLength(): Int {
-            return buffer.getLength()
+            return buffer.length
         }
 
         /**
@@ -508,9 +505,9 @@ class DefaultFileSystem @JvmOverloads constructor(
 
     companion object {
         /** Invalid short identifier.  */
-        val NO_SFI: Int = -1
+        const val NO_SFI: Int = -1
 
-        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+        private val LOGGER: Logger = Logger.getLogger("kmrtd")
 
         /** Number of bytes to read at start of file to determine file length.  */
         private const val READ_AHEAD_LENGTH = 8

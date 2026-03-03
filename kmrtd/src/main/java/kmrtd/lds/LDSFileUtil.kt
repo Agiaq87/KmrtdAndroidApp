@@ -258,7 +258,7 @@ object LDSFileUtil {
             14 -> return LDSFile.Companion.EF_DG14_TAG
             15 -> return LDSFile.Companion.EF_DG15_TAG
             16 -> return LDSFile.Companion.EF_DG16_TAG
-            else -> throw NumberFormatException("Unknown number " + number)
+            else -> throw NumberFormatException("Unknown number $number")
         }
     }
 
@@ -288,7 +288,7 @@ object LDSFileUtil {
             14 -> return PassportService.Companion.EF_DG14
             15 -> return PassportService.Companion.EF_DG15
             16 -> return PassportService.Companion.EF_DG16
-            else -> throw NumberFormatException("Unknown number " + number)
+            else -> throw NumberFormatException("Unknown number $number")
         }
     }
 
@@ -442,7 +442,7 @@ object LDSFileUtil {
      * 
      * @return a file identifier
      */
-    fun lookupFIDBySFI(sfi: Byte): Short {
+    fun lookupFIDBySFI(sfi: Byte): Short =
         when (sfi) {
             PassportService.Companion.SFI_COM -> return PassportService.Companion.EF_COM
             PassportService.Companion.SFI_DG1 -> return PassportService.Companion.EF_DG1
@@ -465,7 +465,6 @@ object LDSFileUtil {
             PassportService.Companion.SFI_CVCA -> return PassportService.Companion.EF_CVCA
             else -> throw NumberFormatException("Unknown SFI " + Integer.toHexString(sfi.toInt()))
         }
-    }
 
     /**
      * Returns the data group list from the security object (SOd).
@@ -481,7 +480,7 @@ object LDSFileUtil {
             return dgNumbers
         }
 
-        dgNumbers.addAll(sodFile.getDataGroupHashes().keys)
+        dgNumbers.addAll(sodFile.dataGroupHashes.keys)
         Collections.sort<Int?>(dgNumbers) /* NOTE: need to sort it, since we get keys as a set. */
         return dgNumbers
     }
@@ -537,27 +536,27 @@ object LDSFileUtil {
      * 
      * @return the lookup map
      */
-    private fun createFIDToSFIMap(): MutableMap<Short?, Byte> {
-        val fidToSFI: MutableMap<Short?, Byte?> = HashMap<Short?, Byte?>(20)
-        fidToSFI.put(PassportService.Companion.EF_COM, PassportService.Companion.SFI_COM)
-        fidToSFI.put(PassportService.Companion.EF_DG1, PassportService.Companion.SFI_DG1)
-        fidToSFI.put(PassportService.Companion.EF_DG2, PassportService.Companion.SFI_DG2)
-        fidToSFI.put(PassportService.Companion.EF_DG3, PassportService.Companion.SFI_DG3)
-        fidToSFI.put(PassportService.Companion.EF_DG4, PassportService.Companion.SFI_DG4)
-        fidToSFI.put(PassportService.Companion.EF_DG5, PassportService.Companion.SFI_DG5)
-        fidToSFI.put(PassportService.Companion.EF_DG6, PassportService.Companion.SFI_DG6)
-        fidToSFI.put(PassportService.Companion.EF_DG7, PassportService.Companion.SFI_DG7)
-        fidToSFI.put(PassportService.Companion.EF_DG8, PassportService.Companion.SFI_DG8)
-        fidToSFI.put(PassportService.Companion.EF_DG9, PassportService.Companion.SFI_DG9)
-        fidToSFI.put(PassportService.Companion.EF_DG10, PassportService.Companion.SFI_DG10)
-        fidToSFI.put(PassportService.Companion.EF_DG11, PassportService.Companion.SFI_DG11)
-        fidToSFI.put(PassportService.Companion.EF_DG12, PassportService.Companion.SFI_DG12)
-        fidToSFI.put(PassportService.Companion.EF_DG13, PassportService.Companion.SFI_DG13)
-        fidToSFI.put(PassportService.Companion.EF_DG14, PassportService.Companion.SFI_DG14)
-        fidToSFI.put(PassportService.Companion.EF_DG15, PassportService.Companion.SFI_DG15)
-        fidToSFI.put(PassportService.Companion.EF_DG16, PassportService.Companion.SFI_DG16)
-        fidToSFI.put(PassportService.Companion.EF_SOD, PassportService.Companion.SFI_SOD)
-        fidToSFI.put(PassportService.Companion.EF_CVCA, PassportService.Companion.SFI_CVCA)
-        return Collections.unmodifiableMap<Short?, Byte?>(fidToSFI)
+    private fun createFIDToSFIMap(): Map<Short, Byte> {
+        val fidToSFI: MutableMap<Short, Byte> = mutableMapOf()
+        fidToSFI[PassportService.Companion.EF_COM] = PassportService.Companion.SFI_COM
+        fidToSFI[PassportService.Companion.EF_DG1] = PassportService.Companion.SFI_DG1
+        fidToSFI[PassportService.Companion.EF_DG2] = PassportService.Companion.SFI_DG2
+        fidToSFI[PassportService.Companion.EF_DG3] = PassportService.Companion.SFI_DG3
+        fidToSFI[PassportService.Companion.EF_DG4] = PassportService.Companion.SFI_DG4
+        fidToSFI[PassportService.Companion.EF_DG5] = PassportService.Companion.SFI_DG5
+        fidToSFI[PassportService.Companion.EF_DG6] = PassportService.Companion.SFI_DG6
+        fidToSFI[PassportService.Companion.EF_DG7] = PassportService.Companion.SFI_DG7
+        fidToSFI[PassportService.Companion.EF_DG8] = PassportService.Companion.SFI_DG8
+        fidToSFI[PassportService.Companion.EF_DG9] = PassportService.Companion.SFI_DG9
+        fidToSFI[PassportService.Companion.EF_DG10] = PassportService.Companion.SFI_DG10
+        fidToSFI[PassportService.Companion.EF_DG11] = PassportService.Companion.SFI_DG11
+        fidToSFI[PassportService.Companion.EF_DG12] = PassportService.Companion.SFI_DG12
+        fidToSFI[PassportService.Companion.EF_DG13] = PassportService.Companion.SFI_DG13
+        fidToSFI[PassportService.Companion.EF_DG14] = PassportService.Companion.SFI_DG14
+        fidToSFI[PassportService.Companion.EF_DG15] = PassportService.Companion.SFI_DG15
+        fidToSFI[PassportService.Companion.EF_DG16] = PassportService.Companion.SFI_DG16
+        fidToSFI[PassportService.Companion.EF_SOD] = PassportService.Companion.SFI_SOD
+        fidToSFI[PassportService.Companion.EF_CVCA] = PassportService.Companion.SFI_CVCA
+        return fidToSFI.toMap()
     }
 }

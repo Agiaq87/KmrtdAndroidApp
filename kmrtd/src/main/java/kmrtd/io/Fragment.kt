@@ -6,8 +6,6 @@
  */
 package kmrtd.io
 
-import java.io.Serializable
-
 /**
  * Fragments encapsulate pairs of offset and length.
  */
@@ -31,8 +29,8 @@ data class Fragment
      * @return the length of the fragment
      */
     val length: Int
-) : Serializable {
-    override fun toString(): String =
+) {
+    /*override fun toString(): String =
         "[$offset .. ${(offset + length - 1)} ($length)]"
 
     override fun equals(other: Any?): Boolean {
@@ -51,11 +49,9 @@ data class Fragment
     }
 
     override fun hashCode(): Int =
-        2 * offset + 3 * length + 5
+        2 * offset + 3 * length + 5*/
 
     companion object {
-        private val serialVersionUID = -3795931618553980328L
-
         /**
          * Returns a fragment instance.
          * 

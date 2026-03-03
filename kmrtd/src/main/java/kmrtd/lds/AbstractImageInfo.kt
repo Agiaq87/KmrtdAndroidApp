@@ -182,7 +182,7 @@ abstract class AbstractImageInfo
     override fun hashCode(): Int {
         var result = 1234567891
         result = 3 * result + 5 * type
-        result += 5 * (if (mimeType == null) 1337 else mimeType.hashCode()) + 7
+        result += 5 * (mimeType?.hashCode() ?: 1337) + 7
         result += 7 * getImageLength() + 11
         return result
     }
@@ -204,12 +204,12 @@ abstract class AbstractImageInfo
                     && (mimeType == null && otherImageInfo.mimeType == null || mimeType != null && mimeType == otherImageInfo.mimeType)
                     && type == otherImageInfo.type
         } catch (e: Exception) {
-            LOGGER.log(Level.WARNING, "Exception" + e)
+            LOGGER.log(Level.WARNING, "Exception$e")
             return false
         }
     }
 
-    val encoded: ByteArray?
+    override val encoded: ByteArray?
         /**
          * Encodes this image info.
          * 

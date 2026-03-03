@@ -40,15 +40,16 @@
  */
 package kmrtd.lds.iso39794
 
-import org.bouncycastle.asn1.ASN1Encodable
-import org.bouncycastle.asn1.ASN1Sequence
-import org.bouncycastle.asn1.BERTags
-import org.bouncycastle.asn1.DERTaggedObject
 import kmrtd.ASN1Util
 import kmrtd.cbeff.BiometricDataBlock
 import kmrtd.cbeff.CBEFFInfo
 import kmrtd.cbeff.ISO781611
 import kmrtd.cbeff.StandardBiometricHeader
+import kmrtd.support.readASN1Object
+import org.bouncycastle.asn1.ASN1Encodable
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.BERTags
+import org.bouncycastle.asn1.DERTaggedObject
 import java.io.InputStream
 import java.util.Objects
 import java.util.SortedMap
@@ -74,7 +75,8 @@ class FingerImageDataBlock : Block, BiometricDataBlock {
 
     constructor(sbh: StandardBiometricHeader?, inputStream: InputStream?) : this(
         sbh,
-        ASN1Util.readASN1Object(inputStream)
+        //ASN1Util.readASN1Object(inputStream)
+        inputStream.readASN1Object()
     )
 
     //  FingerImageDataBlock ::= [APPLICATION 4] SEQUENCE {

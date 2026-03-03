@@ -39,8 +39,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
      * @return the buffer
      */
     /** Buffer with the actual bytes.  */
-    var buffer: ByteArray?
-        private set
+    var buffer: ByteArray = ByteArray(length)
 
     /**
      * Returns the fragments of this buffer.
@@ -48,7 +47,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
      * @return the fragments
      */
     /** Administration of which parts of buffer are filled.  */
-    val fragments: MutableCollection<Fragment>?
+    val fragments: MutableCollection<Fragment> = mutableSetOf()
 
     /**
      * Creates a fragment buffer.
@@ -58,10 +57,10 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
     /**
      * Creates a fragment buffer with default size.
      */
-    init {
-        this.buffer = ByteArray(length)
-        this.fragments = HashSet<Fragment>()
-    }
+    /* init {
+         this.buffer =
+         this.fragments = HashSet<Fragment>()
+     }*/
 
     /**
      * Updates this buffer based on the given buffer.
@@ -70,10 +69,10 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
      */
     @Synchronized
     fun updateFrom(other: FragmentBuffer) {
-        for (otherFragment in other.fragments!!) {
+        for (otherFragment in other.fragments) {
             addFragment(
                 otherFragment.offset,
-                other.buffer!!,
+                other.buffer,
                 otherFragment.offset,
                 otherFragment.length
             )
@@ -116,8 +115,8 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
      */
     @Synchronized
     fun addFragment(offset: Int, bytes: ByteArray, srcOffset: Int, srcLength: Int) {
-        if (offset + srcLength > buffer!!.size) {
-            this.length = 2 * max(offset + srcLength, buffer!!.size)
+        if (offset + srcLength > buffer.size) {
+            this.length = 2 * max(offset + srcLength, buffer.size)
         }
 
         System.arraycopy(bytes, srcOffset, buffer, offset, srcLength)
@@ -143,7 +142,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
          */
                 thisLength = thisOffset + thisLength - other.offset
                 thisOffset = other.offset
-                fragments!!.remove(other)
+                fragments.remove(other)
             } else if (thisOffset <= other.offset && other.offset + other.length <= thisOffset + thisLength) {
                 /*
          *    [...other fragment...]
@@ -151,7 +150,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
          *
          * The other fragment is contained in this fragment. Remove other.
          */
-                fragments!!.remove(other)
+                fragments.remove(other)
             } else if (thisOffset <= other.offset && other.offset <= thisOffset + thisLength) {
                 /*
          *        [...other fragment...]
@@ -160,10 +159,10 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
          * This fragment is partially contained in other. Extend this fragment to size of other, remove other.
          */
                 thisLength = other.offset + other.length - thisOffset
-                fragments!!.remove(other)
+                fragments.remove(other)
             }
         }
-        fragments!!.add(getInstance(thisOffset, thisLength))
+        fragments.add(getInstance(thisOffset, thisLength))
     }
 
     @get:Synchronized
@@ -176,7 +175,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
          */
         get() {
             var result = 0
-            for (i in buffer!!.indices) {
+            for (i in buffer.indices) {
                 if (isCoveredByFragment(i)) {
                     result = i + 1
                 }
@@ -193,7 +192,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
          */
         get() {
             var result = 0
-            for (i in buffer!!.indices) {
+            for (i in buffer.indices) {
                 if (isCoveredByFragment(i)) {
                     result++
                 }
@@ -225,7 +224,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
      */
     @Synchronized
     fun isCoveredByFragment(offset: Int, length: Int): Boolean {
-        for (fragment in fragments!!) {
+        for (fragment in fragments) {
             val left = fragment.offset
             val right = fragment.offset + fragment.length
             if (left <= offset && offset + length <= right) {
@@ -245,14 +244,15 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
     @Synchronized
     fun getBufferedLength(index: Int): Int {
         var result = 0
-        if (index >= buffer!!.size) {
+        if (index >= buffer.size) {
             return 0
         }
 
-        for (fragment in fragments!!) {
+        for (fragment in fragments) {
             val left = fragment.offset
             val right = fragment.offset + fragment.length
-            if (left <= index && index < right) {
+            // if (left <= index && index < right) {
+            if (index in left..<right) {
                 val newResult = right - index
                 if (newResult > result) {
                     result = newResult
@@ -270,7 +270,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
          */
         get() {
             synchronized(this) {
-                return buffer!!.size
+                return buffer.size
             }
         }
         /**
@@ -281,11 +281,11 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
          */
         private set(length) {
             synchronized(this) {
-                if (length <= buffer!!.size) {
+                if (length <= buffer.size) {
                     return
                 }
                 val newBuffer = ByteArray(length)
-                System.arraycopy(this.buffer, 0, newBuffer, 0, this.buffer!!.size)
+                System.arraycopy(this.buffer, 0, newBuffer, 0, this.buffer.size)
                 this.buffer = newBuffer
             }
         }
@@ -303,7 +303,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
     fun getSmallestUnbufferedFragment(offset: Int, length: Int): Fragment {
         var thisOffset = offset
         var thisLength = length
-        for (other in fragments!!) {
+        for (other in fragments) {
             /* On partial overlap we change this fragment, removing sections already buffered. */
             if (other.offset <= thisOffset && thisOffset + thisLength <= other.offset + other.length) {
                 /*
@@ -348,7 +348,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
 
     @Synchronized
     override fun toString(): String {
-        return "FragmentBuffer [" + buffer!!.size + ", " + fragments + "]"
+        return "FragmentBuffer [" + buffer.size + ", " + fragments + "]"
     }
 
     @Synchronized
@@ -470,7 +470,6 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
   }*/
 
     companion object {
-        private val serialVersionUID = -3510872461790499721L
 
         private const val DEFAULT_SIZE = 2000
     }
