@@ -30,18 +30,6 @@ import net.sf.scuba.util.Hex;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
-import kmrtd.APDULevelPACECapable;
-import kmrtd.AccessKeySpec;
-import kmrtd.BACKeySpec;
-import kmrtd.CardServiceProtocolException;
-import kmrtd.PACEKeySpec;
-import kmrtd.PACESecretKeySpec;
-import kmrtd.PassportService;
-import kmrtd.Util;
-import kmrtd.lds.PACEInfo;
-import kmrtd.lds.PACEInfo.DHCParameterSpec;
-import kmrtd.lds.PACEInfo.MappingType;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -82,6 +70,18 @@ import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.DHPublicKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import kmrtd.APDULevelPACECapable;
+import kmrtd.AccessKeySpec;
+import kmrtd.BACKeySpec;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.PACEKeySpec;
+import kmrtd.PACESecretKeySpec;
+import kmrtd.PassportService;
+import kmrtd.Util;
+import kmrtd.lds.PACEInfo;
+import kmrtd.lds.PACEInfo.DHCParameterSpec;
+import kmrtd.lds.PACEInfo.MappingType;
 
 /**
  * The Password Authenticated Connection Establishment protocol.
@@ -146,13 +146,13 @@ public class PACEProtocol {
 
     private SecureMessagingWrapper wrapper;
 
-    private int maxTranceiveLengthForSecureMessaging;
+    private final int maxTranceiveLengthForSecureMessaging;
 
-    private int maxTranceiveLengthForProtocol;
+    private final int maxTranceiveLengthForProtocol;
 
-    private boolean shouldCheckMAC;
+    private final boolean shouldCheckMAC;
 
-    private Random random;
+    private final Random random;
 
     /**
      * Constructs a PACE protocol instance.

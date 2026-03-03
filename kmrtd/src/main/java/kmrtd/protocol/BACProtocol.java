@@ -24,17 +24,17 @@ package kmrtd.protocol;
 
 import net.sf.scuba.smartcards.CardServiceException;
 
-import kmrtd.APDULevelBACCapable;
-import kmrtd.AccessKeySpec;
-import kmrtd.BACKeySpec;
-import kmrtd.CardServiceProtocolException;
-import kmrtd.Util;
-
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.util.Random;
 
 import javax.crypto.SecretKey;
+
+import kmrtd.APDULevelBACCapable;
+import kmrtd.AccessKeySpec;
+import kmrtd.BACKeySpec;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
 
 /**
  * The Basic Access Control protocol.
@@ -77,9 +77,9 @@ public class BACProtocol {
      * @throws GeneralSecurityException on error applying the low level cryptographic primitives
      */
     public static byte[] computeKeySeedForBAC(BACKeySpec bacKey) throws GeneralSecurityException {
-        String documentNumber = bacKey.getDocumentNumber();
-        String dateOfBirth = bacKey.getDateOfBirth();
-        String dateOfExpiry = bacKey.getDateOfExpiry();
+        String documentNumber = bacKey.documentNumber;
+        String dateOfBirth = bacKey.dateOfBirth;
+        String dateOfExpiry = bacKey.dateOfExpiry;
 
         if (dateOfBirth == null || dateOfBirth.length() != 6) {
             throw new IllegalArgumentException("Wrong date format used for date of birth. Expected yyMMdd, found " + dateOfBirth);
@@ -160,7 +160,7 @@ public class BACProtocol {
      */
     public BACResult doBAC(AccessKeySpec bacKey) throws CardServiceException {
         try {
-            byte[] keySeed = bacKey.getKey();
+            byte[] keySeed = bacKey.key;
             SecretKey kEnc = Util.deriveKey(keySeed, Util.ENC_MODE);
             SecretKey kMac = Util.deriveKey(keySeed, Util.MAC_MODE);
 

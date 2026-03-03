@@ -19,32 +19,36 @@
  *
  * $Id: AccessKeySpec.java 1799 2018-10-30 16:25:48Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd
 
-package kmrtd;
-
-import java.io.Serializable;
-import java.security.spec.KeySpec;
+import java.io.Serializable
+import java.security.spec.KeySpec
 
 /**
  * Super interface for BACKeySpec and PACEKeySpec.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1799 $
  */
-public interface AccessKeySpec extends Serializable, KeySpec {
-
+interface AccessKeySpec : Serializable, KeySpec {
     /**
      * Returns the type of access key.
-     * Typical values are {@code "BAC"}, and {@code "PACE"}.
-     *
+     * Typical values are `"BAC"`, and `"PACE"`.
+     * 
      * @return the type of access key
      */
-    String getAlgorithm();
+    val algorithm: String
 
     /**
      * Returns the bytes used for deriving the key seed.
-     *
+     * 
      * @return a byte array with the input for key derivation
      */
-    byte[] getKey();
+    val key: ByteArray
 }

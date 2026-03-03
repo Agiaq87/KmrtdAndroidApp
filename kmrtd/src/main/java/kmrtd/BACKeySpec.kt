@@ -19,17 +19,24 @@
  *
  * $Id: BACKeySpec.java 1786 2018-07-08 21:06:32Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd
 
-package kmrtd;
+import kmrtd.support.DocumentNumber
+import kmrtd.support.ICAODate
 
 /**
  * A BAC key.
- *
+ * 
  * @author The JMRTD team
  * @version $Revision: 1786 $
  */
-public interface BACKeySpec extends AccessKeySpec {
-
+interface BACKeySpec : AccessKeySpec {
     /**
      * Returns the document number. This does not include a check digit.
      * The result may include filler characters to make sure the resulting
@@ -37,19 +44,26 @@ public interface BACKeySpec extends AccessKeySpec {
      *
      * @return the document number
      */
-    String getDocumentNumber();
+    val documentNumber: DocumentNumber
+
+    fun getDocumentNumber(): String
 
     /**
      * Returns the date of birth string.
      *
-     * @return a <i>yymmdd</i> string
+     * @return a *yymmdd* string
      */
-    String getDateOfBirth();
+    val dateOfBirth: ICAODate
+
+    fun getDateOfBirth(): String
+
 
     /**
      * Returns the date of expiry string.
      *
-     * @return a <i>yymmdd</i> string
+     * @return a *yymmdd* string
      */
-    String getDateOfExpiry();
+    val dateOfExpiry: ICAODate
+
+    fun getDateOfExpiry(): String
 }
