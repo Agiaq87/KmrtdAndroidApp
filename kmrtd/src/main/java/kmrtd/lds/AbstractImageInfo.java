@@ -22,7 +22,6 @@
 
 package kmrtd.lds;
 
-import kmrtd.io.SplittableInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,7 +50,7 @@ public abstract class AbstractImageInfo implements ImageInfo {
     private byte[] imageBytes;
 
     // FIXME: It's not clear how serialization should work if not fully read. (Clients should only serialize if imageBytes != null.)
-    private transient SplittableInputStream splittableInputStream;
+    //private transient SplittableInputStream splittableInputStream;
     private int imagePositionInInputStream;
     private int imageLength;
 
@@ -128,20 +127,15 @@ public abstract class AbstractImageInfo implements ImageInfo {
      * @return a human readable string
      */
     private static String typeToString(int type) {
-        switch (type) {
-            case TYPE_PORTRAIT:
-                return "Portrait";
-            case TYPE_SIGNATURE_OR_MARK:
-                return "Signature or usual mark";
-            case TYPE_FINGER:
-                return "Finger";
-            case TYPE_IRIS:
-                return "Iris";
-            case TYPE_UNKNOWN:
-                return "Unknown";
-            default:
-                throw new NumberFormatException("Unknown type: " + Integer.toHexString(type));
-        }
+        return switch (type) {
+            case TYPE_PORTRAIT -> "Portrait";
+            case TYPE_SIGNATURE_OR_MARK -> "Signature or usual mark";
+            case TYPE_FINGER -> "Finger";
+            case TYPE_IRIS -> "Iris";
+            case TYPE_UNKNOWN -> "Unknown";
+            default ->
+                    throw new NumberFormatException("Unknown type: " + Integer.toHexString(type));
+        };
     }
 
     /**
@@ -228,9 +222,9 @@ public abstract class AbstractImageInfo implements ImageInfo {
      */
     public int getImageLength() {
         /* DEBUG: START */
-        if (splittableInputStream != null) {
+        /*if (splittableInputStream != null) {
             return imageLength;
-        }
+        }*/
         /* DEBUG: END */
 
         if (imageBytes == null) {
@@ -247,13 +241,11 @@ public abstract class AbstractImageInfo implements ImageInfo {
      */
     @Override
     public String toString() {
-        return new StringBuilder()
-                .append(this.getClass().getSimpleName())
-                .append(" [")
-                .append("type: ").append(typeToString(type) + ", ")
-                .append("size: ").append(getImageLength())
-                .append("]")
-                .toString();
+        return this.getClass().getSimpleName() +
+                " [" +
+                "type: " + typeToString(type) + ", " +
+                "size: " + getImageLength() +
+                "]";
     }
 
     @Override
@@ -312,10 +304,11 @@ public abstract class AbstractImageInfo implements ImageInfo {
      */
     public InputStream getImageInputStream() {
         /* DEBUG: START */
-        if (splittableInputStream != null) {
+        /*if (splittableInputStream != null) {
             return splittableInputStream.getInputStream(imagePositionInInputStream);
-            /* DEBUG: END */
-        } else if (imageBytes != null) {
+            *//* DEBUG: END *//*
+        } else*/
+        if (imageBytes != null) {
             return new ByteArrayInputStream(imageBytes);
         } else {
             throw new IllegalStateException("Both the byte buffer and the stream are null");
@@ -345,7 +338,7 @@ public abstract class AbstractImageInfo implements ImageInfo {
         //      }
         //    } else {
         /* DEBUG: END */
-        this.splittableInputStream = null;
+        //this.splittableInputStream = null;
         this.imageBytes = new byte[(int) imageLength];
         DataInputStream dataIn = new DataInputStream(inputStream);
         dataIn.readFully(this.imageBytes);
