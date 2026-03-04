@@ -40,12 +40,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERTaggedObject;
 
-import kmrtd.ASN1Util;
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.StandardBiometricHeader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -54,6 +48,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import kmrtd.ASN1Util;
+import kmrtd.cbeff.BiometricDataBlock;
+import kmrtd.cbeff.CBEFFInfoConstants;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
 
 public class FaceImageDataBlock extends Block implements BiometricDataBlock {
 
@@ -108,8 +108,8 @@ public class FaceImageDataBlock extends Block implements BiometricDataBlock {
     @Override
     public StandardBiometricHeader getStandardBiometricHeader() {
         if (sbh == null) {
-            byte[] biometricType = {(byte) CBEFFInfo.BIOMETRIC_TYPE_FACIAL_FEATURES};
-            byte[] biometricSubtype = {(byte) CBEFFInfo.BIOMETRIC_SUBTYPE_NONE};
+            byte[] biometricType = {(byte) CBEFFInfoConstants.BIOMETRIC_TYPE_FACIAL_FEATURES};
+            byte[] biometricSubtype = {(byte) CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE};
             byte[] formatOwner = {(byte) ((StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF)};
             byte[] formatType = {(byte) ((StandardBiometricHeader.ISO_39794_FACE_IMAGE_FORMAT_TYPE_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.ISO_39794_FACE_IMAGE_FORMAT_TYPE_VALUE & 0xFF)};
 

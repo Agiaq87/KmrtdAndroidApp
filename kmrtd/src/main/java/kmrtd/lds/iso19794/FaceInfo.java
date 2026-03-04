@@ -24,14 +24,6 @@ package kmrtd.lds.iso19794;
 
 import net.sf.scuba.data.Gender;
 
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.StandardBiometricHeader;
-import kmrtd.lds.AbstractListInfo;
-import kmrtd.lds.iso19794.FaceImageInfo.EyeColor;
-import kmrtd.lds.iso19794.FaceImageInfo.FeaturePoint;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -44,6 +36,14 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import kmrtd.cbeff.BiometricDataBlock;
+import kmrtd.cbeff.CBEFFInfoConstants;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
+import kmrtd.lds.AbstractListInfo;
+import kmrtd.lds.iso19794.FaceImageInfo.EyeColor;
+import kmrtd.lds.iso19794.FaceImageInfo.FeaturePoint;
 
 /**
  * A facial record consists of a facial record header and one or more facial record datas.
@@ -244,8 +244,8 @@ public class FaceInfo extends AbstractListInfo<FaceImageInfo> implements Biometr
      */
     public StandardBiometricHeader getStandardBiometricHeader() {
         if (sbh == null) {
-            byte[] biometricType = {(byte) CBEFFInfo.BIOMETRIC_TYPE_FACIAL_FEATURES};
-            byte[] biometricSubtype = {(byte) CBEFFInfo.BIOMETRIC_SUBTYPE_NONE};
+            byte[] biometricType = {(byte) CBEFFInfoConstants.BIOMETRIC_TYPE_FACIAL_FEATURES};
+            byte[] biometricSubtype = {(byte) CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE};
             byte[] formatOwner = {(byte) ((StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF)};
             byte[] formatType = {(byte) ((StandardBiometricHeader.ISO_19794_FACE_IMAGE_FORMAT_TYPE_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.ISO_19794_FACE_IMAGE_FORMAT_TYPE_VALUE & 0xFF)};
 

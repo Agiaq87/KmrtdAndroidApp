@@ -41,15 +41,15 @@ import java.util.TreeMap
  */
 class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializable {
     // TODO Change in elements when fully translate to Kotlin
-    val sortedElements: SortedMap<Int, ByteArray?> = TreeMap<Int, ByteArray?>(elements)
+    val sortedElements: SortedMap<Int, ByteArray?> = TreeMap(elements)
 
     /**
      * Returns the elements of this standard biometric header.
      * 
      * @return the elements, each consisting of a tag and value
      */
-    fun getElements(): SortedMap<Int, ByteArray?> =
-        TreeMap<Int, ByteArray?>(sortedElements)
+    /*fun getElements(): SortedMap<Int, ByteArray?> =
+        TreeMap<Int, ByteArray?>(sortedElements)*/
 
     /**
      * Checks whether the format type is present and equals to the given value.
@@ -58,10 +58,7 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
      * @return a boolean indicating the format type is present and equal to the given value
      */
     fun hasFormatType(formatTypeValue: Int): Boolean {
-        val actualFormatTypeValue = sortedElements[ISO781611.FORMAT_TYPE_TAG]
-        if (actualFormatTypeValue == null) {
-            return false
-        }
+        val actualFormatTypeValue = sortedElements[ISO781611.FORMAT_TYPE_TAG] ?: return false
         if (actualFormatTypeValue.size != 2) {
             return false
         }
@@ -88,26 +85,16 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
         return result.toString()
     }
 
-    override fun hashCode(): Int {
-        val prime = 31
-        var result = 1
-        result = prime * result + (if (sortedElements == null) 0 else sortedElements.hashCode())
-        return result
-    }
+    override fun hashCode(): Int =
+        sortedElements.hashCode()
 
-    override fun equals(obj: Any?): Boolean {
-        if (this === obj) {
-            return true
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is StandardBiometricHeader) return false
+        if (sortedElements.keys != other.sortedElements.keys) return false
+        return sortedElements.entries.all { (key, bytes) ->
+            bytes.contentEquals(other.sortedElements[key])
         }
-        if (obj == null) {
-            return false
-        }
-        if (javaClass != obj.javaClass) {
-            return false
-        }
-
-        val other = obj as StandardBiometricHeader
-        return equals(sortedElements, other.sortedElements)
     }
 
     companion object {
@@ -156,16 +143,16 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
          * https://www.ibia.org/cbeff/iso/bdb-format-identifiers.
          */
         const val ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE: Int = 0x002C
-        private const val serialVersionUID = 4113147521594478513L
+        //private const val serialVersionUID = 4113147521594478513L
 
-        /**
+        /*
          * Determines whether the two maps have equal entry sets.
          * 
          * @param elements1 the first map
          * @param elements2 the second map
          * @return a boolean indicating equality
          */
-        private fun equals(
+        /*private fun equals(
             elements1: MutableMap<Int, ByteArray?>,
             elements2: MutableMap<Int, ByteArray?>
         ): Boolean {
@@ -187,6 +174,6 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
             }
 
             return true
-        }
+        }*/
     }
 }

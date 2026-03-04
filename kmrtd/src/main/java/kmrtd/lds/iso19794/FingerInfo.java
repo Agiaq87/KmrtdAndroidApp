@@ -22,12 +22,6 @@
 
 package kmrtd.lds.iso19794;
 
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.StandardBiometricHeader;
-import kmrtd.lds.AbstractListInfo;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -37,6 +31,12 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Logger;
+
+import kmrtd.cbeff.BiometricDataBlock;
+import kmrtd.cbeff.CBEFFInfoConstants;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
+import kmrtd.lds.AbstractListInfo;
 
 /**
  * Fingerprint general record header and finger image data blocks
@@ -556,7 +556,7 @@ public class FingerInfo extends AbstractListInfo<FingerImageInfo> implements Bio
      */
     public StandardBiometricHeader getStandardBiometricHeader() {
         if (sbh == null) {
-            byte[] biometricType = {(byte) CBEFFInfo.BIOMETRIC_TYPE_FINGERPRINT};
+            byte[] biometricType = {(byte) CBEFFInfoConstants.BIOMETRIC_TYPE_FINGERPRINT};
             byte[] biometricSubtype = {(byte) getBiometricSubtype()};
             byte[] formatOwner = {(byte) ((StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF)};
             byte[] formatType = {(byte) ((StandardBiometricHeader.ISO_19794_FINGER_IMAGE_FORMAT_TYPE_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.ISO_19794_FINGER_IMAGE_FORMAT_TYPE_VALUE & 0xFF)};
@@ -605,7 +605,7 @@ public class FingerInfo extends AbstractListInfo<FingerImageInfo> implements Bio
      * @return a biometric sub-type bit mask
      */
     private int getBiometricSubtype() {
-        int result = CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+        int result = CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE;
         boolean isFirst = true;
         List<FingerImageInfo> fingerImageInfos = getSubRecords();
         for (FingerImageInfo fingerImageInfo : fingerImageInfos) {

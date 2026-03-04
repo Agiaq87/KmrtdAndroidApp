@@ -38,8 +38,7 @@ import java.io.OutputStream
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1897 $
 </B> */
-class ISO781611Encoder<B : BiometricDataBlock>(private val bdbEncoder: BiometricDataBlockEncoder<B>) :
-    ISO781611 {
+class ISO781611Encoder<B : BiometricDataBlock>(private val bdbEncoder: BiometricDataBlockEncoder<B>) {
 
     private val encodingType: BiometricEncodingType = bdbEncoder.encodingType
 
@@ -73,8 +72,8 @@ class ISO781611Encoder<B : BiometricDataBlock>(private val bdbEncoder: Biometric
     private fun writeBITGroup(records: MutableList<CBEFFInfo<*>>, outputStream: OutputStream?) {
         val tlvOut =
             outputStream as? TLVOutputStream ?: TLVOutputStream(outputStream)
-        tlvOut.writeTag(ISO781611.Companion.BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) /* 7F61 */
-        tlvOut.writeTag(ISO781611.Companion.BIOMETRIC_INFO_COUNT_TAG) /* 0x02 */
+        tlvOut.writeTag(ISO781611.BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) /* 7F61 */
+        tlvOut.writeTag(ISO781611.BIOMETRIC_INFO_COUNT_TAG) /* 0x02 */
         val count = records.size
         tlvOut.writeValue(byteArrayOf(count.toByte()))
 
@@ -99,7 +98,7 @@ class ISO781611Encoder<B : BiometricDataBlock>(private val bdbEncoder: Biometric
         index: Int,
         cbeffInfo: SimpleCBEFFInfo<B>
     ) {
-        tlvOutputStream.writeTag(ISO781611.Companion.BIOMETRIC_INFORMATION_TEMPLATE_TAG) /* 7F60 */
+        tlvOutputStream.writeTag(ISO781611.BIOMETRIC_INFORMATION_TEMPLATE_TAG) /* 7F60 */
         writeBHT(tlvOutputStream, index, cbeffInfo)
         writeBiometricDataBlock(tlvOutputStream, cbeffInfo.biometricDataBlock)
         tlvOutputStream.writeValueEnd() /* BIOMETRIC_INFORMATION_TEMPLATE_TAG, i.e. 7F60 */
@@ -119,7 +118,7 @@ class ISO781611Encoder<B : BiometricDataBlock>(private val bdbEncoder: Biometric
         index: Int,
         cbeffInfo: SimpleCBEFFInfo<B>
     ) {
-        tlvOutputStream.writeTag((ISO781611.Companion.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG /* + index */) and 0xFF) /* A1 */
+        tlvOutputStream.writeTag((ISO781611.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG /* + index */) and 0xFF) /* A1 */
 
         val bdb = cbeffInfo.biometricDataBlock
 

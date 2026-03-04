@@ -40,12 +40,6 @@ import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.BERTags;
 import org.bouncycastle.asn1.DERTaggedObject;
 
-import kmrtd.ASN1Util;
-import kmrtd.cbeff.BiometricDataBlock;
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.cbeff.ISO781611;
-import kmrtd.cbeff.StandardBiometricHeader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -54,6 +48,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import kmrtd.ASN1Util;
+import kmrtd.cbeff.BiometricDataBlock;
+import kmrtd.cbeff.CBEFFInfoConstants;
+import kmrtd.cbeff.ISO781611;
+import kmrtd.cbeff.StandardBiometricHeader;
 
 public class IrisImageDataBlock extends Block implements BiometricDataBlock {
 
@@ -106,7 +106,7 @@ public class IrisImageDataBlock extends Block implements BiometricDataBlock {
     @Override
     public StandardBiometricHeader getStandardBiometricHeader() {
         if (sbh == null) {
-            byte[] biometricType = {(byte) CBEFFInfo.BIOMETRIC_TYPE_IRIS};
+            byte[] biometricType = {(byte) CBEFFInfoConstants.BIOMETRIC_TYPE_IRIS};
             byte[] biometricSubtype = {(byte) getBiometricSubtype()};
             byte[] formatOwner = {(byte) ((StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.JTC1_SC37_FORMAT_OWNER_VALUE & 0xFF)};
             byte[] formatType = {(byte) ((StandardBiometricHeader.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE & 0xFF00) >> 8), (byte) (StandardBiometricHeader.ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE & 0xFF)};
@@ -171,7 +171,7 @@ public class IrisImageDataBlock extends Block implements BiometricDataBlock {
      * @return a biometric sub-type bit mask
      */
     private int getBiometricSubtype() {
-        int result = CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+        int result = CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE;
         boolean isFirst = true;
 
         List<IrisImageRepresentationBlock> blocks = getRepresentationBlocks();

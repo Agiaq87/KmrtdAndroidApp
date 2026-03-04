@@ -22,15 +22,15 @@
 
 package kmrtd.lds.iso19794;
 
-import kmrtd.cbeff.CBEFFInfo;
-import kmrtd.lds.AbstractImageInfo;
-
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import kmrtd.cbeff.CBEFFInfoConstants;
+import kmrtd.lds.AbstractImageInfo;
 
 /**
  * Data structure for storing view of a single finger
@@ -385,69 +385,69 @@ public class FingerImageInfo extends AbstractImageInfo {
     private static int toBiometricSubtype(int position) {
         switch (position) {
             case FingerImageInfo.POSITION_UNKNOWN_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE;
             case FingerImageInfo.POSITION_RIGHT_THUMB:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_THUMB;
             case FingerImageInfo.POSITION_RIGHT_INDEX_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
             case FingerImageInfo.POSITION_RIGHT_MIDDLE_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
             case FingerImageInfo.POSITION_RIGHT_RING_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
             case FingerImageInfo.POSITION_RIGHT_LITTLE_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
             case FingerImageInfo.POSITION_LEFT_THUMB:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_THUMB;
             case FingerImageInfo.POSITION_LEFT_INDEX_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER;
             case FingerImageInfo.POSITION_LEFT_MIDDLE_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_MIDDLE_FINGER;
             case FingerImageInfo.POSITION_LEFT_RING_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RING_FINGER;
             case FingerImageInfo.POSITION_LEFT_LITTLE_FINGER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LITTLE_FINGER;
             case FingerImageInfo.POSITION_PLAIN_RIGHT_FOUR_FINGERS:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_PLAIN_LEFT_FOUR_FINGERS:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_PLAIN_THUMBS:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_THUMB;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_THUMB;
             case FingerImageInfo.POSITION_UNKNOWN_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE;
             case FingerImageInfo.POSITION_RIGHT_FULL_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_RIGHT_WRITER_S_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE;
             case FingerImageInfo.POSITION_LEFT_FULL_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_LEFT_WRITER_S_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_RIGHT_LOWER_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_RIGHT_UPPER_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_LEFT_LOWER_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_LEFT_UPPER_PALM:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_RIGHT_OTHER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_LEFT_OTHER:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_RIGHT_INTERDIGITAL:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_RIGHT_THENAR:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_RIGHT_HYPOTHENAR:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_RIGHT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT;
             case FingerImageInfo.POSITION_LEFT_INTERDIGITAL:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_LEFT_THENAR:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             case FingerImageInfo.POSITION_LEFT_HYPOTHENAR:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE | CBEFFInfo.BIOMETRIC_SUBTYPE_MASK_LEFT;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE | CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT;
             default:
-                return CBEFFInfo.BIOMETRIC_SUBTYPE_NONE;
+                return CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE;
         }
     }
 
