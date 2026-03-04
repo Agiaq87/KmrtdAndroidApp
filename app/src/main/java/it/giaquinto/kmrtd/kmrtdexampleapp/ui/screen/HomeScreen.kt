@@ -38,7 +38,6 @@ fun HomeScreen(
     onNext: () -> Unit
 ) {
     val state = viewModel.uiState
-    val goToNext = sharedViewModel.resultsState
 
     Column(
         modifier = Modifier
@@ -85,10 +84,9 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (state.jmrtdButtonEnabled) {
+        if (sharedViewModel.enableJmrtdButton) {
             Button(
                 onClick = {
-                    //baseViewModel.acquireMrzData(MrzData(documentNumber, birthDate, expirationDate))
                     readJmrtd(
                         MRZInput(
                             DocumentNumber(viewModel.uiState.documentNumber),
@@ -106,7 +104,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (state.kmrtdButtonEnabled) {
+        if (sharedViewModel.enableKmrtdButton) {
             Button(
                 onClick = {
                     //baseViewModel.acquireMrzData(MrzData(documentNumber, birthDate, expirationDate))
@@ -128,7 +126,7 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (goToNext) {
+        if (sharedViewModel.resultsState) {
             Button(
                 onClick = {
                     onNext()

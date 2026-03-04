@@ -10,16 +10,23 @@ class SharedViewModel : ViewModel() {
 
     var resultsState by mutableStateOf(false)
 
+    var enableJmrtdButton by mutableStateOf(true)
+    var enableKmrtdButton by mutableStateOf(true)
+
     var kmrtdResultBuilder: KmrtdResultBuilder? = null
     var jmrtdResultBuilder: KmrtdResultBuilder? = null
 
     fun updateJmrtd(jmrtdResultBuilder: KmrtdResultBuilder) {
         this@SharedViewModel.jmrtdResultBuilder = jmrtdResultBuilder
         resultsState = kmrtdResultBuilder != null && jmrtdResultBuilder != null
+        enableKmrtdButton = true
+        enableJmrtdButton = false
     }
 
     fun updateKmrtd(kmrtdResultBuilder: KmrtdResultBuilder) {
         this@SharedViewModel.kmrtdResultBuilder = kmrtdResultBuilder
         resultsState = kmrtdResultBuilder != null && jmrtdResultBuilder != null
+        enableJmrtdButton = false
+        enableKmrtdButton = false
     }
 }

@@ -31,9 +31,7 @@ class HomeViewModel : ViewModel() {
 
         uiState = uiState.copy(
             documentNumber = upperValue,
-            documentNumberCheckerState = newState,
-            jmrtdButtonEnabled = isValid,
-            kmrtdButtonEnabled = isValid
+            documentNumberCheckerState = newState
         )
     }
 
@@ -51,9 +49,7 @@ class HomeViewModel : ViewModel() {
 
             uiState = uiState.copy(
                 birthDate = birthDate,
-                dateBirthCheckerState = newState,
-                jmrtdButtonEnabled = isValid,
-                kmrtdButtonEnabled = isValid
+                dateBirthCheckerState = newState
             )
         }
     }
@@ -72,9 +68,7 @@ class HomeViewModel : ViewModel() {
 
             uiState = uiState.copy(
                 expireDate = expireDate,
-                dateExpireCheckerState = newState,
-                jmrtdButtonEnabled = isValid,
-                kmrtdButtonEnabled = isValid
+                dateExpireCheckerState = newState
             )
         }
     }
