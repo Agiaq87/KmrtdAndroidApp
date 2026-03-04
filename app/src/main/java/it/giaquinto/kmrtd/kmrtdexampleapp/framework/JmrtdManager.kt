@@ -54,8 +54,7 @@ class JmrtdManager {
         withContext(Dispatchers.IO) {
             isoDep.timeout = 10000 // 10 seconds
             val kmrtdResultBuilder = KmrtdResultBuilder()
-            val initialTimeStamp = System.currentTimeMillis()
-            kmrtdResultBuilder.initialTimeStamp = initialTimeStamp
+            kmrtdResultBuilder.initialTimeStamp = System.currentTimeMillis()
 
             val cardService: CardService = initCardService(isoDep).getOrElse {
                 _state.value = KmrtdState.Error(
@@ -302,7 +301,9 @@ class JmrtdManager {
                 mrzInput
             )
 
-            kmrtdResultBuilder.elapsedTimeStamp = elapsed(initialTimeStamp)
+            kmrtdResultBuilder.initialTimeStamp?.let {
+                kmrtdResultBuilder.elapsedTimeStamp = elapsed(it)
+            }
         }
 
     // 1)
