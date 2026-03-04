@@ -19,35 +19,34 @@
  *
  * $Id: BiometricDataBlockEncoder.java 1897 2025-05-27 12:34:36Z martijno $
  */
+package kmrtd.cbeff
 
-package kmrtd.cbeff;
-
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.IOException
+import java.io.OutputStream
 
 /**
  * Interface to be implemented by client code to encode BDB implementations.
- *
+ * 
  * @param <B> the type of BDB implementation that is encoded by this encoder
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1897 $
  * @since 0.4.7
- */
-public interface BiometricDataBlockEncoder<B extends BiometricDataBlock> {
-
+</B> */
+interface BiometricDataBlockEncoder<B : BiometricDataBlock> {
     /**
-     * Writes the biometric data block in <code>bdb</code> to the output stream.
-     *
+     * Writes the biometric data block in `bdb` to the output stream.
+     * 
      * @param bdb the biometric data block to write
      * @param out the output stream to write to
      * @throws IOException if writing fails
      */
-    void encode(B bdb, OutputStream out) throws IOException;
+    @Throws(IOException::class)
+    fun encode(bdb: B, out: OutputStream)
 
     /**
      * Returns the biometric encoding type to be used when encoding BITs.
-     *
+     * 
      * @return the biometric encoding type, either ISO-19794 or ISO-39794
      */
-    BiometricEncodingType getEncodingType();
+    val encodingType: BiometricEncodingType
 }

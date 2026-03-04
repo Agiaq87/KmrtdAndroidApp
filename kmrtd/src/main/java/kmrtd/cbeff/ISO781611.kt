@@ -19,103 +19,102 @@
  *
  * $Id: ISO781611.java 1901 2025-07-15 12:31:11Z martijno $
  */
-
-package kmrtd.cbeff;
+package kmrtd.cbeff
 
 /**
  * Constants interface representing ISO7816-11.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1901 $
  * @since 0.4.7
  */
-public interface ISO781611 {
+interface ISO781611 {
+    companion object {
+        const val BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG: Int = 0x7F61
+        const val BIOMETRIC_INFORMATION_TEMPLATE_TAG: Int = 0x7F60
 
-    static final int BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG = 0x7F61;
-    static final int BIOMETRIC_INFORMATION_TEMPLATE_TAG = 0x7F60;
+        const val BIOMETRIC_INFO_COUNT_TAG: Int = 0x02
+        const val BIOMETRIC_HEADER_TEMPLATE_BASE_TAG: Int = 0xA1
+        const val BIOMETRIC_DATA_BLOCK_TAG: Int = 0x5F2E
+        const val BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG: Int = 0x7F2E
 
-    static final int BIOMETRIC_INFO_COUNT_TAG = 0x02;
-    static final int BIOMETRIC_HEADER_TEMPLATE_BASE_TAG = 0xA1;
-    static final int BIOMETRIC_DATA_BLOCK_TAG = 0x5F2E;
-    static final int BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG = 0x7F2E;
+        const val DISCRETIONARY_DATA_FOR_PAYLOAD_TAG: Int = 0x53
+        const val DISCRETIONARY_DATA_FOR_PAYLOAD_CONSTRUCTED_TAG: Int = 0x73
 
-    static final int DISCRETIONARY_DATA_FOR_PAYLOAD_TAG = 0x53;
-    static final int DISCRETIONARY_DATA_FOR_PAYLOAD_CONSTRUCTED_TAG = 0x73;
-
-    /*
+        /*
      * FIXME: For 7F2E check ISO7816-11, Table 3: a 7F2E structure appears to include a 5F2E structure?
      * Difference between primitive/constructed.
      */
+        /**
+         * From ISO7816-11: Secure Messaging Template tag.
+         */
+        const val SMT_TAG: Int = 0x7D
 
-    /**
-     * From ISO7816-11: Secure Messaging Template tag.
-     */
-    static final int SMT_TAG = 0x7D;
+        /**
+         * From ISO7816-11: Secure Messaging Template tag.
+         */
+        const val SMT_DO_PV: Int = 0x81
 
-    /**
-     * From ISO7816-11: Secure Messaging Template tag.
-     */
-    static final int SMT_DO_PV = 0x81;
+        /**
+         * From ISO7816-11: Secure Messaging Template tag.
+         */
+        const val SMT_DO_CG: Int = 0x85
 
-    /**
-     * From ISO7816-11: Secure Messaging Template tag.
-     */
-    static final int SMT_DO_CG = 0x85;
+        /**
+         * From ISO7816-11: Secure Messaging Template tag.
+         */
+        const val SMT_DO_CC: Int = 0x8E
 
-    /**
-     * From ISO7816-11: Secure Messaging Template tag.
-     */
-    static final int SMT_DO_CC = 0x8E;
+        /**
+         * From ISO7816-11: Secure Messaging Template tag.
+         */
+        const val SMT_DO_DS: Int = 0x9E
 
-    /**
-     * From ISO7816-11: Secure Messaging Template tag.
-     */
-    static final int SMT_DO_DS = 0x9E;
+        /**
+         * ISO 7816-11, table C.1., used inside the BHT.
+         * Length 2.
+         */
+        const val PATRON_HEADER_VERSION_TAG: Int = 0x80
 
-    /**
-     * ISO 7816-11, table C.1., used inside the BHT.
-     * Length 2.
-     */
-    static final int PATRON_HEADER_VERSION_TAG = 0x80;
+        /**
+         * Biometric Type tag, ISO7816-11.
+         */
+        const val BIOMETRIC_TYPE_TAG: Int = 0x81
 
-    /**
-     * Biometric Type tag, ISO7816-11.
-     */
-    static final int BIOMETRIC_TYPE_TAG = 0x81;
+        /**
+         * Biometric Subtype tag, ISO7816-11.
+         */
+        const val BIOMETRIC_SUBTYPE_TAG: Int = 0x82
 
-    /**
-     * Biometric Subtype tag, ISO7816-11.
-     */
-    static final int BIOMETRIC_SUBTYPE_TAG = 0x82;
+        /**
+         * ISO7816-11 table C.1, (7), creation date and time of biometric data (CCYYMMDDhhmmss), used inside the BHT.
+         * Length 2.
+         */
+        const val CREATION_DATE_AND_TIME_TAG: Int = 0x83
 
-    /**
-     * ISO7816-11 table C.1, (7), creation date and time of biometric data (CCYYMMDDhhmmss), used inside the BHT.
-     * Length 2.
-     */
-    static final int CREATION_DATE_AND_TIME_TAG = 0x83;
+        /**
+         * ISO7816-11 table C.1, (8), validity period (from CCYYMMDD, to CCYYMMDD), used inside the BHT.
+         * Length 2.
+         */
+        const val VALIDITY_PERIOD_TAG: Int = 0x85
 
-    /**
-     * ISO7816-11 table C.1, (8), validity period (from CCYYMMDD, to CCYYMMDD), used inside the BHT.
-     * Length 2.
-     */
-    static final int VALIDITY_PERIOD_TAG = 0x85;
+        /**
+         * ISO7816-11 table C.1, (2), Identifier of product (PID) that created the biometric reference data,
+         * value assigned by IBIA.
+         * Length 2.
+         */
+        const val CREATOR_OF_BIOMETRIC_REFERENCE_DATA: Int = 0x86
 
-    /**
-     * ISO7816-11 table C.1, (2), Identifier of product (PID) that created the biometric reference data,
-     * value assigned by IBIA.
-     * Length 2.
-     */
-    static final int CREATOR_OF_BIOMETRIC_REFERENCE_DATA = 0x86;
+        /**
+         * ID of the Group or Vendor which defined the BDB, specified in NISTIR-6529A and/or ISO7817-11.
+         * Length 2.
+         */
+        const val FORMAT_OWNER_TAG: Int = 0x87
 
-    /**
-     * ID of the Group or Vendor which defined the BDB, specified in NISTIR-6529A and/or ISO7817-11.
-     * Length 2.
-     */
-    static final int FORMAT_OWNER_TAG = 0x87;
-
-    /**
-     * BDB Format Type as specified by the Format Owner, specified in NISTIR-6529A and/or ISO7816-11.
-     * Length 2.
-     */
-    static final int FORMAT_TYPE_TAG = 0x88;
+        /**
+         * BDB Format Type as specified by the Format Owner, specified in NISTIR-6529A and/or ISO7816-11.
+         * Length 2.
+         */
+        const val FORMAT_TYPE_TAG: Int = 0x88
+    }
 }

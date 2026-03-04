@@ -19,127 +19,126 @@
  *
  * $Id: ISO781611Encoder.java 1897 2025-05-27 12:34:36Z martijno $
  */
+package kmrtd.cbeff
 
-package kmrtd.cbeff;
-
-import net.sf.scuba.tlv.TLVOutputStream;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.SortedMap;
+import net.sf.scuba.tlv.TLVOutputStream
+import java.io.IOException
+import java.io.OutputStream
 
 /**
  * ISO 7816-11 encoder for BIR.
- *
+ * 
  * @param <B> the biometric data block type to use
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1897 $
- */
-public class ISO781611Encoder<B extends BiometricDataBlock> implements ISO781611 {
+</B> */
+class ISO781611Encoder<B : BiometricDataBlock>(private val bdbEncoder: BiometricDataBlockEncoder<B>) :
+    ISO781611 {
 
-    private final BiometricDataBlockEncoder<B> bdbEncoder;
-
-    private final BiometricEncodingType encodingType;
-
-    /**
-     * Constructs an ISO7816-11 encoder that uses the given BDB encoder.
-     *
-     * @param bdbEncoder the BDB encoder to use
-     */
-    public ISO781611Encoder(BiometricDataBlockEncoder<B> bdbEncoder) {
-        this.bdbEncoder = bdbEncoder;
-        this.encodingType = bdbEncoder.getEncodingType();
-    }
+    private val encodingType: BiometricEncodingType = bdbEncoder.encodingType
 
     /**
      * Writes a BIT group to an output stream.
-     *
+     * 
      * @param cbeffInfo    a CBEFF info containing the BIT group
      * @param outputStream the output stream to write to
      * @throws IOException if something goes wrong
      */
-    public void encode(CBEFFInfo cbeffInfo, OutputStream outputStream) throws IOException {
-        if (cbeffInfo instanceof SimpleCBEFFInfo) {
-            writeBITGroup(Arrays.asList(new CBEFFInfo[]{cbeffInfo}), outputStream);
-        } else if (cbeffInfo instanceof ComplexCBEFFInfo) {
-            ComplexCBEFFInfo complexCBEFFInfo = (ComplexCBEFFInfo) cbeffInfo;
-            writeBITGroup(complexCBEFFInfo.getSubRecords(), outputStream);
+    @Throws(IOException::class)
+    fun encode(cbeffInfo: CBEFFInfo<*>?, outputStream: OutputStream?) {
+        if (cbeffInfo is SimpleCBEFFInfo<*>) {
+            writeBITGroup(
+                mutableListOf(cbeffInfo),
+                outputStream
+            )
+        } else if (cbeffInfo is ComplexCBEFFInfo<*>) {
+            writeBITGroup(cbeffInfo.getSubRecords().toMutableList(), outputStream)
         }
     }
 
     /**
      * Writes a BIT group to a stream.
-     *
+     * 
      * @param records      the records of the BIT group
      * @param outputStream the stream to write to
      * @throws IOException on error writing to the stream
      */
-    private void writeBITGroup(List<CBEFFInfo> records, OutputStream outputStream) throws IOException {
-        TLVOutputStream tlvOut = outputStream instanceof TLVOutputStream ? (TLVOutputStream) outputStream : new TLVOutputStream(outputStream);
-        tlvOut.writeTag(BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG); /* 7F61 */
-        tlvOut.writeTag(BIOMETRIC_INFO_COUNT_TAG); /* 0x02 */
-        int count = records.size();
-        tlvOut.writeValue(new byte[]{(byte) count});
+    @Throws(IOException::class)
+    private fun writeBITGroup(records: MutableList<CBEFFInfo<*>>, outputStream: OutputStream?) {
+        val tlvOut =
+            outputStream as? TLVOutputStream ?: TLVOutputStream(outputStream)
+        tlvOut.writeTag(ISO781611.Companion.BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG) /* 7F61 */
+        tlvOut.writeTag(ISO781611.Companion.BIOMETRIC_INFO_COUNT_TAG) /* 0x02 */
+        val count = records.size
+        tlvOut.writeValue(byteArrayOf(count.toByte()))
 
-        for (int index = 0; index < count; index++) {
-            @SuppressWarnings("unchecked")
-            SimpleCBEFFInfo<B> simpleCBEFFInfo = (SimpleCBEFFInfo<B>) records.get(index);
-            writeBIT(tlvOut, index, simpleCBEFFInfo);
+        for (index in 0..<count) {
+            val simpleCBEFFInfo = records[index] as SimpleCBEFFInfo<B>
+            writeBIT(tlvOut, index, simpleCBEFFInfo)
         }
-        tlvOut.writeValueEnd(); /* BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG, i.e. 7F61 */
+        tlvOut.writeValueEnd() /* BIOMETRIC_INFORMATION_GROUP_TEMPLATE_TAG, i.e. 7F61 */
     }
 
     /**
      * Writes a single BIT to a stream.
-     *
+     * 
      * @param tlvOutputStream the stream to write to
      * @param index           the index of the BIT within the BIT group
      * @param cbeffInfo       the BIT
      * @throws IOException on error writing to the stream
      */
-    private void writeBIT(TLVOutputStream tlvOutputStream, int index, SimpleCBEFFInfo<B> cbeffInfo) throws IOException {
-        tlvOutputStream.writeTag(BIOMETRIC_INFORMATION_TEMPLATE_TAG); /* 7F60 */
-        writeBHT(tlvOutputStream, index, cbeffInfo);
-        writeBiometricDataBlock(tlvOutputStream, cbeffInfo.getBiometricDataBlock());
-        tlvOutputStream.writeValueEnd(); /* BIOMETRIC_INFORMATION_TEMPLATE_TAG, i.e. 7F60 */
+    @Throws(IOException::class)
+    private fun writeBIT(
+        tlvOutputStream: TLVOutputStream,
+        index: Int,
+        cbeffInfo: SimpleCBEFFInfo<B>
+    ) {
+        tlvOutputStream.writeTag(ISO781611.Companion.BIOMETRIC_INFORMATION_TEMPLATE_TAG) /* 7F60 */
+        writeBHT(tlvOutputStream, index, cbeffInfo)
+        writeBiometricDataBlock(tlvOutputStream, cbeffInfo.biometricDataBlock)
+        tlvOutputStream.writeValueEnd() /* BIOMETRIC_INFORMATION_TEMPLATE_TAG, i.e. 7F60 */
     }
 
     /**
      * Writes a a header for a single BIT to a stream.
-     *
+     * 
      * @param tlvOutputStream the stream to write to
      * @param index           the index of the BIT within the BIT group
      * @param cbeffInfo       the BIT to write
      * @throws IOException on error writing to the stream
      */
-    private void writeBHT(TLVOutputStream tlvOutputStream, int index, SimpleCBEFFInfo<B> cbeffInfo) throws IOException {
-        tlvOutputStream.writeTag((BIOMETRIC_HEADER_TEMPLATE_BASE_TAG /* + index */) & 0xFF); /* A1 */
+    @Throws(IOException::class)
+    private fun writeBHT(
+        tlvOutputStream: TLVOutputStream,
+        index: Int,
+        cbeffInfo: SimpleCBEFFInfo<B>
+    ) {
+        tlvOutputStream.writeTag((ISO781611.Companion.BIOMETRIC_HEADER_TEMPLATE_BASE_TAG /* + index */) and 0xFF) /* A1 */
 
-        B bdb = cbeffInfo.getBiometricDataBlock();
+        val bdb = cbeffInfo.biometricDataBlock
 
         /* SBH */
-        StandardBiometricHeader sbh = bdb.getStandardBiometricHeader();
-        SortedMap<Integer, byte[]> elements = sbh.getElements();
-        for (SortedMap.Entry<Integer, byte[]> entry : elements.entrySet()) {
-            tlvOutputStream.writeTag(entry.getKey());
-            tlvOutputStream.writeValue(entry.getValue());
+        val sbh = bdb.standardBiometricHeader
+        val elements = sbh.sortedElements
+        for (entry in elements.entries) {
+            tlvOutputStream.writeTag(entry.key)
+            tlvOutputStream.writeValue(entry.value)
         }
-        tlvOutputStream.writeValueEnd(); /* BIOMETRIC_HEADER_TEMPLATE_BASE_TAG, i.e. A1 */
+        tlvOutputStream.writeValueEnd() /* BIOMETRIC_HEADER_TEMPLATE_BASE_TAG, i.e. A1 */
     }
 
     /**
      * Writes the contents of a single BIT to a stream.
-     *
+     * 
      * @param tlvOutputStream the stream to write to
      * @param bdb             the contents to write
      * @throws IOException on error writing to the stream
      */
-    private void writeBiometricDataBlock(TLVOutputStream tlvOutputStream, B bdb) throws IOException {
-        tlvOutputStream.writeTag(BiometricEncodingType.toBDBTag(encodingType)); /* 5F2E or 7F2E */
+    @Throws(IOException::class)
+    private fun writeBiometricDataBlock(tlvOutputStream: TLVOutputStream, bdb: B) {
+        tlvOutputStream.writeTag(BiometricEncodingType.toBDBTag(encodingType)) /* 5F2E or 7F2E */
 
-        bdbEncoder.encode(bdb, tlvOutputStream);
-        tlvOutputStream.writeValueEnd(); /* BIOMETRIC_DATA_BLOCK_TAG, i.e. 5F2E or 7F2E */
+        bdbEncoder.encode(bdb, tlvOutputStream)
+        tlvOutputStream.writeValueEnd() /* BIOMETRIC_DATA_BLOCK_TAG, i.e. 5F2E or 7F2E */
     }
 }

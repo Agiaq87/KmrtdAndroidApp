@@ -70,8 +70,6 @@ data class BACKey(
 
 
     companion object {
-        private const val serialVersionUID: Long = -1059774581180524710L
-
         /**
          * Factory methods
          */

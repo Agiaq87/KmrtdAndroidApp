@@ -19,24 +19,22 @@
  *
  * $Id: BiometricDataBlock.java 1885 2024-11-07 09:17:29Z martijno $
  */
+package kmrtd.cbeff
 
-package kmrtd.cbeff;
-
-import java.io.Serializable;
+import java.io.Serializable
 
 /**
  * Biometric data block.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1885 $
  * @since 0.4.7
  */
-public interface BiometricDataBlock extends Serializable {
-
+interface BiometricDataBlock : Serializable {
     /**
      * Returns the standard biometric header of this biometric data block.
-     *
+     * 
      * @return the standard biometric header
      */
-    StandardBiometricHeader getStandardBiometricHeader();
+    val standardBiometricHeader: StandardBiometricHeader
 }

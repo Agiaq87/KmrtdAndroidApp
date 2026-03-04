@@ -19,37 +19,27 @@
  *
  * $Id: SimpleCBEFFInfo.java 1885 2024-11-07 09:17:29Z martijno $
  */
-
-package kmrtd.cbeff;
+package kmrtd.cbeff
 
 /**
  * Simple CBEFF BIR.
  * Specified in ISO 19785-1 (version 2.0) and NISTIR 6529-A (version 1.1).
- *
+ * 
  * @param <B> the embedded BDB
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1885 $
  * @since 0.4.7
- */
-public class SimpleCBEFFInfo<B extends BiometricDataBlock> implements CBEFFInfo<B> {
-
-    private final B bdb;
-
-    /**
-     * Constructs a simple CBEFF info from the given BDB.
-     *
-     * @param bdb a biometric data block
-     */
-    public SimpleCBEFFInfo(B bdb) {
-        this.bdb = bdb;
-    }
-
+</B> */
+class SimpleCBEFFInfo<B : BiometricDataBlock>
+/**
+ * Constructs a simple CBEFF info from the given BDB.
+ * 
+ * @param biometricDataBlock a biometric data block
+ */(
     /**
      * Returns the biometric data block from this simple CBEFF info.
-     *
+     * 
      * @return a biometric data block
      */
-    public B getBiometricDataBlock() {
-        return bdb;
-    }
-}
+    val biometricDataBlock: B
+) : CBEFFInfo<B>

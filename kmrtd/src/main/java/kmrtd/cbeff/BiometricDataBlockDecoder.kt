@@ -19,25 +19,23 @@
  *
  * $Id: BiometricDataBlockDecoder.java 1802 2018-11-06 16:29:28Z martijno $
  */
+package kmrtd.cbeff
 
-package kmrtd.cbeff;
-
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.IOException
+import java.io.InputStream
 
 /**
  * Interface to be implemented by client code to decode BDB implementations.
- *
+ * 
  * @param <B> the type of BDB implementation that is decoded by this decoder
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1802 $
  * @since 0.4.7
- */
-public interface BiometricDataBlockDecoder<B extends BiometricDataBlock> {
-
+</B> */
+interface BiometricDataBlockDecoder<B : BiometricDataBlock> {
     /**
      * Reads a biometric data block from an input stream.
-     *
+     * 
      * @param inputStream the input stream to read from
      * @param sbh         the standard biometric header that preceded this BDB
      * @param index       the index of this BDB
@@ -45,5 +43,11 @@ public interface BiometricDataBlockDecoder<B extends BiometricDataBlock> {
      * @return a biometric data block
      * @throws IOException if reading failed
      */
-    B decode(InputStream inputStream, StandardBiometricHeader sbh, int index, int length) throws IOException;
+    @Throws(IOException::class)
+    fun decode(
+        inputStream: InputStream?,
+        sbh: StandardBiometricHeader?,
+        index: Int,
+        length: Int
+    ): B
 }
