@@ -136,7 +136,7 @@ fun HomeScreen(
                 //enabled = isValid,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.home_screen_read_button))
+                Text(stringResource(R.string.home_screen_next_button))
             }
         }
     }
