@@ -149,7 +149,7 @@ data class CardVerifiableCertificate
      * @return the public key.
      */
     override fun getPublicKey(): PublicKey? {
-        val rsaKeyFactory = rsaKeyFactory ?: return null
+        val rsaKeyFactory = rsaKeyFactory
         try {
             val publicKey = cvCertificate.certificateBody.publicKey
             if ("RSA" == publicKey.algorithm) { // TODO: something similar for EC / ECDSA?
