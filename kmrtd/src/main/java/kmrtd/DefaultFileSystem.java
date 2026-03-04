@@ -30,12 +30,6 @@ import net.sf.scuba.smartcards.ISO7816;
 import net.sf.scuba.tlv.TLVInputStream;
 import net.sf.scuba.util.Hex;
 
-import kmrtd.io.FragmentBuffer;
-import kmrtd.io.FragmentBuffer.Fragment;
-import kmrtd.lds.CVCAFile;
-import kmrtd.lds.LDSFileUtil;
-import kmrtd.protocol.SecureMessagingWrapper;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -44,6 +38,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import kmrtd.io.Fragment;
+import kmrtd.io.FragmentBuffer;
+import kmrtd.lds.CVCAFile;
+import kmrtd.lds.LDSFileUtil;
+import kmrtd.protocol.SecureMessagingWrapper;
 
 /**
  * A file system for ICAO MRTDs (and similar file systems).

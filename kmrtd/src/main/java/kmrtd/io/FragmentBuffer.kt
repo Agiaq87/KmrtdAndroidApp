@@ -45,7 +45,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
     /**
      * Administration of which parts of buffer are filled.
      */
-    val fragments: MutableCollection<Fragment> = mutableSetOf<Fragment>()
+    val fragments: MutableCollection<Fragment> = sortedSetOf(compareBy { it.offset })
     /**
      * Returns the current buffer.
      * 
@@ -75,7 +75,11 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
      * @param other some other fragment buffer
      */
     @Synchronized
-    fun updateFrom(other: FragmentBuffer) {
+    fun updateFrom(other: FragmentBuffer) =
+        other.fragments.forEach {
+            addFragment(it.offset, other.buffer, it.offset, it.length)
+        }
+    /*{
         for (otherFragment in other.fragments) {
             addFragment(
                 otherFragment.offset,
@@ -84,7 +88,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
                 otherFragment.length
             )
         }
-    }
+    }*/
 
     /**
      * Adds a fragment containing the given byte.
@@ -124,7 +128,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
         if (offset + srcLength > buffer.size) {
             this.length = 2 * max(offset + srcLength, buffer.size)
         }
-
+        //bytes.copyInto(bytes, offset, srcOffset, srcOffset + srcLength) TODO
         System.arraycopy(bytes, srcOffset, buffer, offset, srcLength)
         var thisOffset = offset
         var thisLength = srcLength
@@ -168,7 +172,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
                 fragments.remove(other)
             }
         }
-        fragments.add(Fragment.Companion.getInstance(thisOffset, thisLength))
+        fragments.add(Fragment(thisOffset, thisLength))
     }
 
     @get:Synchronized
@@ -214,9 +218,8 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
      * @return a boolean indicating whether the byte at the given offset is covered
      */
     @Synchronized
-    fun isCoveredByFragment(offset: Int): Boolean {
-        return isCoveredByFragment(offset, 1)
-    }
+    fun isCoveredByFragment(offset: Int): Boolean =
+        isCoveredByFragment(offset, 1)
 
     /**
      * Checks whether the segment specified by the given offset and length
@@ -304,7 +307,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
     fun getSmallestUnbufferedFragment(offset: Int, length: Int): Fragment {
         var thisOffset = offset
         var thisLength = length
-        for (other in fragments!!) {
+        for (other in fragments) {
             /* On partial overlap we change this fragment, removing sections already buffered. */
             if (other.offset <= thisOffset && thisOffset + thisLength <= other.offset + other.length) {
                 /*
@@ -344,7 +347,7 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
                 thisLength = other.offset - thisOffset
             }
         }
-        return Fragment.Companion.getInstance(thisOffset, thisLength)
+        return Fragment(thisOffset, thisLength)
     }
 
     @Synchronized
@@ -363,66 +366,6 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
 
     override fun hashCode(): Int {
         return 3 * buffer.contentHashCode() + 2 * fragments.hashCode() + 7
-    }
-
-    /**
-     * Fragments encapsulate pairs of offset and length.
-     */
-    class Fragment
-    /**
-     * Constructs a fragment.
-     * 
-     * @param offset the offset within the buffer
-     * @param length the length of the fragment
-     */ private constructor(
-        /**
-         * Returns this fragment's offset within the buffer.
-         * 
-         * @return the offset of the fragment
-         */
-        val offset: Int,
-        /**
-         * Returns the length of the fragment.
-         * 
-         * @return the length of the fragment
-         */
-        val length: Int
-    ) : Serializable {
-        override fun toString(): String {
-            return "[" + offset + " .. " + (offset + length - 1) + " (" + length + ")]"
-        }
-
-        override fun equals(otherObject: Any?): Boolean {
-            if (otherObject == null) {
-                return false
-            }
-            if (otherObject === this) {
-                return true
-            }
-            if (otherObject.javaClass != Fragment::class.java) {
-                return false
-            }
-
-            val otherFragment = otherObject as Fragment
-            return otherFragment.offset == offset && otherFragment.length == length
-        }
-
-        override fun hashCode(): Int {
-            return 2 * offset + 3 * length + 5
-        }
-
-        companion object {
-            /**
-             * Returns a fragment instance.
-             * 
-             * @param offset the offset within the buffer
-             * @param length the length of the fragment
-             * @return the new fragment
-             */
-            fun getInstance(offset: Int, length: Int): Fragment {
-                return Fragment(offset, length)
-            }
-        }
     }
 
     companion object {
