@@ -77,9 +77,9 @@ public class BACProtocol {
      * @throws GeneralSecurityException on error applying the low level cryptographic primitives
      */
     public static byte[] computeKeySeedForBAC(BACKeySpec bacKey) throws GeneralSecurityException {
-        String documentNumber = bacKey.documentNumber;
-        String dateOfBirth = bacKey.dateOfBirth;
-        String dateOfExpiry = bacKey.dateOfExpiry;
+        String documentNumber = bacKey.getDocumentNumber();
+        String dateOfBirth = bacKey.getDateOfBirth();
+        String dateOfExpiry = bacKey.getDateOfExpiry();
 
         if (dateOfBirth == null || dateOfBirth.length() != 6) {
             throw new IllegalArgumentException("Wrong date format used for date of birth. Expected yyMMdd, found " + dateOfBirth);
@@ -160,7 +160,7 @@ public class BACProtocol {
      */
     public BACResult doBAC(AccessKeySpec bacKey) throws CardServiceException {
         try {
-            byte[] keySeed = bacKey.key;
+            byte[] keySeed = bacKey.getKey();
             SecretKey kEnc = Util.deriveKey(keySeed, Util.ENC_MODE);
             SecretKey kMac = Util.deriveKey(keySeed, Util.MAC_MODE);
 

@@ -12,7 +12,10 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
@@ -44,7 +47,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             KmrtdExampleAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(WindowInsets.safeContent)
+                ) { innerPadding ->
                     KmrtdNavGraph(
                         padding = innerPadding,
                         showGithub = { openUrl("https://github.com/giaquinto/kmrtd-example-app".toUri()) },

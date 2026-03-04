@@ -357,9 +357,9 @@ class KmrtdManager {
         _state.value = KmrtdState.BACKey
 
         BACKey(
-            mrzInput.documentNumber.value,
-            mrzInput.birthDate.date,
-            mrzInput.expireDate.date
+            mrzInput.documentNumber,
+            mrzInput.birthDate,
+            mrzInput.expireDate
         )
     }
 

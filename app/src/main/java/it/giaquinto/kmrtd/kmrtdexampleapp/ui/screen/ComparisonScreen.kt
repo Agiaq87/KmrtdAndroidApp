@@ -38,12 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.giaquinto.kmrtd.kmrtdexampleapp.framework.KmrtdResultBuilder
 
-/**
- * Colori per il confronto:
- * - Verde: KMRTD ha prodotto un valore NON presente in JMRTD (valore extra)
- * - Rosso: JMRTD ha prodotto un valore che KMRTD NON ha (valore mancante)
- * - Bianco: entrambi hanno lo stesso stato (entrambi presenti o entrambi assenti)
- */
+
 private val KmrtdExtra = Color(0xFF4CAF50)       // Verde
 private val KmrtdMissing = Color(0xFFF44336)      // Rosso
 private val KmrtdMatch = Color.White              // Bianco
@@ -52,18 +47,13 @@ private val HeaderBg = Color(0xFF1A1A2E)
 private val RowBgEven = Color(0xFF16213E)
 private val RowBgOdd = Color(0xFF0F3460)
 
-/**
- * Stato di confronto per un singolo campo
- */
+
 private enum class ComparisonStatus {
     MATCH,    // Entrambi hanno o entrambi non hanno il valore
     EXTRA,    // Solo KMRTD ha il valore
     MISSING   // Solo JMRTD ha il valore (KMRTD mancante)
 }
 
-/**
- * Riga di confronto: attributo, valore kmrtd, valore jmrtd, stato
- */
 private data class ComparisonRow(
     val attribute: String,
     val kmrtdValue: String,
@@ -71,12 +61,7 @@ private data class ComparisonRow(
     val status: ComparisonStatus
 )
 
-/**
- * Determina lo stato di confronto tra due valori nullable.
- * - Se entrambi null/vuoti o entrambi presenti → MATCH
- * - Se solo kmrtd ha valore → EXTRA (verde)
- * - Se solo jmrtd ha valore → MISSING (rosso)
- */
+
 private fun compareValues(kmrtdVal: Any?, jmrtdVal: Any?): ComparisonStatus {
     val kmrtdPresent = isPresent(kmrtdVal)
     val jmrtdPresent = isPresent(jmrtdVal)
@@ -108,9 +93,6 @@ private fun toDisplayString(value: Any?): String = when (value) {
     else -> value.toString()
 }
 
-/**
- * Costruisce la lista completa delle righe di confronto
- */
 private fun buildComparisonRows(
     kmrtd: KmrtdResultBuilder,
     jmrtd: KmrtdResultBuilder
@@ -210,10 +192,6 @@ private fun buildComparisonRows(
         )
     }
 }
-
-// ============================================================================
-// Composables
-// ============================================================================
 
 @Composable
 fun ComparisonScreen(
