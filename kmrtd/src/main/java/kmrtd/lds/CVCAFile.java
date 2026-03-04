@@ -22,13 +22,13 @@
 
 package kmrtd.lds;
 
-import kmrtd.PassportService;
-import kmrtd.cert.CVCPrincipal;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import kmrtd.PassportService;
+import kmrtd.cert.CVCPrincipal;
 
 /* TODO: Use CVCPrincipal instead of String for references? */
 
@@ -176,7 +176,7 @@ public class CVCAFile extends AbstractLDSFile {
      * @return the CA Certificate identifier
      */
     public CVCPrincipal getCAReference() {
-        return caReference == null ? null : new CVCPrincipal(caReference);
+        return caReference == null ? null : CVCPrincipal.from(caReference);
     }
 
     /**
@@ -186,7 +186,7 @@ public class CVCAFile extends AbstractLDSFile {
      * @return the second (alternative) CA Certificate identifier
      */
     public CVCPrincipal getAltCAReference() {
-        return altCAReference == null ? null : new CVCPrincipal(altCAReference);
+        return altCAReference == null ? null : CVCPrincipal.from(altCAReference);
     }
 
     /**

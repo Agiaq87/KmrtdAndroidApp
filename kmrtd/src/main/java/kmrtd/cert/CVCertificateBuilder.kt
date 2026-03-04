@@ -19,42 +19,41 @@
  *
  * $Id: CVCertificateBuilder.java 1767 2018-02-20 12:54:49Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.cert
 
-package kmrtd.cert;
-
-import org.ejbca.cvc.CAReferenceField;
-import org.ejbca.cvc.HolderReferenceField;
-import org.ejbca.cvc.exception.ConstructionException;
-
-import kmrtd.cert.CVCAuthorizationTemplate.Permission;
-import kmrtd.cert.CVCAuthorizationTemplate.Role;
-
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.SignatureException;
-import java.util.Date;
+import kmrtd.cert.support.Permission
+import kmrtd.cert.support.Role
+import org.ejbca.cvc.AccessRightEnum
+import org.ejbca.cvc.AuthorizationRoleEnum
+import org.ejbca.cvc.CAReferenceField
+import org.ejbca.cvc.CertificateGenerator
+import org.ejbca.cvc.HolderReferenceField
+import org.ejbca.cvc.exception.ConstructionException
+import java.io.IOException
+import java.security.InvalidKeyException
+import java.security.NoSuchAlgorithmException
+import java.security.NoSuchProviderException
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.SignatureException
+import java.util.Date
 
 /**
  * Card verifiable certificate builder.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1767 $
  */
-public class CVCertificateBuilder {
-
-    /**
-     * Hides the default constructor.
-     */
-    private CVCertificateBuilder() {
-    }
-
+object CVCertificateBuilder {
     /**
      * Produces card verifiable certificates.
-     *
+     * 
      * @param publicKey     the public key
      * @param signerKey     private key
      * @param algorithmName algorithm name
@@ -72,51 +71,76 @@ public class CVCertificateBuilder {
      * @throws SignatureException       on error creating signature
      * @throws ConstructionException    on error constructing the certificate
      */
-    public static CardVerifiableCertificate createCertificate(PublicKey publicKey,
-                                                              PrivateKey signerKey, String algorithmName, CVCPrincipal caRef,
-                                                              CVCPrincipal holderRef, CVCAuthorizationTemplate authZTemplate, Date validFrom, Date validTo,
-                                                              String provider) throws IOException, NoSuchAlgorithmException,
-            NoSuchProviderException, InvalidKeyException, SignatureException,
-            ConstructionException {
-        return new CardVerifiableCertificate(org.ejbca.cvc.CertificateGenerator
-                .createCertificate(publicKey, signerKey, algorithmName,
-                        new CAReferenceField(caRef.getCountry().toAlpha2Code(),
-                                caRef.getMnemonic(), caRef.getSeqNumber()),
-                        new HolderReferenceField(holderRef.getCountry()
-                                .toAlpha2Code(), holderRef.getMnemonic(),
-                                holderRef.getSeqNumber()), getRole(authZTemplate.getRole()), getAccessRight(authZTemplate.getAccessRight()),
-                        validFrom, validTo, provider));
+    @Throws(
+        IOException::class,
+        NoSuchAlgorithmException::class,
+        NoSuchProviderException::class,
+        InvalidKeyException::class,
+        SignatureException::class,
+        ConstructionException::class
+    )
+    fun createCertificate(
+        publicKey: PublicKey,
+        signerKey: PrivateKey?,
+        algorithmName: String,
+        caRef: CVCPrincipal,
+        holderRef: CVCPrincipal,
+        authZTemplate: CVCAuthorizationTemplate,
+        validFrom: Date,
+        validTo: Date,
+        provider: String
+    ): CardVerifiableCertificate {
+        return CardVerifiableCertificate(
+            CertificateGenerator
+                .createCertificate(
+                    publicKey,
+                    signerKey,
+                    algorithmName,
+                    CAReferenceField(
+                        caRef.getCountry().toAlpha2Code(),
+                        caRef.mnemonic, caRef.seqNumber
+                    ),
+                    HolderReferenceField(
+                        holderRef.getCountry()
+                            .toAlpha2Code(), holderRef.mnemonic,
+                        holderRef.seqNumber
+                    ),
+                    getRole(authZTemplate.role),
+                    getAccessRight(authZTemplate.accessRight),
+                    validFrom,
+                    validTo,
+                    provider
+                )
+        )
     }
 
     /**
      * Translates the role to an EJBCA type.
-     *
+     * 
      * @param role a role
      * @return the role as an EJBCA typed object
      */
-    private static org.ejbca.cvc.AuthorizationRoleEnum getRole(Role role) {
-        return switch (role) {
-            case CVCA -> org.ejbca.cvc.AuthorizationRoleEnum.CVCA;
-            case DV_D -> org.ejbca.cvc.AuthorizationRoleEnum.DV_D;
-            case DV_F -> org.ejbca.cvc.AuthorizationRoleEnum.DV_F;
-            case IS -> org.ejbca.cvc.AuthorizationRoleEnum.IS;
-            default -> throw new NumberFormatException("Cannot decode role " + role);
-        };
-    }
+    private fun getRole(role: Role): AuthorizationRoleEnum =
+        when (role) {
+            Role.CVCA -> AuthorizationRoleEnum.CVCA
+            Role.DV_D -> AuthorizationRoleEnum.DV_D
+            Role.DV_F -> AuthorizationRoleEnum.DV_F
+            Role.IS -> AuthorizationRoleEnum.IS
+            else -> throw NumberFormatException("Cannot decode role $role")
+        }
 
     /**
      * Translates an access right to an EJBCA type.
-     *
+     * 
      * @param accessRight the access right
      * @return the access right as an EJBCA typed object
      */
-    private static org.ejbca.cvc.AccessRightEnum getAccessRight(Permission accessRight) {
-        return switch (accessRight) {
-            case READ_ACCESS_NONE -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_NONE;
-            case READ_ACCESS_DG3 -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3;
-            case READ_ACCESS_DG4 -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG4;
-            case READ_ACCESS_DG3_AND_DG4 -> org.ejbca.cvc.AccessRightEnum.READ_ACCESS_DG3_AND_DG4;
-            default -> throw new NumberFormatException("Cannot decode access right " + accessRight);
-        };
-    }
+    private fun getAccessRight(accessRight: Permission): AccessRightEnum =
+        when (accessRight) {
+            Permission.READ_ACCESS_NONE -> AccessRightEnum.READ_ACCESS_NONE
+            Permission.READ_ACCESS_DG3 -> AccessRightEnum.READ_ACCESS_DG3
+            Permission.READ_ACCESS_DG4 -> AccessRightEnum.READ_ACCESS_DG4
+            Permission.READ_ACCESS_DG3_AND_DG4 -> AccessRightEnum.READ_ACCESS_DG3_AND_DG4
+            else -> throw NumberFormatException("Cannot decode access right $accessRight")
+        }
 }

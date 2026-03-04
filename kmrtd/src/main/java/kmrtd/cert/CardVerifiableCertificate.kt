@@ -19,90 +19,84 @@
  *
  * $Id: CardVerifiableCertificate.java 1808 2019-03-07 21:32:19Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.cert
 
-package kmrtd.cert;
-
-import net.sf.scuba.data.Country;
-
-import org.ejbca.cvc.AccessRightEnum;
-import org.ejbca.cvc.AlgorithmUtil;
-import org.ejbca.cvc.AuthorizationRoleEnum;
-import org.ejbca.cvc.CAReferenceField;
-import org.ejbca.cvc.CVCertificateBody;
-import org.ejbca.cvc.HolderReferenceField;
-import org.ejbca.cvc.OIDField;
-import org.ejbca.cvc.ReferenceField;
-import org.ejbca.cvc.exception.ConstructionException;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.SignatureException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import net.sf.scuba.data.Country
+import org.ejbca.cvc.AlgorithmUtil
+import org.ejbca.cvc.CVCertificate
+import org.ejbca.cvc.ReferenceField
+import java.io.IOException
+import java.security.GeneralSecurityException
+import java.security.InvalidKeyException
+import java.security.KeyFactory
+import java.security.NoSuchAlgorithmException
+import java.security.NoSuchProviderException
+import java.security.PublicKey
+import java.security.Security
+import java.security.SignatureException
+import java.security.cert.Certificate
+import java.security.cert.CertificateEncodingException
+import java.security.cert.CertificateException
+import java.security.interfaces.RSAPublicKey
+import java.security.spec.RSAPublicKeySpec
+import java.util.Date
+import java.util.Locale
+import java.util.logging.Level
+import java.util.logging.Logger
 
 /**
  * Card verifiable certificates as specified in TR 03110.
- * <p>
- * Just a wrapper around <code>org.ejbca.cvc.CVCertificate</code> by Keijo Kurkinen of EJBCA.org,
- * so that we can subclass <code>java.security.cert.Certificate</code>.
- * <p>
+ * 
+ * 
+ * Just a wrapper around `org.ejbca.cvc.CVCertificate` by Keijo Kurkinen of EJBCA.org,
+ * so that we can subclass `java.security.cert.Certificate`.
+ * 
+ * 
  * We also hide some of the internal structure (no more calls to get the "body" just to get some
  * attributes).
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1808 $
  */
-public class CardVerifiableCertificate extends Certificate {
-
-    private static final long serialVersionUID = -3585440601605666288L;
-
-    private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-
+data class CardVerifiableCertificate(private var cvCertificate: CVCertificate) :
+    Certificate("CVC") {
     /**
      * The EJBCA CVC that we wrap.
      */
-    private org.ejbca.cvc.CVCertificate cvCertificate;
+    //private var cvCertificate: CVCertificate
 
-    private transient KeyFactory rsaKeyFactory;
+    @Transient
+    private val rsaKeyFactory: KeyFactory = KeyFactory.getInstance("RSA")
 
     /**
      * Constructs a wrapper.
-     *
+     * 
      * @param cvCertificate the EJCBA CVC to wrap
      */
-    protected CardVerifiableCertificate(org.ejbca.cvc.CVCertificate cvCertificate) {
-        super("CVC");
+    /*init {
         try {
-            rsaKeyFactory = KeyFactory.getInstance("RSA");
-        } catch (NoSuchAlgorithmException nsae) {
-            /* NOTE: never happens, RSA will be provided. */
-            LOGGER.log(Level.WARNING, "Exception", nsae);
+            rsaKeyFactory = KeyFactory.getInstance("RSA")
+        } catch (nsae: NoSuchAlgorithmException) {
+            *//* NOTE: never happens, RSA will be provided. *//*
+            LOGGER.log(Level.WARNING, "Exception", nsae)
         }
-        this.cvCertificate = cvCertificate;
-    }
+        //this.cvCertificate = cvCertificate
+    }*/
 
     /*
      * TODO: perhaps move this to factory class (CertificateFactory, CertificateBuilder, whatever).
      * NOTE: algorithm should be one of"SHA224withECDSA", "SHA256withECDSA", "SHA384withECDSA", "SHA512withECDSA",
      * or similar with RSA.
      */
-
-    /**
+    /*
      * Constructs a certificate.
-     *
+     * 
      * @param authorityReference authority reference
      * @param holderReference    holder reference
      * @param publicKey          public key
@@ -113,144 +107,181 @@ public class CardVerifiableCertificate extends Certificate {
      * @param permission         permission
      * @param signatureData      signed date
      */
-    public CardVerifiableCertificate(CVCPrincipal authorityReference, CVCPrincipal holderReference,
-                                     PublicKey publicKey,
-                                     String algorithm,
-                                     Date notBefore,
-                                     Date notAfter,
-                                     CVCAuthorizationTemplate.Role role,
-                                     CVCAuthorizationTemplate.Permission permission,
-                                     byte[] signatureData) {
-        this(null);
+    /*constructor(
+        authorityReference: CVCPrincipal, holderReference: CVCPrincipal,
+        publicKey: PublicKey,
+        algorithm: String?,
+        notBefore: Date,
+        notAfter: Date,
+        role: CVCAuthorizationTemplate.Role?,
+        permission: CVCAuthorizationTemplate.Permission?,
+        signatureData: ByteArray?
+    ) : this(null) {
         try {
-            CAReferenceField authorityRef = new CAReferenceField(authorityReference.getCountry().toAlpha2Code(), authorityReference.getMnemonic(), authorityReference.getSeqNumber());
-            HolderReferenceField holderRef = new HolderReferenceField(holderReference.getCountry().toAlpha2Code(), holderReference.getMnemonic(), holderReference.getSeqNumber());
-            AuthorizationRoleEnum authRole = CVCAuthorizationTemplate.fromRole(role);
-            AccessRightEnum accessRight = CVCAuthorizationTemplate.fromPermission(permission);
-            CVCertificateBody body = new CVCertificateBody(authorityRef, org.ejbca.cvc.KeyFactory.createInstance(publicKey, algorithm, authRole), holderRef, authRole, accessRight, notBefore, notAfter);
-            this.cvCertificate = new org.ejbca.cvc.CVCertificate(body);
-            this.cvCertificate.setSignature(signatureData);
-            cvCertificate.getTBS();
-        } catch (ConstructionException ce) {
-            throw new IllegalArgumentException(ce);
+            val authorityRef = CAReferenceField(
+                authorityReference.getCountry().toAlpha2Code(),
+                authorityReference.mnemonic,
+                authorityReference.seqNumber
+            )
+            val holderRef = HolderReferenceField(
+                holderReference.getCountry().toAlpha2Code(),
+                holderReference.mnemonic,
+                holderReference.seqNumber
+            )
+            val authRole: AuthorizationRoleEnum = CVCAuthorizationTemplate.Companion.fromRole(role)
+            val accessRight: AccessRightEnum =
+                CVCAuthorizationTemplate.Companion.fromPermission(permission)
+            val body = CVCertificateBody(
+                authorityRef,
+                org.ejbca.cvc.KeyFactory.createInstance(publicKey, algorithm, authRole),
+                holderRef,
+                authRole,
+                accessRight,
+                notBefore,
+                notAfter
+            )
+            this.cvCertificate = CVCertificate(body)
+            this.cvCertificate.signature = signatureData
+            cvCertificate.tbs
+        } catch (ce: ConstructionException) {
+            throw IllegalArgumentException(ce)
         }
-    }
+    }*/
 
-    /**
-     * Returns the signature algorithm.
-     *
-     * @return an algorithm name
-     */
-    public String getSigAlgName() {
-        try {
-            OIDField oid = cvCertificate.getCertificateBody().getPublicKey().getObjectIdentifier();
-            return AlgorithmUtil.getAlgorithmName(oid);
-        } catch (NoSuchFieldException nsfe) {
-            LOGGER.log(Level.WARNING, "No such field", nsfe);
-            return null;
+    val sigAlgName: String?
+        /**
+         * Returns the signature algorithm.
+         * 
+         * @return an algorithm name
+         */
+        get() {
+            try {
+                val oid =
+                    cvCertificate.certificateBody.publicKey.objectIdentifier
+                return AlgorithmUtil.getAlgorithmName(oid)
+            } catch (nsfe: NoSuchFieldException) {
+                LOGGER.log(
+                    Level.WARNING,
+                    "No such field",
+                    nsfe
+                )
+                return null
+            }
         }
-    }
 
-    /**
-     * Returns the signature algorithm object identifier.
-     *
-     * @return an object identifier
-     */
-    public String getSigAlgOID() {
-        try {
-            OIDField oid = cvCertificate.getCertificateBody().getPublicKey().getObjectIdentifier();
-            return oid.getAsText();
-        } catch (NoSuchFieldException nsfe) {
-            LOGGER.log(Level.WARNING, "No such field", nsfe);
-            return null;
+    val sigAlgOID: String?
+        /**
+         * Returns the signature algorithm object identifier.
+         * 
+         * @return an object identifier
+         */
+        get() {
+            try {
+                val oid =
+                    cvCertificate.certificateBody.publicKey.objectIdentifier
+                return oid.asText
+            } catch (nsfe: NoSuchFieldException) {
+                LOGGER.log(
+                    Level.WARNING,
+                    "No such field",
+                    nsfe
+                )
+                return null
+            }
         }
-    }
 
     /**
      * Returns the encoded form of this certificate. It is
      * assumed that each certificate type would have only a single
      * form of encoding; for example, X.509 certificates would
      * be encoded as ASN.1 DER.
-     *
+     * 
      * @return the encoded form of this certificate
      * @throws CertificateEncodingException if an encoding error occurs.
      */
-    @Override
-    public byte[] getEncoded() throws CertificateEncodingException {
+    @Throws(CertificateEncodingException::class)
+    override fun getEncoded(): ByteArray? {
         try {
-            return cvCertificate.getDEREncoded();
-        } catch (IOException ioe) {
-            throw new CertificateEncodingException(ioe);
+            return cvCertificate.getDEREncoded()
+        } catch (ioe: IOException) {
+            throw CertificateEncodingException(ioe)
         }
     }
 
     /**
      * Returns the public key from this certificate.
-     *
+     * 
      * @return the public key.
      */
-    @Override
-    public PublicKey getPublicKey() {
+    override fun getPublicKey(): PublicKey? {
+        val rsaKeyFactory = rsaKeyFactory ?: return null
         try {
-            org.ejbca.cvc.CVCPublicKey publicKey = cvCertificate.getCertificateBody().getPublicKey();
-            if ("RSA".equals(publicKey.getAlgorithm())) { // TODO: something similar for EC / ECDSA?
-                RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+            val publicKey = cvCertificate.certificateBody.publicKey
+            if ("RSA" == publicKey.algorithm) { // TODO: something similar for EC / ECDSA?
+                val rsaPublicKey = publicKey as RSAPublicKey
                 try {
-                    return rsaKeyFactory.generatePublic(new RSAPublicKeySpec(rsaPublicKey.getModulus(), rsaPublicKey.getPublicExponent()));
-                } catch (GeneralSecurityException gse) {
-                    LOGGER.log(Level.WARNING, "Exception", gse);
-                    return publicKey;
+                    return rsaKeyFactory.generatePublic(
+                        RSAPublicKeySpec(
+                            rsaPublicKey.modulus,
+                            rsaPublicKey.publicExponent
+                        )
+                    )
+                } catch (gse: GeneralSecurityException) {
+                    LOGGER.log(Level.WARNING, "Exception", gse)
+                    return publicKey
                 }
             }
 
             /* It's ECDSA... */
-            return publicKey;
-        } catch (NoSuchFieldException nsfe) {
-            LOGGER.log(Level.WARNING, "No such field", nsfe);
-            return null;
+            return publicKey
+        } catch (nsfe: NoSuchFieldException) {
+            LOGGER.log(Level.WARNING, "No such field", nsfe)
+            return null
         }
     }
 
     /**
      * Returns a string representation of this certificate.
-     *
+     * 
      * @return a string representation of this certificate.
      */
-    @Override
-    public String toString() {
-        return cvCertificate.toString();
-    }
+    override fun toString(): String =
+        cvCertificate.toString()
 
     /**
      * Verifies that this certificate was signed using the
      * private key that corresponds to the specified public key.
-     *
+     * 
      * @param key the PublicKey used to carry out the verification.
      * @throws NoSuchAlgorithmException on unsupported signature
-     *                                  algorithms.
+     * algorithms.
      * @throws InvalidKeyException      on incorrect key.
      * @throws NoSuchProviderException  if there's no default provider.
      * @throws SignatureException       on signature errors.
      * @throws CertificateException     on encoding errors.
      */
-    @Override
-    public void verify(PublicKey key) throws CertificateException,
-            NoSuchAlgorithmException, InvalidKeyException,
-            NoSuchProviderException, SignatureException {
-        Provider[] providers = Security.getProviders();
-        boolean foundProvider = false;
-        for (Provider provider : providers) {
+    @Throws(
+        CertificateException::class,
+        NoSuchAlgorithmException::class,
+        InvalidKeyException::class,
+        NoSuchProviderException::class,
+        SignatureException::class
+    )
+    override fun verify(key: PublicKey?) {
+        val providers = Security.getProviders()
+        var foundProvider = false
+        for (provider in providers) {
             try {
-                cvCertificate.verify(key, provider.getName());
-                foundProvider = true;
-                break;
-            } catch (NoSuchAlgorithmException nse) {
-                LOGGER.log(Level.FINE, "Trying next provider", nse);
-                continue;
+                cvCertificate.verify(key, provider.name)
+                foundProvider = true
+                break
+            } catch (nse: NoSuchAlgorithmException) {
+                LOGGER.log(Level.FINE, "Trying next provider", nse)
+                continue
             }
         }
         if (!foundProvider) {
-            throw new NoSuchAlgorithmException("Tried all security providers: None was able to provide this signature algorithm.");
+            throw NoSuchAlgorithmException("Tried all security providers: None was able to provide this signature algorithm.")
         }
     }
 
@@ -259,7 +290,7 @@ public class CardVerifiableCertificate extends Certificate {
      * private key that corresponds to the specified public key.
      * This method uses the signature verification engine
      * supplied by the specified provider.
-     *
+     * 
      * @param key      the PublicKey used to carry out the verification.
      * @param provider the name of the signature provider.
      * @throws NoSuchAlgorithmException on unsupported signature algorithms.
@@ -268,145 +299,174 @@ public class CardVerifiableCertificate extends Certificate {
      * @throws SignatureException       on signature errors.
      * @throws CertificateException     on encoding errors.
      */
-    @Override
-    public void verify(PublicKey key, String provider)
-            throws CertificateException, NoSuchAlgorithmException,
-            InvalidKeyException, NoSuchProviderException, SignatureException {
-        cvCertificate.verify(key, provider);
-    }
+    @Throws(
+        CertificateException::class,
+        NoSuchAlgorithmException::class,
+        InvalidKeyException::class,
+        NoSuchProviderException::class,
+        SignatureException::class
+    )
+    override fun verify(key: PublicKey?, provider: String?) =
+        cvCertificate.verify(key, provider)
 
-    /**
-     * The DER encoded certificate body.
-     *
-     * @return DER encoded certificate body
-     * @throws CertificateException on error
-     * @throws IOException          on error
-     */
-    public byte[] getCertBodyData() throws CertificateException, IOException {
-        try {
-            return cvCertificate.getCertificateBody().getDEREncoded();
-        } catch (NoSuchFieldException nsfe) {
-            throw new CertificateException("No such field", nsfe);
+    @get:Throws(CertificateException::class, IOException::class)
+    val certBodyData: ByteArray?
+        /**
+         * The DER encoded certificate body.
+         * 
+         * @return DER encoded certificate body
+         * @throws CertificateException on error
+         * @throws IOException          on error
+         */
+        get() {
+            try {
+                return cvCertificate.certificateBody.getDEREncoded()
+            } catch (nsfe: NoSuchFieldException) {
+                throw CertificateException("No such field", nsfe)
+            }
         }
-    }
 
-    /**
-     * Returns 'Effective Date'.
-     *
-     * @return the effective date
-     * @throws CertificateException on error
-     */
-    public Date getNotBefore() throws CertificateException {
-        try {
-            return cvCertificate.getCertificateBody().getValidFrom();
-        } catch (NoSuchFieldException nsfe) {
-            throw new CertificateException("No such field", nsfe);
+    @get:Throws(CertificateException::class)
+    val notBefore: Date?
+        /**
+         * Returns 'Effective Date'.
+         * 
+         * @return the effective date
+         * @throws CertificateException on error
+         */
+        get() {
+            try {
+                return cvCertificate.certificateBody.validFrom
+            } catch (nsfe: NoSuchFieldException) {
+                throw CertificateException("No such field", nsfe)
+            }
         }
-    }
 
-    /**
-     * Returns 'Expiration Date'.
-     *
-     * @return the expiration date
-     * @throws CertificateException on error
-     */
-    public Date getNotAfter() throws CertificateException {
-        try {
-            return cvCertificate.getCertificateBody().getValidTo();
-        } catch (NoSuchFieldException nsfe) {
-            throw new CertificateException("No such field", nsfe);
+    @get:Throws(CertificateException::class)
+    val notAfter: Date?
+        /**
+         * Returns 'Expiration Date'.
+         * 
+         * @return the expiration date
+         * @throws CertificateException on error
+         */
+        get() {
+            try {
+                return cvCertificate.certificateBody.validTo
+            } catch (nsfe: NoSuchFieldException) {
+                throw CertificateException("No such field", nsfe)
+            }
         }
-    }
 
-    /**
-     * Returns the authority reference.
-     *
-     * @return the authority reference
-     * @throws CertificateException if the authority reference field is not present
-     */
-    public CVCPrincipal getAuthorityReference() throws CertificateException {
-        try {
-            ReferenceField rf = cvCertificate.getCertificateBody().getAuthorityReference();
-            final String countryCode = rf.getCountry().toUpperCase();
-            Country country = Country.getInstance(countryCode);
-            return new CVCPrincipal(country, rf.getMnemonic(), rf.getSequence());
-        } catch (NoSuchFieldException nsfe) {
-            throw new CertificateException("No such field", nsfe);
+    @get:Throws(CertificateException::class)
+    val authorityReference: CVCPrincipal
+        /**
+         * Returns the authority reference.
+         * 
+         * @return the authority reference
+         * @throws CertificateException if the authority reference field is not present
+         */
+        get() {
+            try {
+                val rf: ReferenceField = cvCertificate.certificateBody.authorityReference
+                val countryCode =
+                    rf.country.uppercase(Locale.getDefault())
+                val country = Country.getInstance(countryCode)
+                return CVCPrincipal(rf.mnemonic, rf.sequence, country)
+            } catch (nsfe: NoSuchFieldException) {
+                throw CertificateException("No such field", nsfe)
+            }
         }
-    }
 
-    /**
-     * Returns the holder reference.
-     *
-     * @return the holder reference
-     * @throws CertificateException if the authority reference field is not present
-     */
-    public CVCPrincipal getHolderReference() throws CertificateException {
-        try {
-            ReferenceField rf = cvCertificate.getCertificateBody().getHolderReference();
-            return new CVCPrincipal(Country.getInstance(rf.getCountry().toUpperCase()), rf.getMnemonic(), rf.getSequence());
-        } catch (NoSuchFieldException nsfe) {
-            throw new CertificateException("No such field", nsfe);
+    @get:Throws(CertificateException::class)
+    val holderReference: CVCPrincipal
+        /**
+         * Returns the holder reference.
+         * 
+         * @return the holder reference
+         * @throws CertificateException if the authority reference field is not present
+         */
+        get() {
+            try {
+                val rf: ReferenceField = cvCertificate.certificateBody.holderReference
+                return CVCPrincipal(
+                    rf.mnemonic,
+                    rf.sequence,
+                    Country.getInstance(
+                        rf.country.uppercase(
+                            Locale.getDefault()
+                        )
+                    )
+                )
+            } catch (nsfe: NoSuchFieldException) {
+                throw CertificateException("No such field", nsfe)
+            }
         }
-    }
 
-    /**
-     * Returns the holder authorization template.
-     *
-     * @return the holder authorization template
-     * @throws CertificateException on error constructing the template
-     */
-    public CVCAuthorizationTemplate getAuthorizationTemplate() throws CertificateException {
-        try {
-            org.ejbca.cvc.CVCAuthorizationTemplate template = cvCertificate.getCertificateBody().getAuthorizationTemplate();
-            return new CVCAuthorizationTemplate(template);
-        } catch (NoSuchFieldException nsfe) {
-            throw new CertificateException("No such field", nsfe);
+    @get:Throws(CertificateException::class)
+    val authorizationTemplate: CVCAuthorizationTemplate
+        /**
+         * Returns the holder authorization template.
+         * 
+         * @return the holder authorization template
+         * @throws CertificateException on error constructing the template
+         */
+        get() {
+            try {
+                val template =
+                    cvCertificate.certificateBody.authorizationTemplate
+                return CVCAuthorizationTemplate.decode(template)
+            } catch (nsfe: NoSuchFieldException) {
+                throw CertificateException("No such field", nsfe)
+            }
         }
-    }
 
-    /**
-     * Returns the signature (just the value, without the <code>0x5F37</code> tag).
-     *
-     * @return the signature bytes
-     * @throws CertificateException if certificate doesn't contain a signature
-     */
-    public byte[] getSignature() throws CertificateException {
-        try {
-            return cvCertificate.getSignature();
-        } catch (NoSuchFieldException nsfe) {
-            throw new CertificateException("No such field", nsfe);
+    @get:Throws(CertificateException::class)
+    val signature: ByteArray?
+        /**
+         * Returns the signature (just the value, without the `0x5F37` tag).
+         * 
+         * @return the signature bytes
+         * @throws CertificateException if certificate doesn't contain a signature
+         */
+        get() {
+            try {
+                return cvCertificate.signature
+            } catch (nsfe: NoSuchFieldException) {
+                throw CertificateException("No such field", nsfe)
+            }
         }
-    }
 
     /**
      * Tests for equality with respect to another object.
-     *
+     * 
      * @param otherObj the other object
      * @return whether this certificate equals the other object
      */
-    @Override
-    public boolean equals(Object otherObj) {
+    /*override fun equals(otherObj: Any?): Boolean {
         if (otherObj == null) {
-            return false;
+            return false
         }
-        if (this == otherObj) {
-            return true;
+        if (this === otherObj) {
+            return true
         }
-        if (!this.getClass().equals(otherObj.getClass())) {
-            return false;
+        if (this.javaClass != otherObj.javaClass) {
+            return false
         }
 
-        return this.cvCertificate.equals(((CardVerifiableCertificate) otherObj).cvCertificate);
-    }
+        return this.cvCertificate == (otherObj as CardVerifiableCertificate).cvCertificate
+    }*/
 
     /**
      * Returns a hash code for this object.
-     *
+     * 
      * @return a hash code for this object
      */
-    @Override
-    public int hashCode() {
-        return cvCertificate.hashCode() * 2 - 1030507011;
+    /*override fun hashCode(): Int {
+        return cvCertificate.hashCode() * 2 - 1030507011
+    }*/
+
+    companion object {
+        private val LOGGER: Logger = Logger.getLogger("kmrtd")
     }
 }

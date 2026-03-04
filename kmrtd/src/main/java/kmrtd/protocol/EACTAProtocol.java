@@ -26,14 +26,6 @@ import net.sf.scuba.smartcards.CardServiceException;
 import net.sf.scuba.tlv.TLVOutputStream;
 import net.sf.scuba.tlv.TLVUtil;
 
-import kmrtd.APDULevelEACTACapable;
-import kmrtd.CardServiceProtocolException;
-import kmrtd.Util;
-import kmrtd.cert.CVCAuthorizationTemplate.Role;
-import kmrtd.cert.CVCPrincipal;
-import kmrtd.cert.CardVerifiableCertificate;
-import kmrtd.lds.icao.MRZInfo;
-
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -48,6 +40,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.crypto.interfaces.DHPublicKey;
+
+import kmrtd.APDULevelEACTACapable;
+import kmrtd.CardServiceProtocolException;
+import kmrtd.Util;
+import kmrtd.cert.CVCPrincipal;
+import kmrtd.cert.CardVerifiableCertificate;
+import kmrtd.cert.support.Role;
+import kmrtd.lds.icao.MRZInfo;
 
 /**
  * The EAC Terminal Authentication protocol.

@@ -19,183 +19,160 @@
  *
  * $Id: CVCPrincipal.java 1808 2019-03-07 21:32:19Z martijno $
  */
+package kmrtd.cert
 
-package kmrtd.cert;
-
-import net.sf.scuba.data.Country;
-
-import java.io.Serializable;
-import java.security.Principal;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import kmrtd.cert.support.UnknownCountry
+import net.sf.scuba.data.Country
+import java.io.Serializable
+import java.security.Principal
+import java.util.Locale
 
 /**
  * Card verifiable certificate principal.
  * This just wraps the EJBCA implementation.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1808 $
  */
-public class CVCPrincipal implements Principal, Serializable {
-
-    private static final long serialVersionUID = -4905647207367309688L;
-
-    private static final Logger LOGGER = Logger.getLogger("org.jmrtd");
-    private final String mnemonic;
-    private final String seqNumber;
-    private Country country;
-
-    /**
-     * Constructs a principal.
-     *
-     * @param name a name with format Country (2F) | Mnemonic (9V) | SeqNum (5F).
-     */
-    public CVCPrincipal(String name) {
-        if (name == null) {
-            throw new IllegalArgumentException("Name should be <Country (2F)><Mnemonic (9V)><SeqNum (5F)> formatted, found null");
-        }
-        if (name.length() < 2 + 5 || name.length() > 2 + 9 + 5) {
-            throw new IllegalArgumentException("Name should be <Country (2F)><Mnemonic (9V)><SeqNum (5F)> formatted, found \"" + name + "\"");
-        }
-
-        final String alpha2Code = name.substring(0, 2).toUpperCase();
-        try {
-            country = Country.getInstance(alpha2Code);
-        } catch (IllegalArgumentException iae) {
-            LOGGER.log(Level.FINE, "Could not find country for " + alpha2Code, iae);
-            country = new Country() {
-
-                private static final long serialVersionUID = 345841304964161797L;
-
-                @Override
-                public int valueOf() {
-                    return -1;
-                }
-
-                @Override
-                public String getName() {
-                    return "Unknown";
-                }
-
-                @Override
-                public String getNationality() {
-                    return "Unknown";
-                }
-
-                @Override
-                public String toAlpha2Code() {
-                    return alpha2Code;
-                }
-
-                @Override
-                public String toAlpha3Code() {
-                    return "XXX";
-                }
-
-            };
-        }
-        mnemonic = name.substring(2, name.length() - 5);
-        seqNumber = name.substring(name.length() - 5, name.length());
-    }
-
-    /**
-     * Constructs a principal.
-     *
-     * @param country   the country
-     * @param mnemonic  the mnemonic
-     * @param seqNumber the sequence number
-     */
-    public CVCPrincipal(Country country, String mnemonic, String seqNumber) {
-        if (mnemonic == null || mnemonic.length() > 9) {
-            throw new IllegalArgumentException("Wrong length mnemonic");
-        }
-        if (seqNumber == null || seqNumber.length() != 5) {
-            throw new IllegalArgumentException("Wrong length seqNumber");
-        }
-        this.country = country;
-        this.mnemonic = mnemonic;
-        this.seqNumber = seqNumber;
-    }
-
-    /**
-     * Consists of the concatenation of
-     * country code (length 2), mnemonic (length &lt; 9) and
-     * sequence number (length 5).
-     *
-     * @return the name of the principal
-     */
-    public String getName() {
-        return country.toAlpha2Code() + mnemonic + seqNumber;
-    }
-
-    /**
-     * Returns a textual representation of this principal.
-     *
-     * @return a textual representation of this principal
-     */
-    @Override
-    public String toString() {
-        return country.toAlpha2Code() + "/" + mnemonic + "/" + seqNumber;
-    }
-
-    /**
-     * Returns the country.
-     *
-     * @return the country
-     */
-    public Country getCountry() {
-        return country;
-    }
-
+data class CVCPrincipal
+/**
+ * Constructs a principal.
+ *
+ * @param country   the country
+ * @param mnemonic  the mnemonic, length < 9 or throw an exception
+ * @param seqNumber the sequence number, length 5 or throw an exception
+ * @throws IllegalArgumentException if the mnemonic is too long
+ * @throws IllegalArgumentException if the sequence number is not 5
+ */
+    (
     /**
      * Returns the mnemonic.
      *
      * @return the mnemonic
      */
-    public String getMnemonic() {
-        return mnemonic;
-    }
-
+    val mnemonic: String,
     /**
      * Returns the sequence number.
      *
      * @return the seqNumber
      */
-    public String getSeqNumber() {
-        return seqNumber;
+    val seqNumber: String,
+    private val country: Country
+) : Principal, Serializable {
+    init {
+        require(mnemonic.length <= 9) { "Wrong length mnemonic" }
+        require(seqNumber.length == 5) { "Wrong length seqNumber" }
     }
 
+    /*
+     * Constructs a principal.
+     * 
+     * @param name a name with format Country (2F) | Mnemonic (9V) | SeqNum (5F).
+     */
+    /*constructor(name: String) {
+        //requireNotNull(name) { "Name should be <Country (2F)><Mnemonic (9V)><SeqNum (5F)> formatted, found null" }
+        require(!(name.length < 2 + 5 || name.length > 2 + 9 + 5)) { "Name should be <Country (2F)><Mnemonic (9V)><SeqNum (5F)> formatted, found \"$name\"" }
+
+        val alpha2Code = name.substring(0, 2).uppercase(Locale.getDefault())
+        country = runCatching {
+            Country.getInstance(alpha2Code)
+        }.getOrElse { UnknownCountry(alpha2Code) }
+        *//*try {
+            country =
+        } catch (iae: IllegalArgumentException) {
+            LOGGER.log(Level.FINE, "Could not find country for $alpha2Code", iae)
+            country = UnknownCountry(alpha2Code)
+        }*//*
+        mnemonic = name.substring(2, name.length - 5)
+        seqNumber = name.substring(name.length - 5, name.length)
+    }*/
+
+
+    /*constructor(country: Country, mnemonic: String, seqNumber: String) {
+        require(mnemonic.length <= 9) { "Wrong length mnemonic" }
+        require(seqNumber.length == 5) { "Wrong length seqNumber" }
+        this.country = country
+        this.mnemonic = mnemonic
+        this.seqNumber = seqNumber
+    }*/
+
     /**
+     * Consists of the concatenation of
+     * country code (length 2), mnemonic (length &lt; 9) and
+     * sequence number (length 5).
+     * 
+     * @return the name of the principal
+     */
+    override fun getName(): String =
+        country.toAlpha2Code() + mnemonic + seqNumber
+
+    /**
+     * Returns a textual representation of this principal.
+     * 
+     * @return a textual representation of this principal
+     */
+    override fun toString(): String =
+        country.toAlpha2Code() + "/" + mnemonic + "/" + seqNumber
+
+    /**
+     * Returns the country.
+     * 
+     * @return the country
+     */
+    fun getCountry(): Country = country
+
+    /*
      * Tests for equality with respect to another object.
-     *
+     * 
      * @param otherObj another object
      * @return whether this principal equals the other object
      */
-    @Override
-    public boolean equals(Object otherObj) {
+    /*override fun equals(otherObj: Any?): Boolean {
         if (otherObj == null) {
-            return false;
+            return false
         }
-        if (otherObj == this) {
-            return true;
+        if (otherObj === this) {
+            return true
         }
-        if (!otherObj.getClass().equals(this.getClass())) {
-            return false;
+        if (otherObj.javaClass != this.javaClass) {
+            return false
         }
 
-        CVCPrincipal otherPrincipal = (CVCPrincipal) otherObj;
-        return otherPrincipal.country.equals(this.country)
-                && otherPrincipal.mnemonic.equals(this.mnemonic)
-                && otherPrincipal.seqNumber.equals(this.seqNumber);
-    }
+        val otherPrincipal = otherObj as CVCPrincipal
+        return otherPrincipal.country == this.country
+                && otherPrincipal.mnemonic == this.mnemonic
+                && otherPrincipal.seqNumber == this.seqNumber
+    }*/
 
-    /**
+    /*
      * Returns a hash code of this object.
-     *
+     * 
      * @return the hash code
      */
-    @Override
-    public int hashCode() {
-        return 2 * getName().hashCode() + 1231211;
+    /*override fun hashCode(): Int {
+        return 2 * name.hashCode() + 1231211
+    }*/
+
+    companion object {
+        /**
+         * Factory method
+         *
+         * @param name a name with format Country (2F) | Mnemonic (9V) | SeqNum (5F).
+         * @return a [CVCPrincipal] principal with the given name
+         * @throws IllegalArgumentException if the name is not in the correct format
+         */
+        @JvmStatic
+        fun from(name: String): CVCPrincipal {
+            require(!(name.length < 2 + 5 || name.length > 2 + 9 + 5)) { "Name should be <Country (2F)><Mnemonic (9V)><SeqNum (5F)> formatted, found \"$name\"" }
+
+            val alpha2Code = name.substring(0, 2).uppercase(Locale.getDefault())
+            return CVCPrincipal(
+                mnemonic = name.substring(2, name.length - 5),
+                seqNumber = name.substring(name.length - 5, name.length),
+                country = runCatching {
+                    Country.getInstance(alpha2Code)
+                }.getOrElse { UnknownCountry(alpha2Code) }
+            )
+        }
     }
 }
