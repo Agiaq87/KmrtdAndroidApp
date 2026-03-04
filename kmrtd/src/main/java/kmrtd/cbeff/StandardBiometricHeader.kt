@@ -19,6 +19,12 @@
  *
  * $Id: StandardBiometricHeader.java 1905 2025-09-25 08:49:09Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cbeff
 
 import net.sf.scuba.util.Hex
@@ -42,9 +48,8 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
      * 
      * @return the elements, each consisting of a tag and value
      */
-    fun getElements(): SortedMap<Int, ByteArray?> {
-        return TreeMap<Int, ByteArray?>(sortedElements)
-    }
+    fun getElements(): SortedMap<Int, ByteArray?> =
+        TreeMap<Int, ByteArray?>(sortedElements)
 
     /**
      * Checks whether the format type is present and equals to the given value.
@@ -161,26 +166,19 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
          * @return a boolean indicating equality
          */
         private fun equals(
-            elements1: MutableMap<Int?, ByteArray?>?,
-            elements2: MutableMap<Int?, ByteArray?>?
+            elements1: MutableMap<Int, ByteArray?>,
+            elements2: MutableMap<Int, ByteArray?>
         ): Boolean {
-            if (elements1 == null && elements2 != null) {
-                return false
-            }
-            if (elements1 != null && elements2 == null) {
-                return false
-            }
-
             if (elements1 === elements2) {
                 return true
             }
 
-            if (elements1!!.keys != elements2!!.keys) {
+            if (elements1.keys != elements2.keys) {
                 return false
             }
 
             for (entry in elements1.entries) {
-                val key: Int = entry.key!!
+                val key: Int = entry.key
                 val bytes = entry.value
                 val otherBytes = elements2[key]
                 if (!bytes.contentEquals(otherBytes)) {

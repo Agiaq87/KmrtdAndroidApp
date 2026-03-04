@@ -19,6 +19,12 @@
  *
  * $Id: ComplexCBEFFInfo.java 1885 2024-11-07 09:17:29Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cbeff
 
 /**
@@ -37,36 +43,32 @@ class ComplexCBEFFInfo<R : BiometricDataBlock> : CBEFFInfo<R> {
      * 
      * @return a list of CBEFF infos
      */
-    fun getSubRecords(): MutableList<CBEFFInfo<R>> {
-        return ArrayList(this.subRecords)
-    }
+    fun getSubRecords(): List<CBEFFInfo<R>> =
+        this.subRecords.toList()
 
     /**
      * Adds a record to this complex CBEFF info.
      * 
      * @param subRecord the CBEFF info to add
      */
-    fun add(subRecord: CBEFFInfo<R>) {
+    fun add(subRecord: CBEFFInfo<R>) =
         this.subRecords.add(subRecord)
-    }
 
     /**
      * Adds all records in a list to this complex CBEFF info.
      * 
      * @param subRecords a list of CBEFF infos
      */
-    fun addAll(subRecords: MutableList<CBEFFInfo<R>>) {
+    fun addAll(subRecords: MutableList<CBEFFInfo<R>>) =
         this.subRecords.addAll(subRecords)
-    }
 
     /**
      * Removes a record in this complex CBEFF info.
      * 
      * @param index the index of the CBEFF info to remove
      */
-    fun remove(index: Int) {
+    fun remove(index: Int) =
         this.subRecords.removeAt(index)
-    }
 
     /**
      * Tests whether the parameter equals this complex CBEFF info.
@@ -94,7 +96,6 @@ class ComplexCBEFFInfo<R : BiometricDataBlock> : CBEFFInfo<R> {
      * 
      * @return the hash code for this complex CBEFF info
      */
-    override fun hashCode(): Int {
-        return 7 * subRecords.hashCode() + 11
-    }
+    override fun hashCode(): Int =
+        7 * subRecords.hashCode() + 11
 }

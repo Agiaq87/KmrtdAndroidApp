@@ -19,6 +19,12 @@
  *
  * $Id: ISO781611Decoder.java 1892 2025-03-18 15:15:52Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cbeff
 
 import net.sf.scuba.tlv.TLVInputStream
@@ -56,9 +62,8 @@ class ISO781611Decoder<B : BiometricDataBlock>(private val bdbDecoders: Map<Int,
      * @throws IOException if reading fails
      */
     @Throws(IOException::class)
-    fun decode(inputStream: InputStream?): ComplexCBEFFInfo<B> {
-        return readBITGroup(inputStream)
-    }
+    fun decode(inputStream: InputStream?): ComplexCBEFFInfo<B> =
+        readBITGroup(inputStream)
 
     /**
      * Reads a BIT group from an input stream.

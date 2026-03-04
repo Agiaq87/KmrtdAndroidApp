@@ -19,6 +19,12 @@
  *
  * $Id: ISO781611Encoder.java 1897 2025-05-27 12:34:36Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cbeff
 
 import net.sf.scuba.tlv.TLVOutputStream

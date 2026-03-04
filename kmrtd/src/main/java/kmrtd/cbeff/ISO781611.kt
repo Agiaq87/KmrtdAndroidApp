@@ -19,6 +19,12 @@
  *
  * $Id: ISO781611.java 1901 2025-07-15 12:31:11Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cbeff
 
 /**

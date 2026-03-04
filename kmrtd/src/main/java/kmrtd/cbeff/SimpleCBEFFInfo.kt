@@ -19,6 +19,12 @@
  *
  * $Id: SimpleCBEFFInfo.java 1885 2024-11-07 09:17:29Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cbeff
 
 /**

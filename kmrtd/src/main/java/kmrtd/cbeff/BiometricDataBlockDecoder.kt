@@ -19,6 +19,12 @@
  *
  * $Id: BiometricDataBlockDecoder.java 1802 2018-11-06 16:29:28Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cbeff
 
 import java.io.IOException
