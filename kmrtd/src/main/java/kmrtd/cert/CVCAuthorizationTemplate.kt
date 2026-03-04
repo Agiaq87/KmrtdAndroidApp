@@ -61,64 +61,6 @@ data class CVCAuthorizationTemplate
      */
     val accessRight: Permission
 ) {
-
-
-    /*
-     * Constructs an authorization template based on an EJBCA authorization template.
-     * 
-     * @param template the authZ template to wrap
-     */
-    /*constructor(template: CVCAuthorizationTemplate) {
-        this.role = toRole(template)
-        this.accessRight = toPermission(template)
-    }*/
-
-
-    /*constructor(role: Role, accessRight: Permission) {
-        this.role = role
-        this.accessRight = accessRight
-    }*/
-
-    /**
-     * Returns a textual representation of this authorization template.
-     * 
-     * @return a textual representation of this authorization template
-     */
-    override fun toString(): String {
-        return role.toString() + accessRight.toString()
-    }
-
-    /**
-     * Checks equality.
-     * 
-     * @param otherObj the other object
-     * @return whether the other object is equal to this object
-     */
-    override fun equals(otherObj: Any?): Boolean {
-        if (otherObj == null) {
-            return false
-        }
-        if (otherObj === this) {
-            return true
-        }
-        if (this.javaClass != otherObj.javaClass) {
-            return false
-        }
-
-        val otherTemplate = otherObj as kmrtd.cert.CVCAuthorizationTemplate
-        return this.role == otherTemplate.role && this.accessRight == otherTemplate.accessRight
-    }
-
-    /**
-     * Returns a hash code of this object.
-     * 
-     * @return the hash code
-     */
-    override fun hashCode(): Int {
-        return 2 * role.value + 3 * accessRight.value + 61
-    }
-
-
     companion object {
         /**
          * Translates a permission to an EJBCA typed equivalent permission.

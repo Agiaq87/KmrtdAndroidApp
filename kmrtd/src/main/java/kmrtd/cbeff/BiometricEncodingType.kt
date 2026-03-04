@@ -60,12 +60,12 @@ enum class BiometricEncodingType {
         fun fromBDBTag(bioDataBlockTag: Int): BiometricEncodingType =
             when (bioDataBlockTag) {
                 ISO781611.BIOMETRIC_DATA_BLOCK_TAG ->  /* 5F2E */
-                    BiometricEncodingType.ISO_19794
+                    ISO_19794
 
                 ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG ->  /* 7F2E */
-                    BiometricEncodingType.ISO_39794
+                    ISO_39794
 
-                else -> BiometricEncodingType.UNKNOWN
+                else -> UNKNOWN
             }
 
         /**
@@ -77,7 +77,7 @@ enum class BiometricEncodingType {
          */
         fun toBDBTag(encodingType: BiometricEncodingType): Int =
             when (encodingType) {
-                BiometricEncodingType.ISO_39794 ->  /* 7F2E */
+                ISO_39794 ->  /* 7F2E */
                     ISO781611.BIOMETRIC_DATA_BLOCK_CONSTRUCTED_TAG
 
                 else ->  /* 5F2E */

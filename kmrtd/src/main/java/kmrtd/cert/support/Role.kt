@@ -12,7 +12,7 @@ package kmrtd.cert.support
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1853 $
  */
-enum class Role(value: Int) {
+enum class Role(private val _value: Int) {
     /**
      * Certificate authority.
      */
@@ -38,5 +38,5 @@ enum class Role(value: Int) {
      *
      * @return a bitmap
      */
-    val value: Byte = value.toByte()
+    val value: Byte = _value.toByte()
 }

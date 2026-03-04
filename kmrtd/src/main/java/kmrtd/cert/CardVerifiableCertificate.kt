@@ -64,89 +64,24 @@ import java.util.logging.Logger
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1808 $
  */
-data class CardVerifiableCertificate(private var cvCertificate: CVCertificate) :
-    Certificate("CVC") {
+data class CardVerifiableCertificate
+/**
+ * Constructs a wrapper.
+ *
+ * @param cvCertificate the EJCBA CVC to wrap
+ */
+    (
     /**
      * The EJBCA CVC that we wrap.
      */
+    private var cvCertificate: CVCertificate
+) :
+    Certificate("CVC") {
+
     //private var cvCertificate: CVCertificate
 
     @Transient
     private val rsaKeyFactory: KeyFactory = KeyFactory.getInstance("RSA")
-
-    /**
-     * Constructs a wrapper.
-     * 
-     * @param cvCertificate the EJCBA CVC to wrap
-     */
-    /*init {
-        try {
-            rsaKeyFactory = KeyFactory.getInstance("RSA")
-        } catch (nsae: NoSuchAlgorithmException) {
-            *//* NOTE: never happens, RSA will be provided. *//*
-            LOGGER.log(Level.WARNING, "Exception", nsae)
-        }
-        //this.cvCertificate = cvCertificate
-    }*/
-
-    /*
-     * TODO: perhaps move this to factory class (CertificateFactory, CertificateBuilder, whatever).
-     * NOTE: algorithm should be one of"SHA224withECDSA", "SHA256withECDSA", "SHA384withECDSA", "SHA512withECDSA",
-     * or similar with RSA.
-     */
-    /*
-     * Constructs a certificate.
-     * 
-     * @param authorityReference authority reference
-     * @param holderReference    holder reference
-     * @param publicKey          public key
-     * @param algorithm          algorithm
-     * @param notBefore          valid from date
-     * @param notAfter           valid to date
-     * @param role               role
-     * @param permission         permission
-     * @param signatureData      signed date
-     */
-    /*constructor(
-        authorityReference: CVCPrincipal, holderReference: CVCPrincipal,
-        publicKey: PublicKey,
-        algorithm: String?,
-        notBefore: Date,
-        notAfter: Date,
-        role: CVCAuthorizationTemplate.Role?,
-        permission: CVCAuthorizationTemplate.Permission?,
-        signatureData: ByteArray?
-    ) : this(null) {
-        try {
-            val authorityRef = CAReferenceField(
-                authorityReference.getCountry().toAlpha2Code(),
-                authorityReference.mnemonic,
-                authorityReference.seqNumber
-            )
-            val holderRef = HolderReferenceField(
-                holderReference.getCountry().toAlpha2Code(),
-                holderReference.mnemonic,
-                holderReference.seqNumber
-            )
-            val authRole: AuthorizationRoleEnum = CVCAuthorizationTemplate.Companion.fromRole(role)
-            val accessRight: AccessRightEnum =
-                CVCAuthorizationTemplate.Companion.fromPermission(permission)
-            val body = CVCertificateBody(
-                authorityRef,
-                org.ejbca.cvc.KeyFactory.createInstance(publicKey, algorithm, authRole),
-                holderRef,
-                authRole,
-                accessRight,
-                notBefore,
-                notAfter
-            )
-            this.cvCertificate = CVCertificate(body)
-            this.cvCertificate.signature = signatureData
-            cvCertificate.tbs
-        } catch (ce: ConstructionException) {
-            throw IllegalArgumentException(ce)
-        }
-    }*/
 
     val sigAlgName: String?
         /**
@@ -436,35 +371,6 @@ data class CardVerifiableCertificate(private var cvCertificate: CVCertificate) :
                 throw CertificateException("No such field", nsfe)
             }
         }
-
-    /**
-     * Tests for equality with respect to another object.
-     * 
-     * @param otherObj the other object
-     * @return whether this certificate equals the other object
-     */
-    /*override fun equals(otherObj: Any?): Boolean {
-        if (otherObj == null) {
-            return false
-        }
-        if (this === otherObj) {
-            return true
-        }
-        if (this.javaClass != otherObj.javaClass) {
-            return false
-        }
-
-        return this.cvCertificate == (otherObj as CardVerifiableCertificate).cvCertificate
-    }*/
-
-    /**
-     * Returns a hash code for this object.
-     * 
-     * @return a hash code for this object
-     */
-    /*override fun hashCode(): Int {
-        return cvCertificate.hashCode() * 2 - 1030507011
-    }*/
 
     companion object {
         private val LOGGER: Logger = Logger.getLogger("kmrtd")

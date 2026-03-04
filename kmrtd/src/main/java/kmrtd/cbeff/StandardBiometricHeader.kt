@@ -44,14 +44,6 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
     val sortedElements: SortedMap<Int, ByteArray?> = TreeMap(elements)
 
     /**
-     * Returns the elements of this standard biometric header.
-     * 
-     * @return the elements, each consisting of a tag and value
-     */
-    /*fun getElements(): SortedMap<Int, ByteArray?> =
-        TreeMap<Int, ByteArray?>(sortedElements)*/
-
-    /**
      * Checks whether the format type is present and equals to the given value.
      * 
      * @param formatTypeValue a format type (short) value
@@ -144,36 +136,5 @@ class StandardBiometricHeader(elements: MutableMap<Int, ByteArray?>) : Serializa
          */
         const val ISO_39794_IRIS_IMAGE_FORMAT_TYPE_VALUE: Int = 0x002C
         //private const val serialVersionUID = 4113147521594478513L
-
-        /*
-         * Determines whether the two maps have equal entry sets.
-         * 
-         * @param elements1 the first map
-         * @param elements2 the second map
-         * @return a boolean indicating equality
-         */
-        /*private fun equals(
-            elements1: MutableMap<Int, ByteArray?>,
-            elements2: MutableMap<Int, ByteArray?>
-        ): Boolean {
-            if (elements1 === elements2) {
-                return true
-            }
-
-            if (elements1.keys != elements2.keys) {
-                return false
-            }
-
-            for (entry in elements1.entries) {
-                val key: Int = entry.key
-                val bytes = entry.value
-                val otherBytes = elements2[key]
-                if (!bytes.contentEquals(otherBytes)) {
-                    return false
-                }
-            }
-
-            return true
-        }*/
     }
 }

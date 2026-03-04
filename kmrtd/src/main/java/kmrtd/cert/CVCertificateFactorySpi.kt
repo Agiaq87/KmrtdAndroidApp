@@ -19,6 +19,12 @@
  *
  * $Id: CVCertificateFactorySpi.java 1751 2018-01-15 15:35:45Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.cert
 
 import net.sf.scuba.tlv.TLVInputStream

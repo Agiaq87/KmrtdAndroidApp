@@ -59,7 +59,7 @@ class ComplexCBEFFInfo<R : BiometricDataBlock> : CBEFFInfo<R> {
      * 
      * @param subRecords a list of CBEFF infos
      */
-    fun addAll(subRecords: MutableList<CBEFFInfo<R>>) =
+    fun addAll(subRecords: List<CBEFFInfo<R>>) =
         _subRecords.addAll(subRecords)
 
     /**

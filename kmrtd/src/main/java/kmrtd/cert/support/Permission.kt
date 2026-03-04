@@ -12,7 +12,7 @@ package kmrtd.cert.support
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1853 $
  */
-enum class Permission(value: Int) {
+enum class Permission(private val _value: Int) {
     /**
      * No read access.
      */
@@ -38,7 +38,7 @@ enum class Permission(value: Int) {
      *
      * @return a bitmap
      */
-    val value: Byte = value.toByte()
+    val value: Byte = _value.toByte()
 
     /**
      * Whether this permission implies the other permission.
