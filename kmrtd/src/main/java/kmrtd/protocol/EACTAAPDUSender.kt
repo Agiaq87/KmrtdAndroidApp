@@ -19,123 +19,146 @@
  *
  * $Id: EACTAAPDUSender.java 1799 2018-10-30 16:25:48Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.protocol
 
-package kmrtd.protocol;
-
-import net.sf.scuba.smartcards.APDUWrapper;
-import net.sf.scuba.smartcards.CardService;
-import net.sf.scuba.smartcards.CardServiceException;
-import net.sf.scuba.smartcards.CommandAPDU;
-import net.sf.scuba.smartcards.ISO7816;
-import net.sf.scuba.smartcards.ResponseAPDU;
-
-import kmrtd.APDULevelEACTACapable;
+import kmrtd.APDULevelEACTACapable
+import net.sf.scuba.smartcards.APDUWrapper
+import net.sf.scuba.smartcards.CardService
+import net.sf.scuba.smartcards.CardServiceException
+import net.sf.scuba.smartcards.CommandAPDU
+import net.sf.scuba.smartcards.ISO7816
 
 /**
  * A low-level APDU sender to support the (EAC) Terminal Authentication protocol.
- *
+ * 
  * @author The JMRTD team
  * @version $Revision: 1799 $
  * @since 0.7.0
  */
-public class EACTAAPDUSender implements APDULevelEACTACapable {
-
-    private final SecureMessagingAPDUSender secureMessagingSender;
-
-    /**
-     * Creates an APDU sender.
-     *
-     * @param service the card service for tranceiving APDUs
-     */
-    public EACTAAPDUSender(CardService service) {
-        this.secureMessagingSender = new SecureMessagingAPDUSender(service);
-    }
+class EACTAAPDUSender(service: CardService) : APDULevelEACTACapable {
+    private val secureMessagingSender: SecureMessagingAPDUSender =
+        SecureMessagingAPDUSender(service)
 
     /**
      * The MSE DST APDU, see EAC 1.11 spec, Section B.2.
      * This means that a case 3 APDU is sent, to which no response is expected.
-     *
+     * 
      * @param wrapper secure messaging wrapper
      * @param data    public key reference data object (tag 0x83)
      * @throws CardServiceException on error
      */
-    public synchronized void sendMSESetDST(APDUWrapper wrapper, byte[] data) throws CardServiceException {
-        CommandAPDU capdu = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_MSE, 0x81, 0xB6, data);
-        ResponseAPDU rapdu = secureMessagingSender.transmit(wrapper, capdu);
-        short sw = (short) rapdu.getSW();
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun sendMSESetDST(wrapper: APDUWrapper?, data: ByteArray?) {
+        val capdu =
+            CommandAPDU(ISO7816.CLA_ISO7816.toInt(), ISO7816.INS_MSE.toInt(), 0x81, 0xB6, data)
+        val rapdu = secureMessagingSender.transmit(wrapper, capdu)
+        val sw = rapdu.sw.toShort()
         if (sw != ISO7816.SW_NO_ERROR) {
-            throw new CardServiceException("Sending MSE Set DST failed", sw);
+            throw CardServiceException("Sending MSE Set DST failed", sw.toInt())
         }
     }
 
     /**
      * Sends a perform security operation command in extended length mode.
-     *
+     * 
      * @param wrapper           secure messaging wrapper
      * @param certBodyData      the certificate body
      * @param certSignatureData signature data
      * @throws CardServiceException on error communicating over the service
      */
-    public synchronized void sendPSOExtendedLengthMode(APDUWrapper wrapper, byte[] certBodyData, byte[] certSignatureData)
-            throws CardServiceException {
-        byte[] certData = new byte[certBodyData.length + certSignatureData.length];
-        System.arraycopy(certBodyData, 0, certData, 0, certBodyData.length);
-        System.arraycopy(certSignatureData, 0, certData, certBodyData.length, certSignatureData.length);
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun sendPSOExtendedLengthMode(
+        wrapper: APDUWrapper?,
+        certBodyData: ByteArray,
+        certSignatureData: ByteArray
+    ) {
+        val certData = ByteArray(certBodyData.size + certSignatureData.size)
+        System.arraycopy(certBodyData, 0, certData, 0, certBodyData.size)
+        System.arraycopy(certSignatureData, 0, certData, certBodyData.size, certSignatureData.size)
 
-        CommandAPDU capdu = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_PSO, 0, 0xBE, certData);
-        ResponseAPDU rapdu = secureMessagingSender.transmit(wrapper, capdu);
-        short sw = (short) rapdu.getSW();
+        val capdu =
+            CommandAPDU(ISO7816.CLA_ISO7816.toInt(), ISO7816.INS_PSO.toInt(), 0, 0xBE, certData)
+        val rapdu = secureMessagingSender.transmit(wrapper, capdu)
+        val sw = rapdu.sw.toShort()
         if (sw != ISO7816.SW_NO_ERROR) {
-            throw new CardServiceException("Sending PSO failed", sw);
+            throw CardServiceException("Sending PSO failed", sw.toInt())
         }
     }
 
     /**
      * The MSE Set AT APDU for TA, see EAC 1.11 spec, Section B.2.
      * MANAGE SECURITY ENVIRONMENT command with SET Authentication Template function.
-     * <p>
+     * 
+     * 
      * Note that caller is responsible for prefixing the byte[] params with specified tags.
-     *
+     * 
      * @param wrapper secure messaging wrapper
      * @param data    public key reference data object (should already be prefixed with tag 0x83)
      * @throws CardServiceException on error
      */
-    public synchronized void sendMSESetATExtAuth(APDUWrapper wrapper, byte[] data) throws CardServiceException {
-        CommandAPDU capdu = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_MSE, 0x81, 0xA4, data);
-        ResponseAPDU rapdu = secureMessagingSender.transmit(wrapper, capdu);
-        short sw = (short) rapdu.getSW();
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun sendMSESetATExtAuth(wrapper: APDUWrapper?, data: ByteArray?) {
+        val capdu =
+            CommandAPDU(ISO7816.CLA_ISO7816.toInt(), ISO7816.INS_MSE.toInt(), 0x81, 0xA4, data)
+        val rapdu = secureMessagingSender.transmit(wrapper, capdu)
+        val sw = rapdu.sw.toShort()
         if (sw != ISO7816.SW_NO_ERROR) {
-            throw new CardServiceException("Sending MSE AT failed", sw);
+            throw CardServiceException("Sending MSE AT failed", sw.toInt())
         }
     }
 
     /**
-     * Sends a {@code GET CHALLENGE} command to the passport.
-     *
+     * Sends a `GET CHALLENGE` command to the passport.
+     * 
      * @param wrapper secure messaging wrapper
      * @return a byte array of length 8 containing the challenge
      * @throws CardServiceException on tranceive error
      */
-    public synchronized byte[] sendGetChallenge(APDUWrapper wrapper) throws CardServiceException {
-        CommandAPDU capdu = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_GET_CHALLENGE, 0x00, 0x00, 8);
-        ResponseAPDU rapdu = secureMessagingSender.transmit(wrapper, capdu);
-        return rapdu.getData();
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun sendGetChallenge(wrapper: APDUWrapper?): ByteArray? {
+        val capdu = CommandAPDU(
+            ISO7816.CLA_ISO7816.toInt(),
+            ISO7816.INS_GET_CHALLENGE.toInt(),
+            0x00,
+            0x00,
+            8
+        )
+        val rapdu = secureMessagingSender.transmit(wrapper, capdu)
+        return rapdu.getData()
     }
 
     /**
      * Sends the EXTERNAL AUTHENTICATE command.
      * This is used in EAC-TA.
-     *
+     * 
      * @param wrapper   secure messaging wrapper
      * @param signature terminal signature
      * @throws CardServiceException if the resulting status word different from 9000
      */
-    public synchronized void sendMutualAuthenticate(APDUWrapper wrapper, byte[] signature) throws CardServiceException {
-        CommandAPDU capdu = new CommandAPDU(ISO7816.CLA_ISO7816, ISO7816.INS_EXTERNAL_AUTHENTICATE, 0, 0, signature);
-        ResponseAPDU rapdu = secureMessagingSender.transmit(wrapper, capdu);
-        short sw = (short) rapdu.getSW();
+    @Synchronized
+    @Throws(CardServiceException::class)
+    override fun sendMutualAuthenticate(wrapper: APDUWrapper?, signature: ByteArray?) {
+        val capdu = CommandAPDU(
+            ISO7816.CLA_ISO7816.toInt(),
+            ISO7816.INS_EXTERNAL_AUTHENTICATE.toInt(),
+            0,
+            0,
+            signature
+        )
+        val rapdu = secureMessagingSender.transmit(wrapper, capdu)
+        val sw = rapdu.getSW().toShort()
         if (sw != ISO7816.SW_NO_ERROR) {
-            throw new CardServiceException("Sending External Authenticate failed.", sw);
+            throw CardServiceException("Sending External Authenticate failed.", sw.toInt())
         }
     }
 }

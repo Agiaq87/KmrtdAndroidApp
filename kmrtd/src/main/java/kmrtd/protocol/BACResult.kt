@@ -19,115 +19,98 @@
  *
  * $Id: BACResult.java 1781 2018-05-25 11:41:48Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
+package kmrtd.protocol
 
-package kmrtd.protocol;
-
-import kmrtd.AccessKeySpec;
-
-import java.io.Serializable;
+import kmrtd.AccessKeySpec
+import java.io.Serializable
 
 /**
  * Result of a Basic Access Control protocol run.
- *
+ * 
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1781 $
  */
-public class BACResult implements Serializable {
-
-    private static final long serialVersionUID = -7114911372181772099L;
-
-    private final AccessKeySpec bacKey;
-    private final SecureMessagingWrapper wrapper;
-
+data class BACResult
+/**
+ * Creates a BAC result.
+ * 
+ * @param bACKey  the initial access key
+ * @param wrapper the secure messaging wrapper that resulted from the BAC protocol run
+ */(
     /**
-     * Creates a BAC result without specifying the initial access key.
-     *
-     * @param wrapper the secure messaging wrapper that resulted from the BAC protocol run
+     * Returns the initial access key or `null`.
+     * 
+     * @return the initial access key or `null`
      */
-    public BACResult(SecureMessagingWrapper wrapper) {
-        this(null, wrapper);
-    }
-
-    /**
-     * Creates a BAC result.
-     *
-     * @param bacKey  the initial access key
-     * @param wrapper the secure messaging wrapper that resulted from the BAC protocol run
-     */
-    public BACResult(AccessKeySpec bacKey, SecureMessagingWrapper wrapper) {
-        this.bacKey = bacKey;
-        this.wrapper = wrapper;
-    }
-
-    /**
-     * Returns the initial access key or {@code null}.
-     *
-     * @return the initial access key or {@code null}
-     */
-    public AccessKeySpec getBACKey() {
-        return bacKey;
-    }
-
+    val bACKey: AccessKeySpec?,
     /**
      * Returns the secure messaging wrapper.
-     *
+     * 
      * @return the secure messaging wrapper
      */
-    public SecureMessagingWrapper getWrapper() {
-        return wrapper;
-    }
-
+    val wrapper: SecureMessagingWrapper?
+) : Serializable {
     /**
+     * Creates a BAC result without specifying the initial access key.
+     * 
+     * @param wrapper the secure messaging wrapper that resulted from the BAC protocol run
+     */
+    constructor(wrapper: SecureMessagingWrapper?) : this(null, wrapper)
+
+    /*
      * Returns a textual representation of this terminal authentication result.
-     *
+     * 
      * @return a textual representation of this terminal authentication result
      */
-    @Override
-    public String toString() {
-        return new StringBuilder()
-                .append("BACResult [bacKey: " + (bacKey == null ? "-" : bacKey))
-                .append(", wrapper: " + wrapper)
-                .append("]")
-                .toString();
+    /*override fun toString(): String {
+        return StringBuilder()
+            .append("BACResult [bacKey: " + (this.bACKey ?: "-"))
+            .append(", wrapper: $wrapper")
+            .append("]")
+            .toString()
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 1234567891;
-        int result = 1991;
-        result = prime * result + ((bacKey == null) ? 0 : bacKey.hashCode());
-        result = prime * result + ((wrapper == null) ? 0 : wrapper.hashCode());
-        return result;
+    override fun hashCode(): Int {
+        val prime = 1234567891
+        var result = 1991
+        result = prime * result + (if (this.bACKey == null) 0 else bACKey.hashCode())
+        result = prime * result + (wrapper?.hashCode() ?: 0)
+        return result
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+    override fun equals(obj: Any?): Boolean {
+        if (this === obj) {
+            return true
         }
         if (obj == null) {
-            return false;
+            return false
         }
-        if (getClass() != obj.getClass()) {
-            return false;
+        if (javaClass != obj.javaClass) {
+            return false
         }
 
-        BACResult other = (BACResult) obj;
-        if (bacKey == null) {
-            if (other.bacKey != null) {
-                return false;
+        val other = obj as BACResult
+        if (this.bACKey == null) {
+            if (other.bACKey != null) {
+                return false
             }
-        } else if (!bacKey.equals(other.bacKey)) {
-            return false;
+        } else if (this.bACKey != other.bACKey) {
+            return false
         }
         if (wrapper == null) {
             if (other.wrapper != null) {
-                return false;
+                return false
             }
-        } else if (!wrapper.equals(other.wrapper)) {
-            return false;
+        } else if (wrapper != other.wrapper) {
+            return false
         }
 
-        return true;
-    }
+        return true
+    }*/
 }
