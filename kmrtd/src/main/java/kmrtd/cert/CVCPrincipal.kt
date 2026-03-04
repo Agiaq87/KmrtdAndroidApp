@@ -63,7 +63,7 @@ data class CVCPrincipal
      * @return the seqNumber
      */
     val seqNumber: String,
-    private val country: Country
+    val country: Country
 ) : Principal, Serializable {
     init {
         require(mnemonic.length <= 9) { "Wrong length mnemonic" }
@@ -87,13 +87,6 @@ data class CVCPrincipal
      */
     override fun toString(): String =
         country.toAlpha2Code() + "/" + mnemonic + "/" + seqNumber
-
-    /**
-     * Returns the country.
-     * 
-     * @return the country
-     */
-    fun getCountry(): Country = country
 
     companion object {
         /**

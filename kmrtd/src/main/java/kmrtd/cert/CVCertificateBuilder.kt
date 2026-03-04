@@ -97,11 +97,11 @@ object CVCertificateBuilder {
                     signerKey,
                     algorithmName,
                     CAReferenceField(
-                        caRef.getCountry().toAlpha2Code(),
+                        caRef.country.toAlpha2Code(),
                         caRef.mnemonic, caRef.seqNumber
                     ),
                     HolderReferenceField(
-                        holderRef.getCountry()
+                        holderRef.country
                             .toAlpha2Code(), holderRef.mnemonic,
                         holderRef.seqNumber
                     ),
