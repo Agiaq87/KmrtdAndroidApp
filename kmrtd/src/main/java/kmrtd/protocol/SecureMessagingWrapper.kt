@@ -567,6 +567,7 @@ abstract class SecureMessagingWrapper protected constructor(
          * @param wrapper the original wrapper
          * @return a copy of that wrapper
          */
+        @JvmStatic
         fun getInstance(wrapper: SecureMessagingWrapper?): SecureMessagingWrapper? {
             try {
                 if (wrapper is DESedeSecureMessagingWrapper) {

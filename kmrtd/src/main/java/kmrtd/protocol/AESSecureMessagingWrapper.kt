@@ -115,9 +115,9 @@ class AESSecureMessagingWrapper(
     override val padLength: Int
         get() = 16
 
-    fun getPadLength(): Int {
+    /*fun getPadLength(): Int {
         return 16
-    }
+    }*/
 
     /**
      * Returns the send sequence counter as bytes, making sure
@@ -156,7 +156,7 @@ class AESSecureMessagingWrapper(
             return null
         }
 
-    fun getEncodedSendSequenceCounter(): ByteArray? {
+    /*fun getEncodedSendSequenceCounter(): ByteArray? {
         val byteArrayOutputStream = ByteArrayOutputStream(16)
         try {
             byteArrayOutputStream.write(0x00)
@@ -168,13 +168,13 @@ class AESSecureMessagingWrapper(
             byteArrayOutputStream.write(0x00)
             byteArrayOutputStream.write(0x00)
 
-            /* A long will take 8 bytes. */
+            *//* A long will take 8 bytes. *//*
             val dataOutputStream = DataOutputStream(byteArrayOutputStream)
             dataOutputStream.writeLong(sendSequenceCounter)
             dataOutputStream.close()
             return byteArrayOutputStream.toByteArray()
         } catch (ioe: IOException) {
-            /* Never happens. */
+            *//* Never happens. *//*
             LOGGER.log(Level.FINE, "Error writing to stream", ioe)
         } finally {
             try {
@@ -184,7 +184,7 @@ class AESSecureMessagingWrapper(
             }
         }
         return null
-    }
+    }*/
 
     override fun toString(): String {
         return StringBuilder()
@@ -227,15 +227,15 @@ class AESSecureMessagingWrapper(
      */
     override val iV: IvParameterSpec
         get() {
-            val encryptedSSC = sscIVCipher.doFinal(getEncodedSendSequenceCounter())
+            val encryptedSSC = sscIVCipher.doFinal(encodedSendSequenceCounter)
             return IvParameterSpec(encryptedSSC)
         }
 
-    @Throws(GeneralSecurityException::class)
+    /*@Throws(GeneralSecurityException::class)
     fun getIV(): IvParameterSpec {
         val encryptedSSC = sscIVCipher.doFinal(getEncodedSendSequenceCounter())
         return IvParameterSpec(encryptedSSC)
-    }
+    }*/
 
     companion object {
         private val LOGGER: Logger = Logger.getLogger("org.jmrtd")

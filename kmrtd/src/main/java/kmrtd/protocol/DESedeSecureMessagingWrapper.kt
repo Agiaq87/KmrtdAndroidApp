@@ -155,8 +155,8 @@ class DESedeSecureMessagingWrapper
     override val padLength: Int
         get() = 8
 
-    fun getPadLength(): Int =
-        8
+    /*fun getPadLength(): Int =
+        8*/
 
     override val encodedSendSequenceCounter: ByteArray?
         get() {
@@ -178,13 +178,13 @@ class DESedeSecureMessagingWrapper
             return byteArrayOutputStream.toByteArray()
         }
 
-    fun getEncodedSendSequenceCounter(): ByteArray? {
+    /*fun getEncodedSendSequenceCounter(): ByteArray? {
         val byteArrayOutputStream = ByteArrayOutputStream()
         try {
             val dataOutputStream = DataOutputStream(byteArrayOutputStream)
             dataOutputStream.writeLong(sendSequenceCounter)
         } catch (ioe: IOException) {
-            /* Never happens. */
+            *//* Never happens. *//*
             LOGGER.log(Level.FINE, "Error writing to stream", ioe)
         } finally {
             try {
@@ -195,7 +195,7 @@ class DESedeSecureMessagingWrapper
         }
 
         return byteArrayOutputStream.toByteArray()
-    }
+    }*/
 
     override fun toString(): String {
         return StringBuilder()
@@ -230,8 +230,8 @@ class DESedeSecureMessagingWrapper
     override val iV: IvParameterSpec
         get() = ZERO_IV_PARAM_SPEC
 
-    fun getIV(): IvParameterSpec =
-        ZERO_IV_PARAM_SPEC
+    /*fun getIV(): IvParameterSpec =
+        ZERO_IV_PARAM_SPEC*/
 
     companion object {
         /**
