@@ -380,7 +380,7 @@ abstract class SecureMessagingWrapper protected constructor(
         try {
             var isFinished = false
             while (!isFinished) {
-                when (val tag = inputStream.readByte().toInt()) {
+                when (val tag = inputStream.readByte().toInt() and 0xFF) {
                     0x87/*.toByte()*/ -> data = readDO87(inputStream, false)
                     0x85/*.toByte()*/ -> data = readDO87(inputStream, true)
                     0x99/*.toByte()*/ -> sw = readDO99(inputStream)
