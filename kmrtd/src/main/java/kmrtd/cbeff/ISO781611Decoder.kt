@@ -331,12 +331,12 @@ class ISO781611Decoder<B : BiometricDataBlock>(private val bdbDecoders: Map<Int,
         }
         encodingType = BiometricEncodingType.fromBDBTag(bioDataBlockTag)
         val length = tlvIn.readLength()
-        val bdbDecoder: BiometricDataBlockDecoder<B> = bdbDecoders[bioDataBlockTag]!!
-        requireNotNull(bdbDecoder) {
+        requireNotNull(bdbDecoders[bioDataBlockTag]) {
             "No decoder for biometric data block tag " + Integer.toHexString(
                 bioDataBlockTag
             )
         }
+        val bdbDecoder: BiometricDataBlockDecoder<B> = bdbDecoders[bioDataBlockTag]!!
         return bdbDecoder.decode(inputStream, sbh, index, length)
     }
 
