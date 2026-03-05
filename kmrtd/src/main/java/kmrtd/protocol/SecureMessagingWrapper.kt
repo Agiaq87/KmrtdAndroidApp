@@ -377,7 +377,7 @@ abstract class SecureMessagingWrapper protected constructor(
         var cc: ByteArray? = null
         var sw: Short = 0
         val inputStream = DataInputStream(ByteArrayInputStream(rapdu))
-        try {
+        inputStream.use { inputStream ->
             var isFinished = false
             while (!isFinished) {
                 when (val tag = inputStream.readByte().toInt() and 0xFF) {
@@ -392,8 +392,6 @@ abstract class SecureMessagingWrapper protected constructor(
                     else -> LOGGER.warning("Unexpected tag " + Integer.toHexString(tag))
                 }
             }
-        } finally {
-            inputStream.close()
         }
         check(!(shouldCheckMAC() && !checkMac(rapdu, cc!!))) { "Invalid MAC" }
         val bOut = ByteArrayOutputStream()
