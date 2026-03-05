@@ -57,19 +57,6 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
     var buffer: ByteArray = ByteArray(length)
 
     /**
-     * Creates a fragment buffer.
-     * 
-     * @param length the length of the buffer
-     */
-    /**
-     * Creates a fragment buffer with default size.
-     */
-    init {
-        //this.buffer = ByteArray(length)
-        //this.fragments = HashSet<Fragment>()
-    }
-
-    /**
      * Updates this buffer based on the given buffer.
      * 
      * @param other some other fragment buffer
@@ -79,16 +66,6 @@ class FragmentBuffer @JvmOverloads constructor(length: Int = DEFAULT_SIZE) : Ser
         other.fragments.forEach {
             addFragment(it.offset, other.buffer, it.offset, it.length)
         }
-    /*{
-        for (otherFragment in other.fragments) {
-            addFragment(
-                otherFragment.offset,
-                other.buffer,
-                otherFragment.offset,
-                otherFragment.length
-            )
-        }
-    }*/
 
     /**
      * Adds a fragment containing the given byte.
