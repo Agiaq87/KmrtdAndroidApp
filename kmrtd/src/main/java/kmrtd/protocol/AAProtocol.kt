@@ -40,7 +40,7 @@ import java.security.PublicKey
  * @version $Revision: 1878 $
  * @since 0.5.6
  */
-class AAProtocol
+data class AAProtocol
 /**
  * Creates a protocol instance.
  * 

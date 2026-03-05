@@ -69,8 +69,8 @@ class PACEGMWithECDHMappingResult(
         val prime = 31
         var result = super.hashCode()
         result =
-            (prime * result + (if (sharedSecretPointX == null) 0 else sharedSecretPointX.hashCode())
-                    + (if (sharedSecretPointY == null) 0 else sharedSecretPointY.hashCode()))
+            (prime * result + (sharedSecretPointX.hashCode())
+                    + (sharedSecretPointY.hashCode()))
 
         return result
     }
@@ -82,24 +82,16 @@ class PACEGMWithECDHMappingResult(
         if (!super.equals(obj)) {
             return false
         }
-        if (javaClass != obj!!.javaClass) {
+        if (javaClass != obj?.javaClass) {
             return false
         }
 
         val other = obj as PACEGMWithECDHMappingResult
-        if (sharedSecretPointX == null) {
-            if (other.sharedSecretPointX != null) {
-                return false
-            }
-        } else if (sharedSecretPointX != other.sharedSecretPointX) {
+        if (sharedSecretPointX != other.sharedSecretPointX) {
             return false
         }
 
-        if (sharedSecretPointY == null) {
-            if (other.sharedSecretPointY != null) {
-                return false
-            }
-        } else if (sharedSecretPointY != other.sharedSecretPointY) {
+        if (sharedSecretPointY != other.sharedSecretPointY) {
             return false
         }
 

@@ -58,7 +58,7 @@ import kotlin.math.ceil
  * @version $Revision: 1878 $
  * @since 0.5.6
  */
-class EACCAProtocol
+data class EACCAProtocol
 /**
  * Constructs a protocol instance.
  * 
@@ -102,8 +102,8 @@ class EACCAProtocol
         publicKeyOID: String?,
         piccPublicKey: PublicKey
     ): EACCAResult {
+        //requireNotNull(piccPublicKey) { "PICC public key is null" }
         var oid = oid
-        requireNotNull(piccPublicKey) { "PICC public key is null" }
 
         if (oid == null) {
             oid = inferChipAuthenticationOIDfromPublicKeyOID(publicKeyOID)

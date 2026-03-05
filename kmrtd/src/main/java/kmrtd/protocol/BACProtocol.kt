@@ -45,7 +45,7 @@ import javax.crypto.SecretKey
  * @version $Revision: 1853 $
  * @since 0.5.6
  */
-class BACProtocol(
+data class BACProtocol(
     private val service: APDULevelBACCapable,
     private val maxTranceiveLength: Int,
     private val shouldCheckMAC: Boolean

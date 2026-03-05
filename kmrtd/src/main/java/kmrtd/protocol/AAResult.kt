@@ -38,7 +38,7 @@ import java.security.PublicKey
  * @author The JMRTD team
  * @version $Revision: 1763 $
  */
-class AAResult
+data class AAResult
 /**
  * The result of an Active Authentication protocol run.
  * 

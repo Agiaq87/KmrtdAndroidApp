@@ -260,7 +260,7 @@ class PACEProtocol(
         /* Key agreement K = KA(SK_PCD~, PK_PICC~, D~). */
         val sharedSecretBytes = doPACEStep3KeyAgreement(
             agreementAlg,
-            ephemeralPCDKeyPair.getPrivate(),
+            ephemeralPCDKeyPair.private,
             ephemeralPICCPublicKey
         )
 

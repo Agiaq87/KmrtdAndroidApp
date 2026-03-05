@@ -71,24 +71,16 @@ abstract class PACEGMMappingResult(
         if (!super.equals(obj)) {
             return false
         }
-        if (javaClass != obj!!.javaClass) {
+        if (javaClass != obj?.javaClass) {
             return false
         }
 
         val other = obj as PACEGMMappingResult
-        if (this.pICCMappingPublicKey == null) {
-            if (other.pICCMappingPublicKey != null) {
-                return false
-            }
-        } else if (this.pICCMappingPublicKey != other.pICCMappingPublicKey) {
+        if (this.pICCMappingPublicKey != other.pICCMappingPublicKey) {
             return false
         }
 
-        if (this.pCDMappingKeyPair == null) {
-            if (other.pCDMappingKeyPair != null) {
-                return false
-            }
-        } else if (this.pCDMappingKeyPair != other.pCDMappingKeyPair) {
+        if (this.pCDMappingKeyPair != other.pCDMappingKeyPair) {
             return false
         }
 

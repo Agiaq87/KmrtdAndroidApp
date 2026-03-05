@@ -46,8 +46,10 @@ import java.security.spec.ECPoint
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1827 $
  */
-class PACEGMWithECDHAgreement {
-    private var privateKey: ECPrivateKey? = null
+data class PACEGMWithECDHAgreement(
+    private val privateKey: ECPrivateKey
+) {
+    //private var privateKey: ECPrivateKey? = null
 
     /**
      * Initializes the key agreement implementation.
@@ -60,7 +62,7 @@ class PACEGMWithECDHAgreement {
         if (privateKey !is ECPrivateKey) {
             throw InvalidKeyException("Not an ECPrivateKey")
         }
-        this.privateKey = privateKey
+        //this.privateKey = privateKey
     }
 
     /**
@@ -73,7 +75,7 @@ class PACEGMWithECDHAgreement {
      */
     @Throws(InvalidKeyException::class, IllegalStateException::class)
     fun doPhase(publicKey: PublicKey?): ECPoint {
-        checkNotNull(privateKey) { "Not initialized!" }
+        //checkNotNull(privateKey) { "Not initialized!" }
 
         if (publicKey !is ECPublicKey) {
             throw InvalidKeyException("Not an ECPublicKey")

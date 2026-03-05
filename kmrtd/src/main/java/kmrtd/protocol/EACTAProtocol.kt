@@ -60,7 +60,7 @@ import kotlin.math.ceil
  * @version $Revision: 1853 $
  * @since 0.5.6
  */
-class EACTAProtocol
+data class EACTAProtocol
 /**
  * Creates a protocol instance.
  * 
@@ -168,9 +168,8 @@ class EACTAProtocol
     ): EACTAResult {
         var caReference = caReference
         try {
-            require(!(terminalCertificates == null || terminalCertificates.isEmpty())) { "Need at least 1 certificate to perform TA, found: $terminalCertificates" }
-
-            requireNotNull(chipAuthenticationResult) { "Could not get EAC-CA key hash" }
+            require(!(terminalCertificates.isEmpty())) { "Need at least 1 certificate to perform TA, found: $terminalCertificates" }
+            //requireNotNull(chipAuthenticationResult) { "Could not get EAC-CA key hash" }
             val caKeyHash = chipAuthenticationResult.keyHash
             /* The key hash that resulted from CA. */
             requireNotNull(caKeyHash) { "Could nnot get EAC-CA key hash" }

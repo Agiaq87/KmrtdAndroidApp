@@ -119,7 +119,7 @@ class PACEAPDUSender(service: CardService) : APDULevelPACECapable {
         val rapdu = secureMessagingSender.transmit(wrapper, capdu)
 
         /* Handle error status word. */
-        val sw = rapdu.getSW().toShort()
+        val sw = rapdu.sw.toShort()
         if (sw != ISO7816.SW_NO_ERROR) {
             throw CardServiceException("Sending MSE AT failed", sw.toInt())
         }

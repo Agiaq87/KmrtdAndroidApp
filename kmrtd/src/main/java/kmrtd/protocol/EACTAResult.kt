@@ -56,7 +56,8 @@ class EACTAResult(
      * @return CA certificate's reference
      */
     val cAReference: CVCPrincipal?,
-    terminalCertificates: List<CardVerifiableCertificate>, terminalKey: PrivateKey?,
+    terminalCertificates: List<CardVerifiableCertificate>,
+    terminalKey: PrivateKey?,
     documentNumber: String?, cardChallenge: ByteArray?
 ) : Serializable {
     private val terminalCertificates: MutableList<CardVerifiableCertificate> =

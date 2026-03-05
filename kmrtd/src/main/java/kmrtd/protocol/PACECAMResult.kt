@@ -158,7 +158,7 @@ class PACECAMResult(
         if (!super.equals(obj)) {
             return false
         }
-        if (javaClass != obj!!.javaClass) {
+        if (javaClass != obj?.javaClass) {
             return false
         }
 

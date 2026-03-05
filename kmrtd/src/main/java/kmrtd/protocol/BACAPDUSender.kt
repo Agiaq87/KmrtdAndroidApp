@@ -49,7 +49,7 @@ import javax.crypto.spec.IvParameterSpec
  * @version $Revision: 1851 $
  * @since 0.7.0
  */
-class BACAPDUSender(private val service: CardService) : APDULevelBACCapable {
+data class BACAPDUSender(private val service: CardService) : APDULevelBACCapable {
     /**
      * DESede encryption/decryption cipher.
      */
@@ -143,8 +143,8 @@ class BACAPDUSender(private val service: CardService) : APDULevelBACCapable {
                 rndICC = ByteArray(8)
             }
             require(kIFD.size == 16) { "kIFD wrong length" }
-            requireNotNull(kEnc) { "kEnc == null" }
-            requireNotNull(kMac) { "kMac == null" }
+            /*requireNotNull(kEnc) { "kEnc == null" }
+            requireNotNull(kMac) { "kMac == null" }*/
 
             cipher.init(Cipher.ENCRYPT_MODE, kEnc, ZERO_IV_PARAM_SPEC)
             val plaintext = ByteArray(32)

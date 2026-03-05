@@ -45,7 +45,8 @@ abstract class PACEMappingResult(
      * @return the original parameters
      */
     // FIXME: Should be serializable instead of transient.
-    @field:Transient val staticParameters: AlgorithmParameterSpec?, piccNonce: ByteArray?,
+    @field:Transient val staticParameters: AlgorithmParameterSpec?,
+    piccNonce: ByteArray?,
     /**
      * Returns the ephemeral (derived) agreement parameters.
      * 
@@ -83,7 +84,7 @@ abstract class PACEMappingResult(
         val prime = 31
         var result = 1
         result =
-            prime * result + (ephemeralParameters?.hashCode() ?: 0)
+            prime * result + (ephemeralParameters.hashCode() ?: 0)
         result = prime * result + pICCNonce.contentHashCode()
         result = prime * result + (staticParameters?.hashCode() ?: 0)
         return result
@@ -101,11 +102,7 @@ abstract class PACEMappingResult(
         }
 
         val other = obj as PACEMappingResult
-        if (ephemeralParameters == null) {
-            if (other.ephemeralParameters != null) {
-                return false
-            }
-        } else if (ephemeralParameters != other.ephemeralParameters) {
+        if (ephemeralParameters != other.ephemeralParameters) {
             return false
         }
         if (!pICCNonce.contentEquals(other.pICCNonce)) {
