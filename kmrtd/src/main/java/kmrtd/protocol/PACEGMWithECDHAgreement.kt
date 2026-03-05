@@ -47,7 +47,7 @@ import java.security.spec.ECPoint
  * @version $Revision: 1827 $
  */
 data class PACEGMWithECDHAgreement(
-    private val privateKey: ECPrivateKey
+    private val privateKey: ECPrivateKey? = null
 ) {
     //private var privateKey: ECPrivateKey? = null
 
