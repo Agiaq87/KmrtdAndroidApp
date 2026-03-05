@@ -84,7 +84,7 @@ abstract class PACEMappingResult(
         val prime = 31
         var result = 1
         result =
-            prime * result + (ephemeralParameters.hashCode() ?: 0)
+            prime * result + (ephemeralParameters.hashCode())
         result = prime * result + pICCNonce.contentHashCode()
         result = prime * result + (staticParameters?.hashCode() ?: 0)
         return result

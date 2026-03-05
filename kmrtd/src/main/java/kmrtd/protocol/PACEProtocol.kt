@@ -299,7 +299,7 @@ class PACEProtocol(
          *  - The new session keys and the new SSC are used to protect subsequent commands/responses.
          */
         try {
-            val ssc = if (wrapper == null) 0L else wrapper!!.sendSequenceCounter
+            val ssc = wrapper?.sendSequenceCounter ?: 0L
             if (cipherAlg.startsWith("DESede")) {
                 wrapper = DESedeSecureMessagingWrapper(
                     encKey,
