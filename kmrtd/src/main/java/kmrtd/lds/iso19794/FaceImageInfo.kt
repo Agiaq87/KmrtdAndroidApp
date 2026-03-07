@@ -189,7 +189,69 @@ class FaceImageInfo
      * @throws IOException if input cannot be read
      */
     constructor(inputStream: InputStream) : super(TYPE_PORTRAIT) {
-        readObject(inputStream)
+        val dataIn =
+            inputStream as? DataInputStream ?: DataInputStream(inputStream)
+
+        /* Facial Information Block (20), see ISO 19794-5 5.5 */
+        recordLength = dataIn.readInt().toLong() and 0xFFFFFFFFL /* 4 */
+        val featurePointCount = dataIn.readUnsignedShort() /* +2 = 6 */
+        gender = Gender.getInstance(dataIn.readUnsignedByte()) /* +1 = 7 */
+        eyeColor = EyeColor.toEyeColor(dataIn.readUnsignedByte()) /* +1 = 8 */
+        hairColor = dataIn.readUnsignedByte() /* +1 = 9 */
+        featureMask = dataIn.readUnsignedByte() /* +1 = 10 */
+        featureMask = (featureMask shl 16) or dataIn.readUnsignedShort() /* +2 = 12 */
+        expression = dataIn.readShort().toInt() /* +2 = 14 */
+        poseAngle = IntArray(3)
+        val by = dataIn.readUnsignedByte() /* +1 = 15 */
+        poseAngle[ISO19794.YAW] = by
+        val bp = dataIn.readUnsignedByte() /* +1 = 16 */
+        poseAngle[ISO19794.PITCH] = bp
+        val br = dataIn.readUnsignedByte() /* +1 = 17 */
+        poseAngle[ISO19794.ROLL] = br
+        poseAngleUncertainty = IntArray(3)
+        poseAngleUncertainty[ISO19794.YAW] = dataIn.readUnsignedByte() /* +1 = 18 */
+        poseAngleUncertainty[ISO19794.PITCH] = dataIn.readUnsignedByte() /* +1 = 19 */
+        poseAngleUncertainty[ISO19794.ROLL] = dataIn.readUnsignedByte() /* +1 = 20 */
+
+        /* Feature Point(s) (optional) (8 * featurePointCount), see ISO 19794-5 5.8 */
+        featurePoints = arrayOfNulls<FeaturePoint>(featurePointCount)
+        for (i in 0..<featurePointCount) {
+            val featureType = dataIn.readUnsignedByte() /* 1 */
+            val featurePoint = dataIn.readByte() /* +1 = 2 */
+            val x = dataIn.readUnsignedShort() /* +2 = 4 */
+            val y = dataIn.readUnsignedShort() /* +2 = 6 */
+            var skippedBytes: Long = 0
+            while (skippedBytes < 2) {
+                skippedBytes += dataIn.skip(2)
+            } /* +2 = 8, NOTE: 2 bytes reserved */
+            featurePoints[i] = FeaturePoint.from(featureType, featurePoint, x, y)
+        }
+
+        /* Image Information */
+        faceImageType = dataIn.readUnsignedByte() /* 1 */
+        imageDataType = dataIn.readUnsignedByte() /* +1 = 2 */
+
+        colorSpace = dataIn.readUnsignedByte() /* +1 = 7 */
+        sourceType = dataIn.readUnsignedByte() /* +1 = 8 */
+        deviceType = dataIn.readUnsignedShort() /* +2 = 10 */
+        quality = dataIn.readUnsignedShort() /* +2 = 12 */
+
+        /* Temporarily fix width and height if 0. */
+        if (width <= 0) {
+            width = 800
+        }
+        if (height <= 0) {
+            height = 600
+        }
+
+        /*
+         * Read image data, image data type code based on Section 5.8.1
+         * ISO 19794-5.
+         */
+        mimeType = toMimeType(imageDataType)
+        val imageLength = recordLength - 20 - 8 * featurePointCount - 12
+
+        readImage(inputStream, imageLength)
     }
 
     @Throws(IOException::class)
@@ -399,7 +461,7 @@ class FaceImageInfo
         val dataOut = DataOutputStream(outputStream)
 
         /* Facial Information (16) */
-        dataOut.writeShort(featurePoints!!.size) /* 2 */
+        dataOut.writeShort(featurePoints.size) /* 2 */
         dataOut.writeByte(if (gender == null) Gender.UNSPECIFIED.toInt() else gender!!.toInt()) /* 1 */
         dataOut.writeByte(if (eyeColor == null) EyeColor.UNSPECIFIED.toInt() else eyeColor!!.toInt()) /* 1 */
         dataOut.writeByte(hairColor) /* 1 */
@@ -610,78 +672,6 @@ class FaceImageInfo
                     return null
                 }
             }
-        }
-
-        /**
-         * Factory method
-         *
-         * Construct FaceImageInfo from InputStream.
-         *
-         * @param inputStream an input stream
-         * @return a new FaceImageInfo instance
-         * @throws IOException if input cannot be read
-         */
-        @JvmStatic
-        @Throws(IOException::class)
-        fun from(inputStream: InputStream): FaceImageInfo {
-            val dataIn =
-                inputStream as? DataInputStream ?: DataInputStream(inputStream)
-
-            val featurePointCount = dataIn.readUnsignedShort() /* +2 = 6 */
-            val featurePoints = mutableListOf<FeaturePoint>()
-            for (i in 0..<featurePointCount) {
-                val featureType = dataIn.readUnsignedByte() /* 1 */
-                val featurePoint = dataIn.readByte() /* +1 = 2 */
-                val x = dataIn.readUnsignedShort() /* +2 = 4 */
-                val y = dataIn.readUnsignedShort() /* +2 = 6 */
-                var skippedBytes: Long = 0
-                while (skippedBytes < 2) {
-                    skippedBytes += dataIn.skip(2)
-                } /* +2 = 8, NOTE: 2 bytes reserved */
-                featurePoints.add(FeaturePoint.from(featureType, featurePoint, x, y))
-            }
-
-            val featureMask = dataIn.readUnsignedByte() /* +1 = 10 */
-            val poseAngle = IntArray(3)
-            poseAngle[ISO19794.YAW] = dataIn.readUnsignedByte() /* +1 = 15 */
-            poseAngle[ISO19794.PITCH] = dataIn.readUnsignedByte() /* +1 = 16 */
-            poseAngle[ISO19794.ROLL] = dataIn.readUnsignedByte() /* +1 = 17 */
-
-            val poseAngleUncertainty = IntArray(3)
-            poseAngleUncertainty[ISO19794.YAW] = dataIn.readUnsignedByte() /* +1 = 18 */
-            poseAngleUncertainty[ISO19794.PITCH] = dataIn.readUnsignedByte() /* +1 = 19 */
-            poseAngleUncertainty[ISO19794.ROLL] = dataIn.readUnsignedByte() /* +1 = 20 */
-
-            var width = dataIn.readUnsignedShort() /* +2 = 4 */
-            var height = dataIn.readUnsignedShort() /* +2 = 6 */
-
-            if (width <= 0) {
-                width = 800
-            }
-            if (height <= 0) {
-                height = 600
-            }
-
-            val returnedObject = FeaturePoint(
-                recordLength = dataIn.readInt().toLong() and 0xFFFFFFFFL /* 4 */,
-                gender = Gender.getInstance(dataIn.readUnsignedByte()) /* +1 = 7 */,
-                eyeColor = EyeColor.toEyeColor(dataIn.readUnsignedByte()) /* +1 = 8 */,
-                hairColor = dataIn.readUnsignedByte() /* +1 = 9 */,
-                featureMask = featureMask,
-                featureMask = (featureMask shl 16) or dataIn.readUnsignedShort() /* +2 = 12 */,
-                expression = dataIn.readShort().toInt() /* +2 = 14 */,
-                poseAngle = poseAngle,
-                poseAngleUncertainty = poseAngleUncertainty,
-                featurePoints = featurePoints,
-                faceImageType = dataIn.readUnsignedByte() /* 1 */,
-                imageDataType = dataIn.readUnsignedByte() /* +1 = 2 */,
-                width = width,
-                height = height,
-                colorSpace = dataIn.readUnsignedByte() /* +1 = 7 */,
-                sourceType = dataIn.readUnsignedByte() /* +1 = 8 */,
-                deviceType = dataIn.readUnsignedShort() /* +2 = 10 */,
-                quality = dataIn.readUnsignedShort() /* +2 = 12 */
-            )
         }
     }
 }
