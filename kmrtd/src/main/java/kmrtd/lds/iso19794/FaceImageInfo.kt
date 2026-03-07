@@ -38,6 +38,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.logging.Logger
+import kotlin.IntArray
 
 /**
  * Data structure for storing facial image data. This represents
@@ -50,7 +51,7 @@ import java.util.logging.Logger
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1808 $
  */
-data class FaceImageInfo
+class FaceImageInfo
 /**
  * Constructs a new face information data structure instance.
  *
@@ -234,8 +235,7 @@ data class FaceImageInfo
         /* Image Information */
         faceImageType = dataIn.readUnsignedByte() /* 1 */
         imageDataType = dataIn.readUnsignedByte() /* +1 = 2 */
-        width = dataIn.readUnsignedShort() /* +2 = 4 */
-        height = dataIn.readUnsignedShort() /* +2 = 6 */
+
         colorSpace = dataIn.readUnsignedByte() /* +1 = 7 */
         sourceType = dataIn.readUnsignedByte() /* +1 = 8 */
         deviceType = dataIn.readUnsignedShort() /* +2 = 10 */
@@ -610,6 +610,78 @@ data class FaceImageInfo
                     return null
                 }
             }
+        }
+
+        /**
+         * Factory method
+         *
+         * Construct FaceImageInfo from InputStream.
+         *
+         * @param inputStream an input stream
+         * @return a new FaceImageInfo instance
+         * @throws IOException if input cannot be read
+         */
+        @JvmStatic
+        @Throws(IOException::class)
+        fun from(inputStream: InputStream): FaceImageInfo {
+            val dataIn =
+                inputStream as? DataInputStream ?: DataInputStream(inputStream)
+
+            val featurePointCount = dataIn.readUnsignedShort() /* +2 = 6 */
+            val featurePoints = mutableListOf<FeaturePoint>()
+            for (i in 0..<featurePointCount) {
+                val featureType = dataIn.readUnsignedByte() /* 1 */
+                val featurePoint = dataIn.readByte() /* +1 = 2 */
+                val x = dataIn.readUnsignedShort() /* +2 = 4 */
+                val y = dataIn.readUnsignedShort() /* +2 = 6 */
+                var skippedBytes: Long = 0
+                while (skippedBytes < 2) {
+                    skippedBytes += dataIn.skip(2)
+                } /* +2 = 8, NOTE: 2 bytes reserved */
+                featurePoints.add(FeaturePoint.from(featureType, featurePoint, x, y))
+            }
+
+            val featureMask = dataIn.readUnsignedByte() /* +1 = 10 */
+            val poseAngle = IntArray(3)
+            poseAngle[ISO19794.YAW] = dataIn.readUnsignedByte() /* +1 = 15 */
+            poseAngle[ISO19794.PITCH] = dataIn.readUnsignedByte() /* +1 = 16 */
+            poseAngle[ISO19794.ROLL] = dataIn.readUnsignedByte() /* +1 = 17 */
+
+            val poseAngleUncertainty = IntArray(3)
+            poseAngleUncertainty[ISO19794.YAW] = dataIn.readUnsignedByte() /* +1 = 18 */
+            poseAngleUncertainty[ISO19794.PITCH] = dataIn.readUnsignedByte() /* +1 = 19 */
+            poseAngleUncertainty[ISO19794.ROLL] = dataIn.readUnsignedByte() /* +1 = 20 */
+
+            var width = dataIn.readUnsignedShort() /* +2 = 4 */
+            var height = dataIn.readUnsignedShort() /* +2 = 6 */
+
+            if (width <= 0) {
+                width = 800
+            }
+            if (height <= 0) {
+                height = 600
+            }
+
+            val returnedObject = FeaturePoint(
+                recordLength = dataIn.readInt().toLong() and 0xFFFFFFFFL /* 4 */,
+                gender = Gender.getInstance(dataIn.readUnsignedByte()) /* +1 = 7 */,
+                eyeColor = EyeColor.toEyeColor(dataIn.readUnsignedByte()) /* +1 = 8 */,
+                hairColor = dataIn.readUnsignedByte() /* +1 = 9 */,
+                featureMask = featureMask,
+                featureMask = (featureMask shl 16) or dataIn.readUnsignedShort() /* +2 = 12 */,
+                expression = dataIn.readShort().toInt() /* +2 = 14 */,
+                poseAngle = poseAngle,
+                poseAngleUncertainty = poseAngleUncertainty,
+                featurePoints = featurePoints,
+                faceImageType = dataIn.readUnsignedByte() /* 1 */,
+                imageDataType = dataIn.readUnsignedByte() /* +1 = 2 */,
+                width = width,
+                height = height,
+                colorSpace = dataIn.readUnsignedByte() /* +1 = 7 */,
+                sourceType = dataIn.readUnsignedByte() /* +1 = 8 */,
+                deviceType = dataIn.readUnsignedShort() /* +2 = 10 */,
+                quality = dataIn.readUnsignedShort() /* +2 = 12 */
+            )
         }
     }
 }
