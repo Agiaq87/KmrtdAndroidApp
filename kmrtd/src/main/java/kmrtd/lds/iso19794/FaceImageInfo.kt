@@ -81,83 +81,83 @@ class FaceImageInfo
      *
      * @return gender
      */
-    val gender: Gender,
+    var gender: Gender,
     /**
      * Returns the eye color
      * (black, blue, brown, etc).
      *
      * @return eye color
      */
-    val eyeColor: EyeColor,
+    var eyeColor: EyeColor,
     /**
      * Returns the feature mask.
      *
      * @return feature mask
      */
-    val featureMask: Int,
+    var featureMask: Int,
     /**
      * Returns the hair color
      * (bald, black, blonde, etc).
      *
      * @return hair color
      */
-    val hairColor: Int,
+    var hairColor: Int,
     /**
      * Returns the expression
      * (neutral, smiling, eyebrow raised, etc).
      *
      * @return expression
      */
-    val expression: Int,
+    var expression: Int,
     /**
      * Returns the face image type
      * (full frontal, token frontal, etc).
      *
      * @return face image type
      */
-    val faceImageType: Int,
+    var faceImageType: Int,
     /**
      * Returns the image color space
      * (rgb, grayscale, etc).
      *
      * @return image color space
      */
-    val colorSpace: Int,
+    var colorSpace: Int,
     /**
      * Returns the source type
      * (camera, scanner, etc).
      *
      * @return source type
      */
-    val sourceType: Int,
+    var sourceType: Int,
     /**
      * Returns the device type.
      *
      * @return device type
      */
-    val deviceType: Int,
+    var deviceType: Int,
     /**
      * Returns the quality as unsigned integer.
      *
      * @return quality
      */
-    val quality: Int,
+    var quality: Int,
     /**
      * Returns the available feature points of this face.
      *
      * @return feature points
      */
     var featurePoints: MutableList<FeaturePoint>,
-    val width: Int,
-    val height: Int,
-    val imageInputStream: InputStream,
-    val imageLength: Int,
+    var width: Int,
+    var height: Int,
+    var imageInputStream: InputStream,
+    var imageLength: Int,
     /**
      * Returns the image data type.
      *
      * @return image data type
      */
-    val imageDataType: Int
+    var imageDataType: Int
 ) : AbstractImageInfo(
     TYPE_PORTRAIT,
     width,
@@ -166,17 +166,19 @@ class FaceImageInfo
     imageLength.toLong(),
     toMimeType(imageDataType)
 ) {
-    val poseAngle: IntArray = IntArray(3)
-    val poseAngleUncertainty: IntArray = IntArray(3)
+    var poseAngle: IntArray = IntArray(3)
+    var poseAngleUncertainty: IntArray = IntArray(3)
 
-    val recordLength: Long = 20L + 8 * featurePoints.size + 12L + imageLength
+    var recordLength: Long = 20L + 8 * featurePoints.size + 12L + imageLength
 
     init {
+        // TODO Re - check JAVA codebase for this
         //requireNotNull(imageInputStream) { "Null image" }
         this.featurePoints = mutableListOf()
         if (featurePoints.isNotEmpty()) {
             System.arraycopy(featurePoints, 0, this.featurePoints, 0, featurePoints.size)
         }
+        // TODO Re - check JAVA codebase for this
 
         System.arraycopy(poseAngle, 0, this.poseAngle, 0, 3)
         System.arraycopy(poseAngleUncertainty, 0, this.poseAngleUncertainty, 0, 3)
@@ -672,6 +674,98 @@ class FaceImageInfo
                     return null
                 }
             }
+        }
+
+        /**
+         * Factory method
+         *
+         * Constructs a new face information structure from binary encoding.
+         *
+         * @param inputStream an input stream
+         * @throws IOException if input cannot be read
+         */
+        @JvmStatic
+        fun from(inputStream: InputStream): FaceImageInfo {
+            val dataIn =
+                inputStream as? DataInputStream ?: DataInputStream(inputStream)
+
+            /* Facial Information Block (20), see ISO 19794-5 5.5 */
+            val recordLength = dataIn.readInt().toLong() and 0xFFFFFFFFL /* 4 */
+            val featurePointCount = dataIn.readUnsignedShort() /* +2 = 6 */
+            val gender = Gender.getInstance(dataIn.readUnsignedByte()) /* +1 = 7 */
+            val eyeColor = EyeColor.toEyeColor(dataIn.readUnsignedByte()) /* +1 = 8 */
+            val hairColor = dataIn.readUnsignedByte() /* +1 = 9 */
+            var featureMask = dataIn.readUnsignedByte() /* +1 = 10 */
+            featureMask = (featureMask shl 16) or dataIn.readUnsignedShort() /* +2 = 12 */
+            val expression = dataIn.readShort().toInt() /* +2 = 14 */
+            val poseAngle = IntArray(3)
+            val by = dataIn.readUnsignedByte() /* +1 = 15 */
+            poseAngle[ISO19794.YAW] = by
+            val bp = dataIn.readUnsignedByte() /* +1 = 16 */
+            poseAngle[ISO19794.PITCH] = bp
+            val br = dataIn.readUnsignedByte() /* +1 = 17 */
+            poseAngle[ISO19794.ROLL] = br
+            val poseAngleUncertainty = IntArray(3)
+            poseAngleUncertainty[ISO19794.YAW] = dataIn.readUnsignedByte() /* +1 = 18 */
+            poseAngleUncertainty[ISO19794.PITCH] = dataIn.readUnsignedByte() /* +1 = 19 */
+            poseAngleUncertainty[ISO19794.ROLL] = dataIn.readUnsignedByte() /* +1 = 20 */
+
+            /* Feature Point(s) (optional) (8 * featurePointCount), see ISO 19794-5 5.8 */
+            val featurePoints = arrayOfNulls<FeaturePoint>(featurePointCount)
+            for (i in 0..<featurePointCount) {
+                val featureType = dataIn.readUnsignedByte() /* 1 */
+                val featurePoint = dataIn.readByte() /* +1 = 2 */
+                val x = dataIn.readUnsignedShort() /* +2 = 4 */
+                val y = dataIn.readUnsignedShort() /* +2 = 6 */
+                var skippedBytes: Long = 0
+                while (skippedBytes < 2) {
+                    skippedBytes += dataIn.skip(2)
+                } /* +2 = 8, NOTE: 2 bytes reserved */
+                featurePoints[i] = FeaturePoint.from(featureType, featurePoint, x, y)
+            }
+
+            /* Image Information */
+            val faceImageType = dataIn.readUnsignedByte() /* 1 */
+            val imageDataType = dataIn.readUnsignedByte() /* +1 = 2 */
+            val colorSpace = dataIn.readUnsignedByte() /* +1 = 7 */
+            val sourceType = dataIn.readUnsignedByte() /* +1 = 8 */
+            val deviceType = dataIn.readUnsignedShort() /* +2 = 10 */
+            val quality = dataIn.readUnsignedShort() /* +2 = 12 */
+            val width = dataIn.readUnsignedShort() /* +2 = 14 */
+            val height = dataIn.readUnsignedShort() /* +2 = 16 */
+
+            /* Temporarily fix width and height if 0. */
+            /*if (width <= 0) {
+                width = 800
+            }
+            if (height <= 0) {
+                height = 600
+            }*/
+
+            /*
+             * Read image data, image data type code based on Section 5.8.1
+             * ISO 19794-5.
+             */
+            val mimeType = toMimeType(imageDataType)
+            val imageLength = recordLength - 20 - 8 * featurePointCount - 12
+
+            return FaceImageInfo(
+                gender,
+                eyeColor,
+                featureMask,
+                hairColor,
+                expression,
+                faceImageType,
+                colorSpace,
+                sourceType,
+                deviceType,
+                quality,
+                featurePoints.toMutableList(),
+                width,
+                height,
+                inputStream,
+                imageLength.toInt(),
+                mimeType
         }
     }
 }
