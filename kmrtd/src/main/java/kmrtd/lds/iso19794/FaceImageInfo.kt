@@ -25,6 +25,7 @@
  *
  * Licensed under LGPL 3.0
  */
+
 package kmrtd.lds.iso19794
 
 import kmrtd.lds.AbstractImageInfo
@@ -38,7 +39,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.logging.Logger
-import kotlin.IntArray
 
 /**
  * Data structure for storing facial image data. This represents
