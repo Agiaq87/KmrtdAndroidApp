@@ -307,7 +307,7 @@ class FingerInfo : AbstractListInfo<FingerImageInfo?>, BiometricDataBlock {
 
         /* General record header, should be 32... */
         val dataOut =
-            if (outputStream is DataOutputStream) outputStream else DataOutputStream(outputStream)
+            outputStream as? DataOutputStream ?: DataOutputStream(outputStream)
 
         dataOut.writeInt(FORMAT_IDENTIFIER) /* 4 */
         dataOut.writeInt(VERSION_NUMBER) /* + 4 = 8 */

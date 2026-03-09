@@ -252,7 +252,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         val headerLength: Long = 45
         var dataLength: Long = 0
         for (irisBiometricSubtypeInfo in irisBiometricSubtypeInfos) {
-            dataLength += irisBiometricSubtypeInfo.getRecordLength()
+            dataLength += irisBiometricSubtypeInfo.recordLength
             add(irisBiometricSubtypeInfo)
         }
         require(!(deviceUniqueId == null || deviceUniqueId.size != 16)) { "deviceUniqueId invalid" }
@@ -316,7 +316,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         val count = dataIn.readUnsignedByte() /* + 1 = 15 */
 
         val recordHeaderLength = dataIn.readUnsignedShort() /* Should be 45. */ /* + 2 = 17 */
-        require(recordHeaderLength.toLong() == headerLength) { "Expected header length " + headerLength + ", found " + recordHeaderLength }
+        require(recordHeaderLength.toLong() == headerLength) { "Expected header length $headerLength, found $recordHeaderLength" }
 
         /*
          *  16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1
@@ -360,7 +360,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         /* A record contains biometric subtype (or: 'feature') blocks (which contain image data blocks)... */
         for (i in 0..<count) {
             val biometricSubtypeInfo = IrisBiometricSubtypeInfo(inputStream, imageFormat)
-            constructedDataLength += biometricSubtypeInfo.getRecordLength()
+            constructedDataLength += biometricSubtypeInfo.recordLength
             add(biometricSubtypeInfo)
         }
         if (dataLength != constructedDataLength) {
@@ -385,14 +385,14 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         var dataLength = 0
         val biometricSubtypeInfos = getSubRecords()
         for (biometricSubtypeInfo in biometricSubtypeInfos) {
-            dataLength += biometricSubtypeInfo.getRecordLength().toInt()
+            dataLength += biometricSubtypeInfo?.recordLength?.toInt()
         }
 
         val recordLength = headerLength + dataLength
 
         /* Iris Record Header (45) */
         val dataOut =
-            if (outputStream is DataOutputStream) outputStream else DataOutputStream(outputStream)
+            outputStream as? DataOutputStream ?: DataOutputStream(outputStream)
 
         dataOut.writeInt(FORMAT_IDENTIFIER) /* header (e.g. "IIR", 0x00) */ /* 4 */
         dataOut.writeInt(VERSION_NUMBER) /* version in ASCII (e.g. "010" 0x00) */ /* +4 = 8 */
@@ -426,7 +426,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         }
     }
 
-    val standardBiometricHeader: StandardBiometricHeader
+    override val standardBiometricHeader: StandardBiometricHeader
         /**
          * Returns the standard biometric header of this iris info.
          * 
@@ -449,10 +449,10 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
 
                 val elements: SortedMap<Int?, ByteArray?> =
                     TreeMap<Int?, ByteArray?>()
-                elements.put(ISO781611.BIOMETRIC_TYPE_TAG, biometricType)
-                elements.put(ISO781611.BIOMETRIC_SUBTYPE_TAG, biometricSubtype)
-                elements.put(ISO781611.FORMAT_OWNER_TAG, formatOwner)
-                elements.put(ISO781611.FORMAT_TYPE_TAG, formatType)
+                elements[ISO781611.BIOMETRIC_TYPE_TAG] = biometricType
+                elements[ISO781611.BIOMETRIC_SUBTYPE_TAG] = biometricSubtype
+                elements[ISO781611.FORMAT_OWNER_TAG] = formatOwner
+                elements[ISO781611.FORMAT_TYPE_TAG] = formatType
 
                 sbh = StandardBiometricHeader(elements)
             }
@@ -475,7 +475,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         result = prime * result + rawImageHeight
         result = prime * result + rawImageWidth
         result = prime * result + (recordLength xor (recordLength ushr 32)).toInt()
-        result = prime * result + (if (sbh == null) 0 else sbh.hashCode())
+        result = prime * result + (sbh?.hashCode() ?: 0)
         result = prime * result + scanType
         result = prime * result + verticalOrientation
         return result
@@ -600,7 +600,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
             val irisBiometricSubtypeInfos =
                 getSubRecords()
             for (irisBiometricSubtypeInfo in irisBiometricSubtypeInfos) {
-                result = result and irisBiometricSubtypeInfo.getBiometricSubtype()
+                result = result and irisBiometricSubtypeInfo?.biometricSubtype
             }
             return result
         }
@@ -721,7 +721,6 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         /* TODO: reference to specification. */
         const val IRBNDY_UNDEF: Int = 0
         const val IRBNDY_PROCESSED: Int = 1
-        private val serialVersionUID = -3415309711643815511L
         private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
 
         /**

@@ -19,6 +19,12 @@
  *
  * $Id: FaceInfo.java 1896 2025-04-18 21:39:56Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.lds.iso19794
 
 import kmrtd.cbeff.BiometricDataBlock
@@ -26,6 +32,8 @@ import kmrtd.cbeff.CBEFFInfoConstants
 import kmrtd.cbeff.ISO781611
 import kmrtd.cbeff.StandardBiometricHeader
 import kmrtd.lds.AbstractListInfo
+import kmrtd.lds.support.EyeColor
+import kmrtd.lds.support.FeaturePoint
 import net.sf.scuba.data.Gender
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -96,7 +104,7 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
     @Throws(IOException::class)
     override fun readObject(inputStream: InputStream) {
         val dataInputStream =
-            if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
+            inputStream as? DataInputStream ?: DataInputStream(inputStream)
 
         /* Facial Record Header (14) */
         val fac0 = dataInputStream.readInt() // header (e.g. "FAC", 0x00)						/* 4 */
@@ -128,23 +136,23 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
                 /* Construct header with default values. */
                 val imageInfo = FaceImageInfo(
                     Gender.UNKNOWN,
-                    FaceImageInfo.EyeColor.UNSPECIFIED,
+                    EyeColor.UNSPECIFIED,
                     0x00,
-                    FaceImageInfo.HAIR_COLOR_UNSPECIFIED,
-                    FaceImageInfo.EXPRESSION_UNSPECIFIED.toInt(),
+                    ISO19794.HAIR_COLOR_UNSPECIFIED,
+                    ISO19794.EXPRESSION_UNSPECIFIED.toInt(),
                     intArrayOf(0, 0, 0),
                     intArrayOf(0, 0, 0),
-                    FaceImageInfo.IMAGE_DATA_TYPE_JPEG2000,
-                    FaceImageInfo.IMAGE_COLOR_SPACE_UNSPECIFIED,
-                    FaceImageInfo.SOURCE_TYPE_UNSPECIFIED,
+                    ISO19794.IMAGE_DATA_TYPE_JPEG2000,
+                    ISO19794.IMAGE_COLOR_SPACE_UNSPECIFIED,
+                    ISO19794.SOURCE_TYPE_UNSPECIFIED,
                     0x00,
                     0,
-                    arrayOf<FaceImageInfo.FeaturePoint?>(),
+                    arrayOf<FeaturePoint?>(),
                     0,
                     0,
                     ByteArrayInputStream(bOut.toByteArray()),
                     imageLength,
-                    FaceImageInfo.IMAGE_DATA_TYPE_JPEG2000
+                    ISO19794.IMAGE_DATA_TYPE_JPEG2000
                 )
                 add(imageInfo)
                 return
@@ -200,7 +208,7 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
         val recordLength = headerLength + dataLength
 
         val dataOut =
-            if (outputStream is DataOutputStream) outputStream else DataOutputStream(outputStream)
+            outputStream as? DataOutputStream ?: DataOutputStream(outputStream)
 
         dataOut.writeInt(FORMAT_IDENTIFIER) /* 4 */
         dataOut.writeInt(VERSION_NUMBER) /* + 4 = 8 */
@@ -317,8 +325,6 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
     }
 
     companion object {
-        private val serialVersionUID = -6053206262773400725L
-
         private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
 
         /**

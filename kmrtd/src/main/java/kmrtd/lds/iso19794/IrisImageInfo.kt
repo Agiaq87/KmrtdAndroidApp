@@ -203,7 +203,7 @@ class IrisImageInfo : AbstractImageInfo {
     @Throws(IOException::class)
     override fun readObject(inputStream: InputStream) {
         val dataIn =
-            if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
+            inputStream as? DataInputStream ?: DataInputStream(inputStream)
 
         this.imageNumber = dataIn.readUnsignedShort() /* 2 */
         this.quality = dataIn.readUnsignedByte() /* + 1 = 3 */
@@ -315,9 +315,16 @@ class IrisImageInfo : AbstractImageInfo {
          */
         private fun getMimeTypeFromImageFormat(imageFormat: Int): String? {
             return when (imageFormat) {
-                IrisInfo.Companion.IMAGEFORMAT_MONO_RAW, IrisInfo.Companion.IMAGEFORMAT_RGB_RAW -> WSQ_MIME_TYPE
-                IrisInfo.Companion.IMAGEFORMAT_MONO_JPEG, IrisInfo.Companion.IMAGEFORMAT_RGB_JPEG, IrisInfo.Companion.IMAGEFORMAT_MONO_JPEG_LS, IrisInfo.Companion.IMAGEFORMAT_RGB_JPEG_LS -> JPEG_MIME_TYPE
-                IrisInfo.Companion.IMAGEFORMAT_MONO_JPEG2000, IrisInfo.Companion.IMAGEFORMAT_RGB_JPEG2000 -> JPEG2000_MIME_TYPE
+                IrisInfo.IMAGEFORMAT_MONO_RAW,
+                IrisInfo.IMAGEFORMAT_RGB_RAW -> WSQ_MIME_TYPE
+
+                IrisInfo.IMAGEFORMAT_MONO_JPEG,
+                IrisInfo.IMAGEFORMAT_RGB_JPEG,
+                IrisInfo.IMAGEFORMAT_MONO_JPEG_LS,
+                IrisInfo.IMAGEFORMAT_RGB_JPEG_LS -> JPEG_MIME_TYPE
+
+                IrisInfo.IMAGEFORMAT_MONO_JPEG2000,
+                IrisInfo.IMAGEFORMAT_RGB_JPEG2000 -> JPEG2000_MIME_TYPE
                 else -> null
             }
         }

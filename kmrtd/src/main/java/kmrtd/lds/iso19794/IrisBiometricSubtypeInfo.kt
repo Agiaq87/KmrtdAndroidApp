@@ -73,13 +73,13 @@ class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
     /**
      * Constructs an iris biometric subtype from binary encoding.
      * 
-     * @param in          an input stream
+     * @param input       an input stream
      * @param imageFormat the image format used
      * @throws IOException if reading fails
      */
-    constructor(`in`: InputStream, imageFormat: Int) {
+    constructor(input: InputStream, imageFormat: Int) {
         this.imageFormat = imageFormat
-        readObject(`in`)
+        readObject(input)
     }
 
     /**
@@ -91,7 +91,7 @@ class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
     @Throws(IOException::class)
     override fun readObject(inputStream: InputStream) {
         val dataIn =
-            if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
+            inputStream as? DataInputStream ?: DataInputStream(inputStream)
 
         /* Iris biometric subtype header */
         this.biometricSubtype = dataIn.readUnsignedByte() /* 1 */
@@ -101,7 +101,7 @@ class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
 
         for (i in 0..<count) {
             val imageInfo = IrisImageInfo(inputStream, imageFormat)
-            constructedDataLength += imageInfo.getRecordLength()
+            constructedDataLength += imageInfo.recordLength
             add(imageInfo)
         }
         //		if (dataLength != constructedDataLength) {
@@ -118,7 +118,7 @@ class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
     @Throws(IOException::class)
     override fun writeObject(outputStream: OutputStream?) {
         val dataOut =
-            if (outputStream is DataOutputStream) outputStream else DataOutputStream(outputStream)
+            outputStream as? DataOutputStream ?: DataOutputStream(outputStream)
 
         dataOut.writeByte(biometricSubtype and 0xFF) /* 1 */
 
@@ -140,7 +140,7 @@ class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
             val irisImageInfos =
                 getSubRecords()
             for (irisImageInfo in irisImageInfos) {
-                result += irisImageInfo.getRecordLength()
+                result += irisImageInfo?.getRecordLength()
             }
             return result
         }
@@ -219,7 +219,6 @@ class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
          * Biometric subtype value.
          */
         const val EYE_LEFT: Int = 2
-        private val serialVersionUID = -6588640634764878039L
 
         /**
          * Returns a textual representation of the given biometric sub-type code.
@@ -227,17 +226,16 @@ class IrisBiometricSubtypeInfo : AbstractListInfo<IrisImageInfo?> {
          * @param biometricSubtype the biometric sub-type code
          * @return a human readable string such as `"Left eye"`, `"Right eye"`, or `"Undefined"`
          */
-        private fun biometricSubtypeToString(biometricSubtype: Int): String {
+        private fun biometricSubtypeToString(biometricSubtype: Int): String =
             when (biometricSubtype) {
-                EYE_LEFT -> return "Left eye"
-                EYE_RIGHT -> return "Right eye"
-                EYE_UNDEF -> return "Undefined"
+                EYE_LEFT -> "Left eye"
+                EYE_RIGHT -> "Right eye"
+                EYE_UNDEF -> "Undefined"
                 else -> throw NumberFormatException(
                     "Unknown biometric subtype: " + Integer.toHexString(
                         biometricSubtype
                     )
                 )
             }
-        }
     }
 }
