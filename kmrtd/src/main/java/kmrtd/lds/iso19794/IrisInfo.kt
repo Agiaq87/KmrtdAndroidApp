@@ -292,7 +292,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         /* Iris Record Header (45) */
 
         val dataIn =
-            if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
+            inputStream as? DataInputStream ?: DataInputStream(inputStream)
 
         val iir0 = dataIn.readInt() /* format id (e.g. "IIR" 0x00) */ /* 4 */
         require(iir0 == FORMAT_IDENTIFIER) {
@@ -422,7 +422,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
         dataOut.write(deviceUniqueId) /* array of length 16 */ /* + 16 = 45 */
 
         for (biometricSubtypeInfo in biometricSubtypeInfos) {
-            biometricSubtypeInfo.writeObject(outputStream)
+            biometricSubtypeInfo?.writeObject(outputStream)
         }
     }
 
@@ -497,7 +497,7 @@ class IrisInfo : AbstractListInfo<IrisBiometricSubtypeInfo?>, BiometricDataBlock
             if (other.sbh != null) {
                 return false
             }
-        } else if (!sbh!!.equals(other.sbh)) {
+        } else if (sbh != other.sbh) {
             return false
         }
         if (boundaryExtraction != other.boundaryExtraction) {

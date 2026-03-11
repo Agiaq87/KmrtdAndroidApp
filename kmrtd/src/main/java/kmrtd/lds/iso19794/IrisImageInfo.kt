@@ -96,8 +96,15 @@ class IrisImageInfo : AbstractImageInfo {
      * @throws IOException on error reading the image input stream
      */
     constructor(
-        imageNumber: Int, quality: Int, rotationAngle: Int, rotationAngleUncertainty: Int,
-        width: Int, height: Int, imageBytes: InputStream, imageLength: Int, imageFormat: Int
+        imageNumber: Int,
+        quality: Int,
+        rotationAngle: Int,
+        rotationAngleUncertainty: Int,
+        width: Int,
+        height: Int,
+        imageBytes: InputStream,
+        imageLength: Int,
+        imageFormat: Int
     ) : super(
         TYPE_IRIS,
         width,
@@ -145,7 +152,7 @@ class IrisImageInfo : AbstractImageInfo {
      */
     internal constructor(inputStream: InputStream, imageFormat: Int) : super(TYPE_IRIS) {
         this.imageFormat = imageFormat
-        setMimeType(getMimeTypeFromImageFormat(imageFormat))
+        mimeType = getMimeTypeFromImageFormat(imageFormat)
         readObject(inputStream)
     }
 
@@ -195,7 +202,7 @@ class IrisImageInfo : AbstractImageInfo {
                 "image number: " + imageNumber + ", " +
                 "quality: " + quality + ", " +
                 "image: " +
-                getWidth() + " x " + getHeight() +
+                width + " x " + height +
                 "mime-type: " + getMimeTypeFromImageFormat(imageFormat) +
                 "]"
     }
@@ -238,7 +245,7 @@ class IrisImageInfo : AbstractImageInfo {
 
     @Throws(IOException::class)
     public override fun writeObject(out: OutputStream?) {
-        val dataOut = if (out is DataOutputStream) out else DataOutputStream(out)
+        val dataOut = out as? DataOutputStream ?: DataOutputStream(out)
 
         dataOut.writeShort(this.imageNumber) /* 2 */
         dataOut.writeByte(this.quality) /* + 1 = 3 */
@@ -303,7 +310,6 @@ class IrisImageInfo : AbstractImageInfo {
          * Image quality, based on Table 3 in Section 5.5 of ISO 19794-6.
          */
         const val IMAGE_QUAL_HIGH_HI: Int = 0x64 /* (decimal 76-100) */
-        private const val serialVersionUID = 833541246115625112L
         private const val ROT_ANGLE_UNDEF = 0xFFFF
         private const val ROT_UNCERTAIN_UNDEF = 0xFFFF
 

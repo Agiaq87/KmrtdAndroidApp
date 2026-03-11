@@ -275,7 +275,7 @@ class FingerInfo : AbstractListInfo<FingerImageInfo?>, BiometricDataBlock {
 
         for (i in 0..<count) {
             val imageInfo = FingerImageInfo(inputStream, compressionAlgorithm)
-            constructedDataLength += imageInfo.getRecordLength()
+            constructedDataLength += imageInfo.recordLength
             add(imageInfo)
         }
         if (dataLength != constructedDataLength) {
@@ -300,7 +300,7 @@ class FingerInfo : AbstractListInfo<FingerImageInfo?>, BiometricDataBlock {
         var dataLength: Long = 0
         val fingerImageInfos = getSubRecords()
         for (fingerImageInfo in fingerImageInfos) {
-            dataLength += fingerImageInfo.getRecordLength()
+            dataLength += fingerImageInfo.recordLength
         }
 
         val recordLength = headerLength + dataLength
