@@ -33,7 +33,6 @@ import kmrtd.cbeff.ISO781611
 import kmrtd.cbeff.StandardBiometricHeader
 import kmrtd.lds.AbstractListInfo
 import kmrtd.lds.support.EyeColor
-import kmrtd.lds.support.FeaturePoint
 import net.sf.scuba.data.Gender
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -54,7 +53,7 @@ import java.util.logging.Logger
  * @author The JMRTD team (info@jmrtd.org)
  * @version $Revision: 1896 $
  */
-class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
+class FaceInfo : AbstractListInfo<FaceImageInfo>, BiometricDataBlock {
     private var sbh: StandardBiometricHeader?
 
     /**
@@ -62,7 +61,7 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
      * 
      * @param faceImageInfos face image infos
      */
-    constructor(faceImageInfos: MutableList<FaceImageInfo?>?) : this(null, faceImageInfos)
+    //constructor(faceImageInfos: MutableList<FaceImageInfo?>?) : this(null, faceImageInfos)
 
     /**
      * Constructs a face info from a list of face image infos.
@@ -70,30 +69,30 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
      * @param sbh            the standard biometric header to use
      * @param faceImageInfos face image infos
      */
-    constructor(sbh: StandardBiometricHeader?, faceImageInfos: MutableList<FaceImageInfo?>?) {
+    constructor(sbh: StandardBiometricHeader?, faceImageInfos: List<FaceImageInfo>) {
         this.sbh = sbh
         addAll(faceImageInfos)
     }
 
     /**
      * Constructs a face info from binary encoding.
-     * 
+     *
      * @param inputStream an input stream
      * @throws IOException when decoding fails
      */
-    constructor(inputStream: InputStream) : this(null, inputStream)
+    /*constructor(inputStream: InputStream) : this(null, inputStream)*/
 
     /**
      * Constructs a face info from binary encoding.
-     * 
+     *
      * @param sbh         the standard biometric header to use
      * @param inputStream an input stream
      * @throws IOException when decoding fails
      */
-    constructor(sbh: StandardBiometricHeader?, inputStream: InputStream) {
+    /*constructor(sbh: StandardBiometricHeader?, inputStream: InputStream) {
         this.sbh = sbh
         readObject(inputStream)
-    }
+    }*/
 
     /**
      * Reads the facial record from an input stream. Note that the standard biometric header
@@ -140,14 +139,14 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
                     0x00,
                     ISO19794.HAIR_COLOR_UNSPECIFIED,
                     ISO19794.EXPRESSION_UNSPECIFIED.toInt(),
-                    intArrayOf(0, 0, 0),
-                    intArrayOf(0, 0, 0),
+                    /*intArrayOf(0, 0, 0),
+                    intArrayOf(0, 0, 0),*/
                     ISO19794.IMAGE_DATA_TYPE_JPEG2000,
                     ISO19794.IMAGE_COLOR_SPACE_UNSPECIFIED,
                     ISO19794.SOURCE_TYPE_UNSPECIFIED,
                     0x00,
                     0,
-                    arrayOf<FeaturePoint?>(),
+                    /*arrayOf<FeaturePoint?>()*/emptyList(),
                     0,
                     0,
                     ByteArrayInputStream(bOut.toByteArray()),
@@ -176,7 +175,7 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
         val count = dataInputStream.readUnsignedShort() /* + 2 = 14 */
 
         for (i in 0..<count) {
-            val imageInfo = FaceImageInfo(inputStream)
+            val imageInfo = FaceImageInfo.from(inputStream)
             constructedDataLength += imageInfo.getRecordLength()
             add(imageInfo)
         }
@@ -202,7 +201,10 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
         var dataLength: Long = 0
         val faceImageInfos = getSubRecords()
         for (faceImageInfo in faceImageInfos) {
-            dataLength += faceImageInfo.getRecordLength()
+            faceImageInfo?.let {
+                dataLength += it.getRecordLength()
+            }
+            //dataLength += faceImageInfo?.recordLength
         }
 
         val recordLength = headerLength + dataLength
@@ -225,11 +227,11 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
         dataOut.writeShort(faceImageInfos.size) /* + 2 = 14 */
 
         for (faceImageInfo in faceImageInfos) {
-            faceImageInfo.writeObject(dataOut)
+            faceImageInfo?.writeObject(dataOut)
         }
     }
 
-    val standardBiometricHeader: StandardBiometricHeader
+    override val standardBiometricHeader: StandardBiometricHeader
         /**
          * Returns the standard biometric header of this biometric data block.
          * 
@@ -250,18 +252,17 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
                     (StandardBiometricHeader.ISO_19794_FACE_IMAGE_FORMAT_TYPE_VALUE and 0xFF).toByte()
                 )
 
-                val elements: SortedMap<Int?, ByteArray?> =
-                    TreeMap<Int?, ByteArray?>()
-                elements.put(ISO781611.BIOMETRIC_TYPE_TAG, biometricType)
-                elements.put(ISO781611.BIOMETRIC_SUBTYPE_TAG, biometricSubtype)
-                elements.put(ISO781611.FORMAT_OWNER_TAG, formatOwner)
-                elements.put(ISO781611.FORMAT_TYPE_TAG, formatType)
+                val elements: SortedMap<Int, ByteArray> = TreeMap()
+                elements[ISO781611.BIOMETRIC_TYPE_TAG] = biometricType
+                elements[ISO781611.BIOMETRIC_SUBTYPE_TAG] = biometricSubtype
+                elements[ISO781611.FORMAT_OWNER_TAG] = formatOwner
+                elements[ISO781611.FORMAT_TYPE_TAG] = formatType
                 sbh = StandardBiometricHeader(elements)
             }
-            return sbh
+            return sbh!!
         }
 
-    val faceImageInfos: MutableList<FaceImageInfo?>
+    val faceImageInfos: MutableList<FaceImageInfo>
         /**
          * Returns the face image infos embedded in this face info.
          * 
@@ -301,7 +302,7 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
     override fun hashCode(): Int {
         val prime = 31
         var result = super.hashCode()
-        result = prime * result + (if (sbh == null) 0 else sbh.hashCode())
+        result = prime * result + (sbh?.hashCode() ?: 0)
         return result
     }
 
@@ -321,11 +322,11 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
             return other.sbh == null
         }
 
-        return sbh === other.sbh || sbh!!.equals(other.sbh)
+        return sbh === other.sbh || sbh!! == other.sbh
     }
 
     companion object {
-        private val LOGGER: Logger = Logger.getLogger("org.jmrtd")
+        private val LOGGER: Logger = Logger.getLogger("kmrtd")
 
         /**
          * Facial Record Header 'F', 'A', 'C', 0x00. Section 5.4, Table 2 of ISO/IEC 19794-5.
@@ -336,5 +337,110 @@ class FaceInfo : AbstractListInfo<FaceImageInfo?>, BiometricDataBlock {
          * Version number '0', '1', '0', 0x00. Section 5.4, Table 2 of ISO/IEC 19794-5.
          */
         private const val VERSION_NUMBER = 0x30313000
+
+        /**
+         * Factory method
+         *
+         * Constructs a face info from binary encoding.
+         *
+         * @param sbh         the standard biometric header to use
+         * @param inputStream an input stream
+         * @throws IOException when decoding fails
+         */
+        @JvmStatic
+        @Throws(IOException::class)
+        fun from(sbh: StandardBiometricHeader?, inputStream: InputStream): FaceInfo {
+            val dataInputStream =
+                inputStream as? DataInputStream ?: DataInputStream(inputStream)
+
+            val faceImageInfos = mutableListOf<FaceImageInfo>()
+
+            /* Facial Record Header (14) */
+            val fac0 = dataInputStream.readInt() // header (e.g. "FAC", 0x00)						/* 4 */
+            if (fac0 != FORMAT_IDENTIFIER) {
+                LOGGER.log(
+                    Level.WARNING,
+                    "'FAC' marker expected! Found " + Integer.toHexString(fac0)
+                )
+
+                if (fac0 == 0x0000000C) {
+                    /* Magic JP2 header. Best effort, assume this is a single image. */
+
+                    val bOut = ByteArrayOutputStream()
+                    val dataOutputStream = DataOutputStream(bOut)
+                    dataOutputStream.writeInt(fac0)
+
+                    val imageLength = dataInputStream.readShort().toInt()
+
+                    dataOutputStream.writeShort(imageLength)
+
+                    var totalBytesRead = 0
+                    while (totalBytesRead < imageLength) {
+                        val buffer = ByteArray(2048)
+                        val chunkSize = dataInputStream.read(buffer)
+                        if (chunkSize < 0) {
+                            break
+                        }
+                        bOut.write(buffer)
+                        totalBytesRead += chunkSize
+                    }
+
+                    /* Construct header with default values. */
+                    val imageInfo = FaceImageInfo(
+                        Gender.UNKNOWN,
+                        EyeColor.UNSPECIFIED,
+                        0x00,
+                        ISO19794.HAIR_COLOR_UNSPECIFIED,
+                        ISO19794.EXPRESSION_UNSPECIFIED.toInt(),
+                        /*intArrayOf(0, 0, 0),
+                        intArrayOf(0, 0, 0),*/
+                        ISO19794.IMAGE_DATA_TYPE_JPEG2000,
+                        ISO19794.IMAGE_COLOR_SPACE_UNSPECIFIED,
+                        ISO19794.SOURCE_TYPE_UNSPECIFIED,
+                        0x00,
+                        0,
+                        /*arrayOf<FeaturePoint?>()*/emptyList(),
+                        0,
+                        0,
+                        ByteArrayInputStream(bOut.toByteArray()),
+                        imageLength,
+                        ISO19794.IMAGE_DATA_TYPE_JPEG2000
+                    )
+                    faceImageInfos.add(imageInfo)
+                    return FaceInfo(sbh, faceImageInfos)
+                }
+            }
+
+            val version =
+                dataInputStream.readInt() // version in ASCII (e.g. "010" 0x00)			/* + 4 = 8 */
+            require(version == VERSION_NUMBER) {
+                "'010' version number expected! Found " + Integer.toHexString(
+                    version
+                )
+            }
+
+            val recordLength = dataInputStream.readInt().toLong() and 0xFFFFFFFFL /* + 4 = 12 */
+            val headerLength: Long = 14 /* 4 + 4 + 4 + 2 */
+            val dataLength = recordLength - headerLength
+
+            var constructedDataLength = 0L
+
+            val count = dataInputStream.readUnsignedShort() /* + 2 = 14 */
+
+            for (i in 0..<count) {
+                val imageInfo = FaceImageInfo.from(inputStream)
+                constructedDataLength += imageInfo.getRecordLength()
+                faceImageInfos.add(imageInfo)
+            }
+            if (dataLength != constructedDataLength) {
+                LOGGER.warning(
+                    ("ConstructedDataLength and dataLength differ: "
+                            + "dataLength = " + dataLength
+                            + ", constructedDataLength = " + constructedDataLength)
+                )
+            }
+
+            return FaceInfo(sbh, faceImageInfos)
+        }
     }
 }
