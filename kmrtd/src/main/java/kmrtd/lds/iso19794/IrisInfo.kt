@@ -19,6 +19,12 @@
  *
  * $Id: IrisInfo.java 1896 2025-04-18 21:39:56Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.lds.iso19794
 
 import kmrtd.cbeff.BiometricDataBlock

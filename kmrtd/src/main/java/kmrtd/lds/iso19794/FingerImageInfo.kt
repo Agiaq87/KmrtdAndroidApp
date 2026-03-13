@@ -19,6 +19,12 @@
  *
  * $Id: FingerImageInfo.java 1808 2019-03-07 21:32:19Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.lds.iso19794
 
 import kmrtd.cbeff.CBEFFInfoConstants
@@ -167,7 +173,7 @@ class FingerImageInfo : AbstractImageInfo {
     @Throws(IOException::class)
     override fun readObject(inputStream: InputStream) {
         val dataIn =
-            if (inputStream is DataInputStream) inputStream else DataInputStream(inputStream)
+            inputStream as? DataInputStream ?: DataInputStream(inputStream)
 
         /* Finger image header (14), see Table 4, 7.2 in Annex F. */
         /* NOTE: sometimes called "finger header", "finger record header" */
@@ -177,8 +183,8 @@ class FingerImageInfo : AbstractImageInfo {
         this.viewNumber = dataIn.readUnsignedByte()
         this.quality = dataIn.readUnsignedByte()
         this.impressionType = dataIn.readUnsignedByte()
-        setWidth(dataIn.readUnsignedShort())
-        setHeight(dataIn.readUnsignedShort())
+        width = dataIn.readUnsignedShort()
+        height = dataIn.readUnsignedShort()
         /* int RFU = */
         dataIn.readUnsignedByte() /* Should be 0x0000 */
 
@@ -215,8 +221,8 @@ class FingerImageInfo : AbstractImageInfo {
         dataOut.writeByte(viewNumber)
         dataOut.writeByte(quality)
         dataOut.writeByte(impressionType)
-        dataOut.writeShort(getWidth())
-        dataOut.writeShort(getHeight())
+        dataOut.writeShort(width)
+        dataOut.writeShort(height)
         dataOut.writeByte(0x00) /* RFU */
 
         dataOut.write(imageBytes)
@@ -266,7 +272,13 @@ class FingerImageInfo : AbstractImageInfo {
         }
 
         val other = obj as FingerImageInfo
-        return compressionAlgorithm == other.compressionAlgorithm && impressionType == other.impressionType && position == other.position && quality == other.quality && recordLength == other.recordLength && viewCount == other.viewCount && viewNumber == other.viewNumber
+        return compressionAlgorithm == other.compressionAlgorithm &&
+                impressionType == other.impressionType &&
+                position == other.position &&
+                quality == other.quality &&
+                recordLength == other.recordLength &&
+                viewCount == other.viewCount &&
+                viewNumber == other.viewNumber
     }
 
     /**
@@ -281,9 +293,9 @@ class FingerImageInfo : AbstractImageInfo {
             .append("quality: ").append(quality).append(", ")
             .append("position: ").append(positionToString(position)).append(", ")
             .append("impression type: ").append(impressionTypeToString(impressionType)).append(", ")
-            .append("horizontal line length: ").append(getWidth()).append(", ")
-            .append("vertical line length: ").append(getHeight()).append(", ")
-            .append("image: ").append(getWidth()).append(" x ").append(getHeight())
+            .append("horizontal line length: ").append(width).append(", ")
+            .append("vertical line length: ").append(height).append(", ")
+            .append("image: ").append(width).append(" x ").append(height)
             .append(" \"").append(FingerInfo.Companion.toMimeType(compressionAlgorithm))
             .append("\"")
             .append("]")
@@ -497,8 +509,8 @@ class FingerImageInfo : AbstractImageInfo {
          * @param position an ISO finger position code
          * @return a human readable string
          */
-        private fun positionToString(position: Int): String? {
-            return when (position) {
+        private fun positionToString(position: Int): String? =
+            when (position) {
                 POSITION_UNKNOWN_FINGER -> "Unknown finger"
                 POSITION_RIGHT_THUMB -> "Right thumb"
                 POSITION_RIGHT_INDEX_FINGER -> "Right index finger"
@@ -532,7 +544,6 @@ class FingerImageInfo : AbstractImageInfo {
                 POSITION_LEFT_HYPOTHENAR -> "Left hypothenar"
                 else -> null
             }
-        }
 
         /**
          * Returns a human readable string for the given impression type code.
@@ -540,8 +551,8 @@ class FingerImageInfo : AbstractImageInfo {
          * @param impressionType the impression type code
          * @return a human readable string for the given impression type code
          */
-        private fun impressionTypeToString(impressionType: Int): String? {
-            return when (impressionType) {
+        private fun impressionTypeToString(impressionType: Int): String? =
+            when (impressionType) {
                 IMPRESSION_TYPE_LIVE_SCAN_PLAIN -> "Live scan plain"
                 IMPRESSION_TYPE_LIVE_SCAN_ROLLED -> "Live scan rolled"
                 IMPRESSION_TYPE_NON_LIVE_SCAN_PLAIN -> "Non-live scan plain"
@@ -551,7 +562,6 @@ class FingerImageInfo : AbstractImageInfo {
                 IMPRESSION_TYPE_LIVE_SCAN_CONTACTLESS -> "Live scan contactless"
                 else -> null
             }
-        }
 
         /**
          * Converts from ISO (FRH) coding to ICAO/CBEFF (BHT) coding.
@@ -573,8 +583,8 @@ class FingerImageInfo : AbstractImageInfo {
          * @param position an ISO finger position code
          * @return an ICAO biometric subtype
          */
-        private fun toBiometricSubtype(position: Int): Int {
-            return when (position) {
+        private fun toBiometricSubtype(position: Int): Int =
+            when (position) {
                 POSITION_UNKNOWN_FINGER -> CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE
                 POSITION_RIGHT_THUMB -> CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE or CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT or CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_THUMB
                 POSITION_RIGHT_INDEX_FINGER -> CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE or CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_RIGHT or CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_POINTER_FINGER
@@ -608,6 +618,5 @@ class FingerImageInfo : AbstractImageInfo {
                 POSITION_LEFT_HYPOTHENAR -> CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE or CBEFFInfoConstants.BIOMETRIC_SUBTYPE_MASK_LEFT
                 else -> CBEFFInfoConstants.BIOMETRIC_SUBTYPE_NONE
             }
-        }
     }
 }

@@ -19,6 +19,12 @@
  *
  * $Id: IrisBiometricSubtypeInfo.java 1799 2018-10-30 16:25:48Z martijno $
  */
+/*
+ * Modified work Copyright (C) 2026 Alessandro Giaquinto
+ * Kotlin port of JMRTD
+ *
+ * Licensed under LGPL 3.0
+ */
 package kmrtd.lds.iso19794
 
 import kmrtd.lds.AbstractListInfo

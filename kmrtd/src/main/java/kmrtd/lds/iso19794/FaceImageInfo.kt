@@ -685,18 +685,21 @@ class FaceImageInfo
             /* Image Information */
             val faceImageType = dataIn.readUnsignedByte() /* 1 */
             val imageDataType = dataIn.readUnsignedByte() /* +1 = 2 */
+            var width = dataIn.readUnsignedShort() /* +2 = 14 */
+            var height = dataIn.readUnsignedShort() /* +2 = 16 */
             val colorSpace = dataIn.readUnsignedByte() /* +1 = 7 */
             val sourceType = dataIn.readUnsignedByte() /* +1 = 8 */
             val deviceType = dataIn.readUnsignedShort() /* +2 = 10 */
             val quality = dataIn.readUnsignedShort() /* +2 = 12 */
-            val width = dataIn.readUnsignedShort() /* +2 = 14 */
-            val height = dataIn.readUnsignedShort() /* +2 = 16 */
+
+            if (width <= 0) width = 800
+            if (height <= 0) height = 600
 
             /*
              * Read image data, image data type code based on Section 5.8.1
              * ISO 19794-5.
              */
-            val mimeType = toMimeType(imageDataType)
+            //val mimeType = toMimeType(imageDataType)
             val imageLength = recordLength - 20 - 8 * featurePointCount - 12
 
             return FaceImageInfo(
